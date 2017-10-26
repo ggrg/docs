@@ -20,8 +20,6 @@ The DFSP code is an example implementation of a mobile money provider. Customers
 ### Level One Client Service
 The client service connects a DFSP to other other DFSPs and the central services. It has a few simple interfaces to connect to a DFSP for account holder lookup, payment setup, and ledger operations. The level one client can be hosted locally by the DFSP or in a remote data center such as Amazon.
 
-[Level One Client Documentation](./LevelOneClient)
-
 ### Central Services
 The central services are a collection of separate services that help the DFSPs perform operations on the network.
 
