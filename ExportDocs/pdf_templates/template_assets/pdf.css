@@ -1,0 +1,195 @@
+/* latin-ext */
+@font-face {
+  font-family: 'Quattrocento Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Quattrocento Sans'), local('QuattrocentoSans'), url(https://fonts.gstatic.com/s/quattrocentosans/v9/efd6FGWWGX5Z3ztwLBrG9T48MEBspdEKklcQvcIk8pU.woff2) format('woff2');
+  unicode-range: U+0100-024F, U+1E00-1EFF, U+20A0-20AB, U+20AD-20CF, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Quattrocento Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Quattrocento Sans'), local('QuattrocentoSans'), url(https://fonts.gstatic.com/s/quattrocentosans/v9/efd6FGWWGX5Z3ztwLBrG9cZ4HySTEWshgORbPp2tk8k.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215;
+}
+
+.main code {
+    color: black;
+}
+
+.main .hljs {
+    background: transparent;
+}
+
+.main pre {
+  background: transparent;
+  box-decoration-break: slice;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* Table of Contents */
+.toc-heading {
+  font-family: 'open_sansregular', sans-serif;
+  font-size: 19px;
+  color: #000000;
+}
+
+@media print {
+
+  .wrapper .main p,
+  .wrapper .main td {
+    color: #000000;
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  h1, h2 {
+    font-family: 'Quattrocento Sans', sans-serif;
+    font-size: 48px;
+    color: #000000;
+    padding: 30px 0 20px 0;
+  }
+
+  h3 {
+    font-family: 'Quattrocento Sans', sans-serif;
+    font-size: 38px;
+    color: #000000;
+    padding: 30px 0 20px 0;
+  }
+
+  h4 {
+    font-family: 'Quattrocento Sans', sans-serif;
+    font-size: 21px;
+    color: #000000;
+    padding-top: 20px;
+  }
+
+  h5 {
+    font-family: 'Quattrocento Sans', sans-serif;
+    font-size: 18px;
+    color: #000000;
+    padding-top: 20px;
+  }
+
+  a {
+    color: #27A2DB;
+  }
+
+  pre {
+    background-color: #FAFAFA !important;
+    border-radius: 3px;
+  }
+
+  ul,
+  ol {
+    color: #000000;
+    padding: 15px 0;
+  }
+
+  li {
+    padding-bottom: 5px;
+  }
+
+  img {
+    max-width: 100%;
+  }
+
+  /*Cover page*/
+  .cover-page {
+    background-repeat: no-repeat;
+    background-color:#fff;
+    background-size: contain;
+    height: 2500px;
+  }
+
+  .cover-page h1 {
+    position: absolute;
+    top: 23%;
+    left: 8%;
+    font-size: 60px;
+    font-family: 'Source Sans Pro', sans-serif;
+    max-width: 650px;
+  }
+
+  .cover-page .date {
+    padding-left: 5px;
+    margin-top: 5%;
+    display: block;
+    color: white;
+    font-size: 21px;
+    font-family: 'open_sanslight', sans-serif;
+  }
+
+  .section-header {
+      page-break-before: always;
+  }
+
+}
+
+.pdf-cover-wrapper {
+    page: pdf-cover;
+}
+.pdf-content-wrapper {
+    page: pdf-content;
+}
+
+/*Cover page full width and no page number*/
+@page pdf-cover {
+  margin: 0;
+  @bottom-right {
+    content: none;
+  }
+  @bottom-left {
+    content: none;
+  }
+}
+
+/*Page numbers */
+@page:right {
+  @bottom-right {
+    font-family: 'open_sansregular', sans-serif;
+    content: counter(page);
+    font-size: 10px;
+    color: #707070;
+  }
+}
+
+@page:left {
+  @bottom-right {
+    font-family: 'open_sansregular', sans-serif;
+    content: counter(page);
+    font-size: 10px;
+    color: #707070;
+  }
+}
+
+/*Footer copy*/
+@page pdf-content {
+  @bottom-left {
+    content: flow(footer);
+  }
+}
+
+.pdf-footer {
+  line-height: 1.1em;
+  font-family: 'open_sansregular', sans-serif;
+  font-size: 8px;
+  color: #707070;
+  flow: static(footer);
+}
+
+.trisk {
+  margin-right: 5px;
+  width: 15px;
+  height: auto;
+  vertical-align: inherit;
+  position: relative;
+  top: 1px;
+}
+
+.footer-info {
+  display: inline-block;
+}

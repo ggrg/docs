@@ -1,0 +1,160 @@
+{
+    "swagger": "2.0",
+    "tags": [],
+    "host": "api.leveloneproject.org",
+    "basePath": "/rpc",
+    "schemes": ["https"],
+    "info": {
+        "title": "Directory service",
+        "version": "0.0.1"
+    },
+    "paths": {
+        "/directory/user/get": {
+            "post": {
+                "operationId": "directory.user.get",
+                "responses": {
+                    "200": {
+                        "$ref": "#/responses/directory.user.get"
+                    },
+                    "default": {
+                        "$ref": "#/responses/ErrorResponse"
+                    }
+                },
+                "summary": "Lookup name, default account and currency of end user, given an end user URI.",
+                "description": "When the directory service is asked to return information about an end user, it will determine which discovery service to use, based on user URI. Then it will use the discovery service to convert the URI to endpoint URL and finally contact that endpoint to obtain user details.",
+                "parameters": [{"$ref":"#/parameters/directory.user.get"}],
+                "tags": ["directory"]
+            }
+        }
+    },
+    "parameters":{
+        "directory.user.get":{
+            "schema": {
+                "properties": {
+                    "jsonrpc": {
+                        "enum": ["2.0"],
+                        "type": "string"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "method": {
+                        "enum": ["directory.user.get"],
+                        "type": "string",
+                        "description": "Method names follow the standard microservice.entity.action"
+                    },
+                    "params": {
+                        "type":"object",
+                        "properties":{
+                            "userURI": {
+                                "type": "string",
+                                "description": "URI identifying the user uniquely. It may support various schemes, nut as minimum it MUST support the number: scheme, which represents the user as number using E.164 alike numbering plan."
+                            }
+                        },
+                        "required":["userURI"]
+                    }
+                },
+                "required": ["jsonrpc","method","params","id"],
+                "type": "object",
+                "description": "JSON-RPC compatible request object"
+            },
+            "in": "body",
+            "name": "body",
+            "required": true
+        }
+    },
+    "responses": {
+        "ErrorResponse":{
+            "description":"error",
+            "schema":{
+                "properties": {
+                    "jsonrpc": {
+                        "enum": ["2.0"],
+                        "type": "string"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "error": {
+                        "properties": {
+                            "code": {
+                                "description": "Standard code as defined by JSON-RPC. These codes usually are not application errors, but more on protocol or network level.",
+                                "type": "string"
+                            },
+                            "message": {
+                                "description": "Technical error message suitable to be logged in application logs. This message is supposed to aid for audit / debug purposes and is visible to system admins",
+                                "type": "string"
+                            },
+                            "errorPrint": {
+                                "description": "User friendly message translated to the user's language and suitable for displaying to the user that invoked the action",
+                                "type": "string"
+                            },
+                            "type": {
+                                "type":"string",
+                                "description": "Application defined error type, usually part of well defined list of error types. The error types should be namespaced similar to the services. The calling app should be able to interpret these types and in some cases provide suitable options for the user to proceed accordingly to the error. For example errors such duplication of data, expired passwords and similar, are usually things that the calling front end could handle."
+                            }
+                        },
+                        "required":["type","code"],
+                        "type": "object",
+                        "description": "Presence of this property indicates an error"
+                    },
+                    "debug": {
+                        "properties": {
+                            "stackInfo": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "description": "Provides the calling stack, which should include also the filename and row:column as per browser standard"
+                            },
+                            "cause": {
+                                "type": "object",
+                                "description": "Any nested errors should be in this property. The nested errors could have their own cause and stackinfo"
+                            }
+                        
+                        },
+                        "type":"object",
+                        "description":"This whole object is included only in non production environment, to aid integration and testing efforts. There could be many properties in the debug object, that give further details, but main idea here is to stick to at least the specified properties as minimum standard."
+                    }
+                },
+                "required": ["jsonrpc","error","id"],
+                "description": "JSON-RPC compatible response object for error"
+            }
+        },
+        "directory.user.get": {
+            "description":"response",
+            "schema":{
+                "properties": {
+                    "jsonrpc": {
+                        "enum": ["2.0"],
+                        "type": "string"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "result": {
+                        "properties": {
+                            "name": {
+                                "type": "string",
+                                "description":"Name of end user"
+                            },
+                            "account": {
+                                "type": "string",
+                                "description": "ILP address of user's default account"
+                            },
+                            "currency": {
+                                "type": "string",
+                                "description": "Currency of user's default account"
+                            }
+                        },
+                        "required": ["name", "account", "currency"],
+                        "type": "object",
+                        "description": "Presence of this property indicates successful operation"
+                    }
+                },
+                "required": ["jsonrpc","result","id"],
+                "description": "JSON-RPC compatible response object for success"
+            }
+        },
+    }
+}

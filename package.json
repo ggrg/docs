@@ -1,0 +1,23 @@
+{
+  "name": "@mojaloop/docs",
+  "version": "2.0.0",
+  "description": "Cross-repo documentation, end to end scenarios, and architecture",
+  "scripts": {
+    "lint": "mdspell -n -a -x -r --en-us \"**/*.md\"",
+    "fixspelling": "mdspell -n -a --en-us \"**/*.md\""
+  },
+  "devDependencies": {
+    "markdown-spellcheck": "^0.11.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mojaloop/Docs.git"
+  },
+  "keywords": [],
+  "author": "Bill Hodghead",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/mojaloop/Docs/issues"
+  },
+  "homepage": "https://github.com/mojaloop/Docs#readme"
+}
