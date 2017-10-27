@@ -56,7 +56,7 @@ The L1P shall reject component transactions where named participants are ineligi
 
 Rationale: Payments must be subject to fraud and AML/CFT checks, and blocked where the participant is deemed an unacceptable recipient. www.gatesfoundation.org Requirements for a Pro-Poor Interoperability Service for Transfers.
 
-*Currently we don’t have such components in the system to support this scenario.*
+*Currently we don't have such components in the system to support this scenario.*
 
 ## Handling Bulk Payments Transactions
 

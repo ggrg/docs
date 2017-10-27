@@ -10,9 +10,9 @@ HAProxy is free, open source software that provides a high availability load bal
 
 ### Install HAProxy
 
-Install a HA Proxy in AWS EC2 Instance by Issuing the command ‘sudo yum install --enablerepo=epel haproxy’.
+Install a HA Proxy in AWS EC2 Instance by Issuing the command 'sudo yum install --enablerepo=epel haproxy'.
 
-After the Successful Installation check the version Installed by Issuing the command ‘haproxy -version’.
+After the Successful Installation check the version Installed by Issuing the command 'haproxy -version'.
 
          Senthilkumars-MacBook-Pro:HaProxy-Mule  senthil$ haproxy -version
          HA-Proxy version 1.7.4 2017/03/27

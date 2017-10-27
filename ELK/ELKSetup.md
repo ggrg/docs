@@ -36,12 +36,12 @@ Steps to perform ELK 5.X Stack Installation in AWS EC2 Instance RHEL
 
 ### Set Java default
 
-> java –version
+> java -version
 >
 > If not 1.8.0\_121, make it your default java using the alternatives
 > command:
 >
-> sudo alternatives –config java
+> sudo alternatives -config java
 >
 > Enter the selection number to choose which java executable should be
 > used by default.
@@ -77,7 +77,7 @@ Create file with elasticsearch repository information
 
 ### Install elasticsearch
 
-> \# yum –y install elasticsearch
+> \# yum -y install elasticsearch
 
 ### Configure elasticsearch
 
@@ -96,7 +96,7 @@ Create file with elasticsearch repository information
 >
 > sudo service elasticsearch restart
 
-### Make elasticsearch more verbose by removing the “-- quite \\” flag
+### Make elasticsearch more verbose by removing the "-- quite \\" flag
 
 > \# vi /usr/lib/system/system/elasticsearch.service
 
@@ -108,9 +108,9 @@ Create file with elasticsearch repository information
 
 > Install netcat if not already install for debugging purposes:
 >
-> \# yum –y install nmap-ncat
+> \# yum -y install nmap-ncat
 >
-> \#ncat –v **localhost** 9200
+> \#ncat -v **localhost** 9200
 >
 > Ncat: Version 6.40 ( http://nmap.org/ncat )
 >
@@ -139,7 +139,7 @@ Create file with elasticsearch repository information
 > index","resource.type":"index\_or\_alias","resource.id":"bad-request","index\_uuid":"\_na\_","index":"bad-request"},"status":404}
 >
 > If localhost is not the hostname, specify correct hostname or use
-> server ip here. Also, must type “**GET \\**”**.**
+> server ip here. Also, must type "**GET \\**"**.**
 >
 > Can also use curl command to check that elasticsearch is running:
 >
@@ -149,7 +149,7 @@ Create file with elasticsearch repository information
 
 ### Install kibana
 
-> \# yum –y install kibana
+> \# yum -y install kibana
 
 ### Configure Kibana
 
@@ -201,7 +201,7 @@ Additional Considerations section.
 
 ### Install Logstash
 
-> \# yum –y install logstash
+> \# yum -y install logstash
 
 ### Start/Stop/Restart Logstash
 
@@ -258,7 +258,7 @@ alphabetical order.
 
 ### Install Filebeat
 
-> \# yum –y install filebeat
+> \# yum -y install filebeat
 
 ### Configure Filebeat
 
@@ -319,7 +319,7 @@ json.
 
 ### Install Metricbeat
 
-> \# yum –y install metricbeat
+> \# yum -y install metricbeat
 
 ### Configure Metricbeat
 
@@ -842,7 +842,7 @@ types.json
 
 ## L1P_Index population
 
-The L1P_Index is populated by the Logstash component of the ELK Stack. The following files (log-pipeling.txt, filebeat.yml) found at GitHub’s interop-elk repo contains a Logstash pipeline used to populate the custom L1P_Index elasticsearch index.
+The L1P_Index is populated by the Logstash component of the ELK Stack. The following files (log-pipeling.txt, filebeat.yml) found at GitHub's interop-elk repo contains a Logstash pipeline used to populate the custom L1P_Index elasticsearch index.
 
 log-pipeline.txt
 
@@ -979,9 +979,9 @@ filebeat.yml
 >
 >  #fields:
 >
->  #  level: debug
+>  # level: debug
 >
->  #  review: 1
+>  # review: 1
 >
 >
 >
@@ -1017,7 +1017,7 @@ filebeat.yml
 
 ## Transaction Details Kibana Custom Visualization
 
-In order to access the Transaction Details Kibana custom visualization navigate to Visualize menu and look for “Transaction Details”.
+In order to access the Transaction Details Kibana custom visualization navigate to Visualize menu and look for "Transaction Details".
 
 ![alt text](./images/navigateToTransactionDetails.png)
 
@@ -1100,7 +1100,7 @@ To create the visualization navigate to Visualize menu in Kibana, select the typ
 > Logstash and Elasticsearch should run on different machines as they
 > both use the JVM and consume large amounts of memory. Cluster
 > Elasticsearch, use at least 3 master nodes and at least 2 data nodes.
-> “We recommend clustering Elasticsearch with at least three master
+> "We recommend clustering Elasticsearch with at least three master
 > nodes because of the common occurrence of split brain, which is
 > essentially a dispute between two nodes regarding which one is
 > actually the master. As a result, using three master nodes prevents
@@ -1109,4 +1109,4 @@ To create the visualization navigate to Visualize menu in Kibana, select the typ
 > least once. This results in a minimum of five nodes: the three master
 > nodes can be small machines, and the two data nodes need to be scaled
 > on solid machines with very fast storage and a large capacity for
-> memory.”
+> memory."

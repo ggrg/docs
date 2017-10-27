@@ -3,7 +3,8 @@
 
 ## Introduction
 In this guide, we will introduce some features of CloudFlare PKI -- [cfssl](https://github.com/cloudflare/cfssl)
-CFSSL is a tool developed by CloudFlare. It’s both a command line tool and an HTTP API server for signing, verifying and bundling TLS certificates. It requires GO 1.6+ to build. In this guide, we use command line tool as the example.
+CFSSL is a tool developed by CloudFlare. It's both a command line tool and an HTTP API server for signing, verifying and bundling TLS certificates. It requires GO 1.6+ to build. In this guide, we use the command line tool as the example.
+
 * [**Background**](#background)
 * [**Rationale**](#rationale)
 * [**Install cfssl**](#install-cfssl)
@@ -16,16 +17,20 @@ CFSSL is a tool developed by CloudFlare. It’s both a command line tool and an 
 ### Background
 Secure Channels enable confidentiality and integrity of data across network connections.  In the context of Mojaloop,  a secure channel can be made possible by the implementation of service transport security via TLS to protect data in-transit and enable mutual authentication.  The centralization of trust in a TLS implementation is provided through a Public Key Infrastructure (PKI).  Note:  While the Central KMS may serve as a PKI as the Central Services evolve, an existing internal or hosted PKI can provide the management and distribution of certificates for service endpoints.
 TLS helps mitigate a number of identified threats discovered during Mojaloop Threat Modeling exercises:
+
 * **Tampering**: Network traffic sniffing and or manipulation across DFSP, Pathfinder and Central Services
+
 * **Spoofing**:
     1. Rogue DFSP pretends to be another DFSP at central directory
     2. False connector subscribes to notifications for transfers
     3. Notifications are sent by a party other than the central ledger
     4. Rogue KMS requests a health check or log inquiry to Forensic Logging Sidecars
     5. Data manipulation of REST calls
+
 * **Information Disclosure**:
     1. A false connector or 3rd party connector subscribes to notifications that are not theirs
     2. Inappropriate use of Cryptography (including side-channel weaknesses)
+
 * **Elevation of Privilege**:
     1. Credential Exposure by DFSP
     2. Credential Exposure by Customer

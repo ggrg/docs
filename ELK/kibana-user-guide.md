@@ -39,8 +39,8 @@ http://EC2_INSTANCE_URL
 
 Follow the following steps:
 
-1.	Navigate to “Discover” menu
-2.	Expand Time Range, by clicking the “Time picker” icon on top right corner
+1.	Navigate to "Discover" menu
+2.	Expand Time Range, by clicking the "Time picker" icon on top right corner
 3.	Set Time Range, pick between Quick, Relative and Absolute modes and set time range
 4.	Enter your search criteria (e.g. L1p-Trace-Id)
 5.	Perform search
@@ -50,14 +50,14 @@ Follow the following steps:
 
 ![alt text](./images/howToSetTimeRange.png)
 
-By default, Kibana will show you logs for the last 15 min. To set the time range from the Discover Kibana page click on the area where with the “Time picker” icon on the top right corner. This will expand the “Time Range” control panel down containing three different modes to set the time range; “Quick”, “Relative” and “Absolute” as shown in screenshots below.
+By default, Kibana will show you logs for the last 15 min. To set the time range from the Discover Kibana page click on the area where with the "Time picker" icon on the top right corner. This will expand the "Time Range" control panel down containing three different modes to set the time range; "Quick", "Relative" and "Absolute" as shown in screenshots below.
 
 
 #### How to enable auto refresh of search results?
 
 ![alt text](./images/howToEnableAutoRefresh.png)
 
-Search results can be set to auto refresh, so your search results and visualizations do not contain stale data. Optionally, you can manually refresh results by clicking “Refresh”. The Auto-refresh can be enabled by clicking the “Time picker” icon, clicking the “Auto-refresh” link and then set it to on and specify the refresh rate.
+Search results can be set to auto refresh, so your search results and visualizations do not contain stale data. Optionally, you can manually refresh results by clicking "Refresh". The Auto-refresh can be enabled by clicking the "Time picker" icon, clicking the "Auto-refresh" link and then set it to on and specify the refresh rate.
 
 
 #### How change to which indices you are searching?
@@ -67,7 +67,7 @@ Search results can be set to auto refresh, so your search results and visualizat
 When you submit a search request, the indices that match the currently-selected index pattern are searched. The current index pattern is shown below the toolbar. To change which indices you are searching, click the index pattern and select a different index pattern. NOTE: By default, only 1 index pattern is shown, you must click the arrow to expand the index section to show you the different indexes available.
 
 
-#### How to add/remove fields from Kibana’s Discover window to monitor logs?
+#### How to add/remove fields from Kibana's Discover window to monitor logs?
 
 ![alt text](./images/howToAddRemoveFieldsFromKibanaDiscover.png)
 
@@ -101,13 +101,13 @@ L1p-Trace-Id=d349c18b-e4ea-4913-b2f8-0b9dcd2f2293
 
 ![alt text](./images/howToSaveASearch.png)
 
-Kibana allows you to save a search criteria. From the Kibana Discover page just hit the “Save” link on the top right hand corner just before the “Time Picker” icon to save your search. To access your saved search, hit the “Open” link. To delete or edit your save search hit the “Open” link and then the “Manage Saved Searches” link.
+Kibana allows you to save a search criteria. From the Kibana Discover page just hit the "Save" link on the top right hand corner just before the "Time Picker" icon to save your search. To access your saved search, hit the "Open" link. To delete or edit your save search hit the "Open" link and then the "Manage Saved Searches" link.
 
 #### How to monitor transaction duration between l1p_components?
 
 ![alt text](./images/howToMonitorTransactionDuration.png)
 
-A Kibana Visualization on top of the custom l1p_index was created for this purpose and can be accessed by navigating to Kibana Visualize page and selecting the “Transaction Details” link. NOTE: Once the trace id is contained at all component and services logs this table will correctly display the durations.
+A Kibana Visualization on top of the custom l1p_index was created for this purpose and can be accessed by navigating to Kibana Visualize page and selecting the "Transaction Details" link. NOTE: Once the trace id is contained at all component and services logs this table will correctly display the durations.
 
 ### Reference to Kibana's Official Documentation
 

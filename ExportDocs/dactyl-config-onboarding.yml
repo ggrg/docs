@@ -1,17 +1,17 @@
 # From the directory above docs:
 # (run the copy-images script first)
-# dactyl_build -t all -c Docs/ExportDocs/dactyl-config-onboarding.yml --pdf
+# dactyl_build -t all -c docs/ExportDocs/dactyl-config-onboarding.yml --pdf
 #--leave_temp_files
 content_path: .
 content_static_path: ./images
 temporary_files_path: .
-template_path: ./Docs/ExportDocs/pdf_templates
-template_static_path: ./Docs/ExportDocs/pdf_templates/template_assets
+template_path: ./docs/ExportDocs/pdf_templates
+template_static_path: ./docs/ExportDocs/pdf_templates/template_assets
 default_template: template-l1p_pdf_content.html
 default_pdf_template: template-l1p_pdf_content.html
 
 filter_paths:
-    - ./Docs/ExportDocs/pdf_templates/filters
+    - ./docs/ExportDocs/pdf_templates/filters
 
 default_filters:
     - out_of_date
@@ -26,23 +26,21 @@ cover_page:
 
 targets:
     -   name: all
-        display_name: Level One Project Developer Onboarding
+        display_name: Mojaloop Developer Onboarding
         image_re_subs:
             "[./\\w]*/([\\w%.-]+[.](jpg|JPG|png|PNG))": "images/\\1"
         image_subs:
-            https://github.com/LevelOneProject/Docs/blob/master/Wiki/PuttyConnection.PNG: images/PuttyConnection.PNG
-            https://github.com/LevelOneProject/Docs/blob/master/Wiki/PuttyConfig.png: images/PuttyConfig.PNG
-            https://github.com/LevelOneProject/Docs/blob/master/Wiki/Test%20Pyramid.png: images/Test%20Pyramid.PNG
-            https://github.com/LevelOneProject/Docs/blob/master/Wiki/Microservice%20testing.png: images/Microservice%20testing.PNG
-            https://github.com/LevelOneProject/Docs/blob/master/Wiki/Tracking%20requirements%20to%20results.png: images/Tracking%20requirements%20to%20results.PNG
-            https://github.com/LevelOneProject/Docs/blob/master/Wiki/Glory%20of%20Rest.png: images/Glory%20of%20Rest.PNG
-            https://github.com/LevelOneProject/Docs/blob/master/Wiki/mergebtn.png: images/mergebtn.PNG
-            https://github.com/LevelOneProject/Docs/blob/master/Wiki/CreateBranch.png: images/CreateBranch.PNG
-            https://github.com/LevelOneProject/Docs/blob/master/Wiki/CompareNPull.png: images/CompareNPull.PNG
-            https://github.com/LevelOneProject/Docs/blob/master/Wiki/ConfirmNSquash.png: images/ConfirmNSquash.PNG
-
+            https://github.com/mojaloop/docs/blob/master/Wiki/Test%20Pyramid.png: images/Test%20Pyramid.png
+            https://github.com/mojaloop/docs/blob/master/Wiki/Microservice%20testing.png: images/Microservice%20testing.png
+            https://github.com/mojaloop/docs/blob/master/Wiki/PuttyConnection.png: images/PuttyConnection.png
+            https://github.com/mojaloop/docs/blob/master/Wiki/PuttyConfig.png: images/PuttyConfig.png
+            https://github.com/mojaloop/docs/blob/master/Wiki/Tracking%20requirements%20to%20results.png: images/Tracking%20requirements%20to%20results.png
+            https://github.com/mojaloop/docs/blob/master/Wiki/Glory%20of%20Rest.png: images/Glory%20of%20Rest.png
+            https://github.com/mojaloop/docs/blob/master/Wiki/mergebtn.png: images/mergebtn.png
+            https://github.com/mojaloop/docs/blob/master/Wiki/CreateBranch.png: images/CreateBranch.png
+            https://github.com/mojaloop/docs/blob/master/Wiki/CompareNPull.png: images/CompareNPull.png
+            https://github.com/mojaloop/docs/blob/master/Wiki/ConfirmNSquash.png: images/ConfirmNSquash.png
         link_subs:
-            ./AWS/Infrastructure/machines.md: machines.html
             ./LevelOneClient/scenarios/Send%20Payment.md: SendPayment.html
             ./LevelOneClient: LevelOneClient.html
             ./DFSP/PendingTransactions/README.md: Invoices.html
@@ -56,7 +54,7 @@ targets:
             ./CentralLedger: central_ledger.html
             ./CentralRules: central_rules.html
             ./JMeter: IntegrationTests.html
-            ./ansible.yml: https://github.com/LevelOneProject/Docs/blob/master/ILP/ansible.yml
+            ./ansible.yml: https://github.com/LevelOneProject/docs/blob/master/ILP/ansible.yml
             ./ledger-adapter.md: ledger-adapter.html
             ../Ports.md: ports.html
        # link_re_subs:
@@ -68,13 +66,13 @@ pages:
     -   name: 'Contribution Guide'
         html: Contributionguide.html
         category: Onboarding
-        md: paymoja/contribute.md
+        md: mojaloop/contribute.md
         section_header: true
         targets:
             - all
 
     -   name: 'Onboarding Developers'
-        md: paymoja/contribute/Onboarding-Developers.md
+        md: mojaloop/contribute/Onboarding-Developers.md
         html: Onboarding-Developers.html
         category: Onboarding
         targets:
@@ -84,7 +82,7 @@ pages:
     -   name: 'Structure of the Documentation'
         html: Structure-of-the-Documentation.html
         category: 'Structure of the Documentation'
-        md: paymoja/contribute/Structure-of-the-Documentation.md
+        md: mojaloop/contribute/Structure-of-the-Documentation.md
         section_header: true
         targets:
             - all
@@ -92,65 +90,28 @@ pages:
     -   name: 'Documentation and Template Standards'
         html: Documentation-and-Template-Standards.html
         category: 'Structure of the Documentation'
-        md: paymoja/contribute/Documentation-and-Template-Standards.md
+        md: mojaloop/contribute/Documentation-and-Template-Standards.md
         targets:
             - all
 
     -   name: 'Architecture Documentation Guidelines'
         html: Architecture-Documentation-Guidelines.html
         category: 'Structure of the Documentation'
-        md: paymoja/contribute/Architecture-Documentation-Guidelines.md
+        md: mojaloop/contribute/Architecture-Documentation-Guidelines.md
         targets:
             - all
 
-    -   name: 'Documentation Style Guide'
-        html: Documentation-Style-Guide.html
-        category: 'Structure of the Documentation'
-        md: paymoja/contribute/Documentation-Style-Guide.md
-        targets:
-            - all
+ #   -   name: 'Documentation Style Guide'
+ #       html: Documentation-Style-Guide.html
+ #       category: 'Structure of the Documentation'
+ #       md: mojaloop/contribute/Documentation-Style-Guide.md
+ #       targets:
+ #           - all
 
     -   name: 'README Template'
         html: README-Template.html
         category: 'Structure of the Documentation'
-        md: paymoja/contribute/README-Template.md
-        targets:
-            - all
-
-# test environments
-    -   name: 'Accessing the Test Environment'
-        html: Accessing-the-Test-Environment.html
-        category: 'Accessing the Test Environment'
-        md: paymoja/contribute/Accessing-the-Test-Environment.md
-        section_header: true
-        targets:
-            - all
-
-    -   name: 'Accessing AWS instances'
-        html: Accessing-AWS-instances.html
-        category: 'Accessing the Test Environment'
-        md: paymoja/contribute/Accessing-AWS-instances.md
-        targets:
-            - all 
-
-    -   name: Machines
-        html: machines.html
-        category: 'Accessing the Test Environment'
-        md: Docs/AWS/Infrastructure/machines.md
-        targets:
-            - all    
-
-    -   name: 'Test Environment'
-        html: Test-Env.html
-        category: 'Accessing the Test Environment'
-        md: Docs/AWS/Infrastructure/Test-Env/README.md
-        targets:
-            - all
-
-    -   name: 'Demo Environment'
-        html: Customer-Demo-Env.html
-        category: Infrastructure
-        md: Docs/AWS/Infrastructure/Customer-Demo-Env/README.md
+        md: mojaloop/contribute/README-Template.md
         targets:
             - all
 
@@ -158,14 +119,14 @@ pages:
     -   name: 'USSD Simulator User Guide'
         html: USSD.html
         category: Testing
-        md: Docs/DFSP/USSD/README.md
+        md: docs/DFSP/USSD/README.md
         section_header: true
         targets:
             - all
 
 # local test environment
     -   name: 'Creating a local test environment'
-        html: USSD.html
+        html: devops.html
         category: Local Test Envirnment
         md: interop-devops/README.md
         section_header: true
@@ -176,7 +137,7 @@ pages:
     -   name: 'Testing strategy'
         html: Testing-strategy.html
         category: Testing
-        md: paymoja/contribute/Testing-strategy.md
+        md: mojaloop/contribute/Testing-strategy.md
         section_header: true
         targets:
             - all
@@ -184,129 +145,71 @@ pages:
     -   name: 'Use Case Tests'
         html: UseCaseTests.html
         category: Testing
-        md: Docs/test/README.md
+        md: docs/test/README.md
         targets:
             - all
 
     -   name: 'Account Management Tests'
         html: AccountManagementTests.html
         category: Testing
-        md: 'Docs/test/account management tests.md'
+        md: 'docs/test/account management tests.md'
         targets:
             - all
 
     -   name: 'Customer Management Tests'
         html: CustomerManagementTests.html
         category: Testing
-        md: 'Docs/test/customer management tests.md'
+        md: 'docs/test/customer management tests.md'
         targets:
             - all
 
     -   name: 'DFSP Management Tests'
         html: DFSPManagementTests.html
         category: Testing
-        md: 'Docs/test/dfsp management tests.md'
+        md: 'docs/test/dfsp management tests.md'
         targets:
             - all
 
     -   name: 'Fees Tests'
         html: FeesTests.html
         category: Testing
-        md: 'Docs/test/fees tests.md'
+        md: 'docs/test/fees tests.md'
         targets:
             - all
 
     -   name: 'Pending Transaction Tests'
         html: PendingTransactionTests.html
         category: Testing
-        md: 'Docs/test/pending transaction tests.md'
+        md: 'docs/test/pending transaction tests.md'
         targets:
             - all
 
     -   name: 'Send Money Tests'
         html: SendMoneyTests.html
         category: Testing
-        md: 'Docs/test/send money tests.md'
+        md: 'docs/test/send money tests.md'
         targets:
             - all
 
     -   name: 'Scenario Automation'
         html: scenarioAutomation.html
         category: Testing
-        md: Docs/test/end-to-end/readme.md
+        md: docs/test/end-to-end/readme.md
         targets:
             - all
 
     -   name: 'Integration Automation'
         html: IntegrationAutomation.html
         category: Testing
-        md: Docs/test/ilp-integration/README.md
+        md: docs/test/ilp-integration/README.md
         targets:
             - all
 
-
-    -   name: 'Performance Automation'
-        html: PerformanceAutomation.html
-        category: Testing
-        md: Docs/Interop Services and Mule/L1P Performance Test.md
-        targets:
-            - all
-
-    -   name: 'Performance Tests'
-        html: PerformanceTests.html
-        category: Testing
-        md: Docs/Interop Services and Mule/L1P Performance Test.md 
-        targets:
-            - all
 
     -   name: 'Resilience Modeling and Anaylysis'
         html: RMA.html
         category: Appendix
-        md: Docs/test/rma.md
-        targets:
-            - all
-            - stakeholder
-
-# SDLC
-    -   name: 'Software Development Process Management'
-        html: Software-Development-Process.html
-        category: Software Development Process
-        md: paymoja/contribute/Software-Development-Process.md
-        targets:
-            - all
-
-    -   name: 'Program Increments and Milestones'
-        html: Program-Increments-and-Milestones.html
-        category: Software Development Process
-        md: paymoja/contribute/Program-Increments-and-Milestones.md
-        targets:
-            - all
-
-    -   name: 'Scenarios and Epics'
-        html: Scenarios-and-Epics.html
-        category: Software Development Process
-        md: paymoja/contribute/Scenarios-and-Epics.md
-        targets:
-            - all
-
-    -   name: 'User Story Pipeline'
-        html: Pipeline.html
-        category: Software Development Process
-        md: paymoja/contribute/Pipeline.md
-        targets:
-            - all
-
-    -   name: 'GitHub Labels'
-        html: GitHub-Labels.html
-        category: Software Development Process
-        md: paymoja/contribute/GitHub-Labels.md
-        targets:
-            - all
-
-    -   name: 'Estimates'
-        html: Estimates.html
-        category: Software Development Process
-        md: paymoja/contribute/Estimates.md
+        md: docs/test/rma.md
         targets:
             - all
 
@@ -314,95 +217,65 @@ pages:
     -   name: Setting up the development environment'
         html: development.html
         category: Writing code
-        md: Docs/DFSP/development.md
+        md: docs/DFSP/development.md
         targets:
             - all   
 
     -   name: 'Writing Code'
         html: Writing-Code.html
         category: Writing code
-        md: paymoja/contribute/Writing-Code.md
+        md: mojaloop/contribute/Writing-Code.md
         targets:
             - all    
 
     -   name: 'Pragmatic REST Guidelines'
         html: Pragmatic-REST-Guidelines.html
         category: Writing code
-        md: paymoja/contribute/Pragmatic-REST-Guidelines.md
+        md: mojaloop/contribute/Pragmatic-REST-Guidelines.md
         targets:
             - all
 
     -   name: 'Branching Strategy'
         html: Branching-Strategy.html
         category: Writing code
-        md: paymoja/contribute/Branching-Strategy.md
+        md: mojaloop/contribute/Branching-Strategy.md
         targets:
             - all
 
-    -   name: 'Creating a new Repository'
-        html: NewRepository.html
-        category: Writing code
-        md: Docs/Interop Services and Mule/Repository/NewRepository.md
-        targets:
-            - all
 
     -   name: 'Build and Publish NodeJS'
         html: Build-and-Publish-NodeJS.html
         category: Writing code
-        md: paymoja/contribute/Build-and-Publish-NodeJS.md
+        md: mojaloop/contribute/Build-and-Publish-NodeJS.md
         targets:
             - all
-
-   
 
     -   name: 'Code Quality Metrics'
         html: Code-Quality-Metrics.html
         category: Writing code
-        md: paymoja/contribute/Code-Quality-Metrics.md
-        targets:
-            - all
-
-    -   name: 'Collecting and viewing code coverage'
-        html: Collecting-and-viewing-code-coverage.html
-        category: Writing code
-        md: paymoja/contribute/Collecting-and-viewing-code-coverage.md
+        md: mojaloop/contribute/Code-Quality-Metrics.md
         targets:
             - all
 
     -   name: 'Code  Style Guidelines'
         html: Code-Style.html
         category: Writing code
-        md: paymoja/contribute/Code-Style.md
+        md: mojaloop/contribute/Code-Style.md
         targets:
             - all
 
-# Build and Deployment
-    -   name: 'CircleCI'
-        html: CircleCI.html
-        category: Build
-        md: Docs/Interop Services and Mule/CircleCI/CircleCI.md
+    -   name: 'GitHub Labels'
+        html: GitHub-Labels.html
+        category: Software Development Process
+        md: mojaloop/contribute/GitHub-Labels.md
         targets:
-            - all
-
-    -   name: 'Accessing the npm repository'
-        html: npm_repos.html
-        category: Build
-        md: Docs/Artifactory/npm_repos.md
-        targets:
-            - all   
-
-    -   name: 'Accessing the Docker repository'
-        html: docker_repos.html
-        category: Build
-        md: Docs/Artifactory/docker_repos.md
-        targets:
-            - all        
+            - all     
      
 # Debugging
     -   name: 'Logging Standards'
         html: elk.html
         category: Debugging
-        md: Docs/Interop Services and Mule/logging-guidelines.md
+        md: docs/Interop Services and Mule/logging-guidelines.md
         section_header: true
         targets:
             - all
@@ -410,7 +283,7 @@ pages:
     -   name: 'Kibana user guide'
         html: kibana-user-guide.html
         category: Infrastructure
-        md: Docs/ELK/kibana-user-guide.md
+        md: docs/ELK/kibana-user-guide.md
         targets:
             - all
 
@@ -418,7 +291,7 @@ pages:
     -   name: 'Terminology'
         html: terminology.html
         category: Appendix
-        md: Docs/terminology.md
+        md: docs/terminology.md
         section_header: true
         targets:
             - all
@@ -426,21 +299,21 @@ pages:
     -   name: 'Tools and Process Decisions'
         html: Decisions.html
         category: Appendix
-        md: Docs/decisions.md
+        md: docs/decisions.md
         targets:
             - all
 
     -   name: 'FAQ'
         html: FAQ.html
         category: Appendix
-        md: paymoja/contribute/FAQ.md
+        md: mojaloop/FAQ.md
         targets:
             - all
 
     -   name: 'Roadmap'
         html: Roadmap.html
         category: Appendix
-        md: paymoja/contribute/Roadmap.md
+        md: mojaloop/contribute/Roadmap.md
         targets:
             - all      
 

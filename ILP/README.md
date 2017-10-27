@@ -81,11 +81,11 @@ Each transfer needs a timeout, or else malicious actors could trick connectors i
 
 ## Protocol Layers
 
-The design of Interledger intentionally copies the design of the Internet as much as is applicable. The four Interledger layers—Ledger, Interledger, Transport, and Application—are analogous to the Data link, Network, Transport, and Application layers of the [OSI model](https://en.wikipedia.org/wiki/OSI_model). Both models revolve around a single core protocol: Internet Protocol (IP) for the OSI stack, and the Interledger Protocol (ILP) for the Interledger stack.
+The design of Interledger intentionally copies the design of the Internet as much as is applicable. The four Interledger layers-Ledger, Interledger, Transport, and Application-are analogous to the Data link, Network, Transport, and Application layers of the [OSI model](https://en.wikipedia.org/wiki/OSI_model). Both models revolve around a single core protocol: Internet Protocol (IP) for the OSI stack, and the Interledger Protocol (ILP) for the Interledger stack.
 
 | Internet Stack | ILP Stack |
 |----------------|-----------|
-| ![Application, Transport, Internetwork, Network layers](./internet-arch.png) | ![Application, Transport, Interledger, Ledger layers](./interledger-arch.png) |
+| <img src="./internet-arch.png" width="320"> | <img src="./interledger-arch.png" width="320"> |
 
 Another way of looking at the protocol:
 
@@ -199,7 +199,7 @@ The ILP Packet is a binary data structure that should be attached to transfers (
 
 ### ILP Error Format
 
-The ILP Error Format is a binary data structure that Interledger components use to indicate a problem with executing a payment in the Interledger layer. The error format includes an error code, which is inspired by HTTP status codes, where the prefix specifies a broad category of causes and the number specifies the exact error that occurred. To distinguish Interledger error codes from HTTP status codes, Interledger errors use a letter prefix instead of a number. For example, temporary interledger errors use the prefix "T"—this is similar to HTTP status codes in the 500 range.
+The ILP Error Format is a binary data structure that Interledger components use to indicate a problem with executing a payment in the Interledger layer. The error format includes an error code, which is inspired by HTTP status codes, where the prefix specifies a broad category of causes and the number specifies the exact error that occurred. To distinguish Interledger error codes from HTTP status codes, Interledger errors use a letter prefix instead of a number. For example, temporary interledger errors use the prefix "T"-this is similar to HTTP status codes in the 500 range.
 
 #### More information
 
@@ -222,8 +222,8 @@ Interledger guarantees that the receiver gets paid or the sender gets their mone
 
 In the case of a Mojaloop instance, some more specific modifications are possible to further mitigate risk. These are possible because Mojaloop design involves a trusted central ledger, and each DFSP has control over its ledger _and_ connector. These optimizations are, in short:
 
-- _Receiver Wait & Pay_ — The receiving DFSP tries to fulfill the transfer on the central ledger before preparing the transfer to the final receiver.
-- _Sender Check-before-Rollback_ — The sending DFSP checks the outcome of the transfer on the central ledger shortly after that transfer expires. The sending DFSP sets the timeout of the transfer in its own ledger such that it can execute the transfer (including possible retries) after seeing the outcome on the central ledger.
+- _Receiver Wait & Pay_ - The receiving DFSP tries to fulfill the transfer on the central ledger before preparing the transfer to the final receiver.
+- _Sender Check-before-Rollback_ - The sending DFSP checks the outcome of the transfer on the central ledger shortly after that transfer expires. The sending DFSP sets the timeout of the transfer in its own ledger such that it can execute the transfer (including possible retries) after seeing the outcome on the central ledger.
     - Or the sender checks the result on the central ledger before expiring a transfer in the sending DFSP's ledger. If the transfer succeeded on the central ledger, the sender executes the transfer on the sender's DFSP ledger even if that means the transfer in the sending DFSP's ledger executes at or slightly past its expiration time.
 
 

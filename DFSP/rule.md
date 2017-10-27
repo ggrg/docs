@@ -59,4 +59,4 @@ Instruct the rule service that a transfer with a token reference is roll backed
     	* rule.alreadyReversed
 
 ## rule.voucher.check
-Check voucher’s applicability
+Check voucher's applicability

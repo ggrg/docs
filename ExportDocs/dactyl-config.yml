@@ -1,17 +1,17 @@
-# Usage: Run these two commands from the directory above Docs:
-#   ./Docs/ExportDocs/CopyImages.sh
-#   dactyl_build -t all -c Docs/ExportDocs/dactyl-config.yml --pdf --leave_temp_files
+# Usage: Run these two commands from the directory above docs:
+#   ./docs/Exportdocs/CopyImages.sh
+#   dactyl_build -t all -c docs/Exportdocs/dactyl-config.yml --pdf --leave_temp_files
 #--leave_temp_files
 content_path: .
 content_static_path: ./images
 temporary_files_path: .
-template_path: ./Docs/ExportDocs/pdf_templates
-template_static_path: ./Docs/ExportDocs/pdf_templates/template_assets
+template_path: ./docs/Exportdocs/pdf_templates
+template_static_path: ./docs/Exportdocs/pdf_templates/template_assets
 default_template: template-l1p_pdf_content.html
 default_pdf_template: template-l1p_pdf_content.html
 
 filter_paths:
-    - ./Docs/ExportDocs/pdf_templates/filters
+    - ./docs/Exportdocs/pdf_templates/filters
 
 default_filters:
     - out_of_date
@@ -26,15 +26,13 @@ cover_page:
 
 targets:
     -   name: all
-        display_name: Level One Project Comprehensive Documentation
+        display_name: Mojaloop Comprehensive Documentation
         image_subs:
             ./interconnectivity-animation.gif: images/interconnectivity-animation.gif
+            https://github.com/mojaloop/docs/blob/master/Wiki/Basic%20Overview.png: images/Basic%20Overview.png
         image_re_subs:
             "[./\\w]*/([\\w%.-]+[.](jpg|JPG|png|PNG))": "images/\\1"
         link_subs:
-            ./AWS/Infrastructure/machines.md: https://github.com/LevelOneProject/Docs/blob/master/AWS/Infrastructure/machines.md
-            ./LevelOneClient/scenarios/Send%20Payment.md: SendPayment.html
-            ./LevelOneClient: LevelOneClient.html
             ./DFSP/PendingTransactions/README.md: Invoices.html
             ./DFSP/BulkPayment/README.md: BulkPayments.html
             ../../DFSP#default-ports: DFSP.html#default-ports
@@ -47,48 +45,45 @@ targets:
             ../CentralLedger/README.md: central_ledger.html
             ./CentralRules: central_rules.html
             ./JMeter: IntegrationTests.html
-            ./ansible.yml: https://github.com/LevelOneProject/Docs/blob/master/ILP/ansible.yml
             ../Ports.md: ports.html
   #      link_re_subs:
   #          "[./\\w]*/([\\w%.-]+[.]md)": "\\1.html"
 
     -  name: contributor
-       display_name: Level One Project Developer Guide
+       display_name: Mojaloop Developer Guide
 
     -  name: stakeholder
-       display_name: Level One Project Financial Provider Overview
+       display_name: Mojaloop Financial Provider Overview
        image_subs:
             ./interconnectivity-animation.gif: images/interconnectivity-animation.gif
+            https://github.com/mojaloop/Docs/blob/master/Wiki/Basic%20Overview.png": images/Basic%20Overview.png
        image_re_subs:
             "[./\\w]*/([\\w%.-]+[.](jpg|JPG|png|PNG))": "images/\\1"
        link_subs:
-            ./AWS/Infrastructure/machines.md: https://github.com/LevelOneProject/Docs/blob/master/AWS/Infrastructure/machines.md
-            ./LevelOneClient/scenarios/Send%20Payment.md: SendPayment.html
-            ./LevelOneClient: LevelOneClient.html
             ./DFSP/PendingTransactions/README.md: Invoices.html
             ./DFSP/BulkPayment/README.md: BulkPayments.html
             ../../DFSP#default-ports: DFSP.html#default-ports
             ./DFSP: DFSP.html
             ../DFSP/README.md: DFSP.html
             ./ILP: ILP.html
-            ../CentralDirectory/central_directory_endpoints.md: https://github.com/LevelOneProject/Docs/blob/master/CentralDirectory/central_directory_endpoints.md
-            ./CentralDirectory: https://github.com/LevelOneProject/Docs/blob/master/CentralDirectory
-            ./CentralLedger: https://github.com/LevelOneProject/Docs/tree/master/CentralLedger
-            ../CentralLedger/README.md: https://github.com/LevelOneProject/Docs/tree/master/CentralLedger
-            ./CentralRules: https://github.com/LevelOneProject/Docs/blob/master/CentralRules
-            ./JMeter: https://github.com/LevelOneProject/Docs/blob/master/JMeter
-            ./ansible.yml: https://github.com/LevelOneProject/Docs/blob/master/ILP/ansible.yml
-            ../Ports.md: https://github.com/LevelOneProject/Docs/blob/master/LevelOneClient/Ports.md
+            ../CentralDirectory/central_directory_endpoints.md: https://github.com/mojaloop/docs/blob/master/CentralDirectory/central_directory_endpoints.md
+            ./CentralDirectory: https://github.com/mojaloop/docs/blob/master/CentralDirectory
+            ./CentralLedger: https://github.com/mojaloop/docs/tree/master/CentralLedger
+            ../CentralLedger/README.md: https://github.com/mojaloop/docs/tree/master/CentralLedger
+            ./CentralRules: https://github.com/mojaloop/docs/blob/master/CentralRules
+            ./JMeter: https://github.com/mojaloop/docs/blob/master/JMeter
+            ./ansible.yml: https://github.com/mojaloop/docs/blob/master/ILP/ansible.yml
+
 
 
     -  name: regulator
-       display_name: Level One Project Compliance Guide
+       display_name: Mojaloop Compliance Guide
 
 pages:
-# /Docs
-    -   name: Level One Project Overview
-        md: paymoja/README.md
-        html: paymoja.html
+# /docs
+    -   name: Mojaloop Overview
+        md: Mojaloop/README.md
+        html: Mojaloop.html
         category: Overview
         section_header: true
         targets:
@@ -98,7 +93,7 @@ pages:
             - regulator
 
     -   name: Documentation Overview
-        md: Docs/README.md
+        md: docs/README.md
         html: docs.html
         category: Overview
         targets:
@@ -110,7 +105,7 @@ pages:
     -   name: Central Serices Overview
         html: central-services-overview.html
         category: Overview
-        md: Docs/central-services-overview.md
+        md: docs/central-services-overview.md
         targets:
             - all
             - contributor
@@ -119,16 +114,8 @@ pages:
     -   name: 'Scenario Descriptions'
         html: Scenarios.html
         category: Scenarios
-        md: Docs/scenarios.md
+        md: docs/scenarios.md
         section_header: true
-        targets:
-            - all
-            - stakeholder
-
-    -   name: 'Send Payment'
-        html: SendPayment.html
-        category: Scenarios
-        md: 'Docs/LevelOneClient/scenarios/Send Payment.md'
         targets:
             - all
             - stakeholder
@@ -136,7 +123,7 @@ pages:
     -   name: 'Pending Transfers'
         html: Invoices.html
         category: Scenarios
-        md: Docs/DFSP/PendingTransactions/README.md
+        md: docs/DFSP/PendingTransactions/README.md
         targets:
             - all
             - stakeholder
@@ -144,32 +131,23 @@ pages:
     -   name: 'Pending Transfers API'
         html: TransferAPI.html
         category: Scenarios
-        md: Docs/DFSP/Pending Transactions Api/README.md
+        md: docs/DFSP/Pending Transactions Api/README.md
         targets:
             - all
 
     -   name: 'Bulk Payments'
         html: BulkPayments.html
         category: Scenarios
-        md: 'Docs/DFSP/BulkPayment/README.md'
+        md: 'docs/DFSP/BulkPayment/README.md'
         targets:
             - all
             - stakeholder
 
-# Docs/LevelOneClient
-    -   name: 'Level One Client'
-        html: LevelOneClient.html
-        category: 'Level One Client'
-        md: Docs/LevelOneClient/readme.md
-        section_header: true
-        targets:
-            - all
-            - stakeholder
-
+# docs/LevelOneClient
     -   name: 'Interledger Components and Flow'
         html: ILP.html
         category: 'Level One Client'
-        md: Docs/ILP/README.md
+        md: docs/ILP/README.md
         targets:
             - all
             - stakeholder
@@ -185,7 +163,7 @@ pages:
     -   name: 'Interop Services'
         html: mule.html
         category: 'Level One Client'
-        md: Docs/Interop Services and Mule/README.md
+        md: docs/Interop Services and Mule/README.md
         targets:
             - all
 
@@ -197,19 +175,19 @@ pages:
             - all
 
 
-#Docs/CentralDirectory
+#docs/CentralDirectory
     -   name: 'Central Directory'
         html: CentralDirectory.html
         category: 'Central Directory'
         section_header: true
-        md: Docs/CentralDirectory/README.md
+        md: docs/CentralDirectory/README.md
         targets:
             - all
 
     -   name: User Discovery
         html: discovery.html
         category: 'Central Directory'
-        md: Docs/Discovery.md
+        md: docs/Discovery.md
         targets:
             - all
             - contributor
@@ -217,7 +195,7 @@ pages:
     # -   name: 'Central Directory Endpoints'
     #     html: central_directory_endpoints.html
     #     category: 'Central Directory'
-    #     md: Docs/CentralDirectory/central_directory_endpoints.md
+    #     md: docs/CentralDirectory/central_directory_endpoints.md
     #     targets:
     #         - all
 
@@ -243,13 +221,13 @@ pages:
             - all
 
 
-#Docs/CentralLedger
+#docs/CentralLedger
 # README.md central_ledger_endpoints.md
     -   name: 'Central Ledger'
         html: central_ledger.html
         category: 'Central Ledger'
         section_header: true
-        md: Docs/CentralLedger/README.md
+        md: docs/CentralLedger/README.md
         targets:
             - all
 
@@ -264,7 +242,7 @@ pages:
     # -   name: 'Central Ledger Endpoints'
     #     html: central_ledger_endpoints.html
     #     category: 'Central Ledger'
-    #     md: Docs/CentralLedger/central_ledger_endpoints.md
+    #     md: docs/CentralLedger/central_ledger_endpoints.md
     #     targets:
     #         - all
     #         - central
@@ -291,12 +269,12 @@ pages:
             - all
 
 
-#Docs/CentralRules
+#docs/CentralRules
 # README.md central_rules_endpoints.md
     -   name: 'Central Rules'
         html: central_rules.html
         category: 'Central Rules'
-        md: Docs/CentralRules/README.md
+        md: docs/CentralRules/README.md
         targets:
             - all
 
@@ -304,7 +282,7 @@ pages:
     -   name: 'Central Rules Endpoints'
         html: central_rules_endpoints.html
         category: 'Central Rules'
-        md: Docs/CentralRules/central_rules_endpoints.md
+        md: docs/CentralRules/central_rules_endpoints.md
         targets:
             - all
 #Fraud
@@ -315,27 +293,27 @@ pages:
         targets:
             - all
 
-#Docs/ELK
+#docs/ELK
 # ELKSetup.md
     -   name: 'Setup Logging'
         html: elk.html
         category: Infrastructure
         section_header: true # If we add an "Infrastructure" intro, move this to there
-        md: Docs/ELK/ELKSetup.md
+        md: docs/ELK/ELKSetup.md
         targets:
             - all
 
     -   name: 'Using Kibana'
         html: kibana-user-guide.html
         category: Infrastructure
-        md: Docs/ELK/kibana-user-guide.md
+        md: docs/ELK/kibana-user-guide.md
         targets:
             - all
 
     -   name: 'Using Logging'
         html: logging.html
         category: Infrastructure
-        md: Docs/Interop Services and Mule/logging-guidelines.md
+        md: docs/Interop Services and Mule/logging-guidelines.md
         targets:
             - all
 
@@ -347,33 +325,19 @@ pages:
             - all
 
 
-#Docs/AWS/Infrastructure
+#docs/Infrastructure
 
     -   name: "Mule's Docker Image"
         html: docker.html
         category: Infrastructure
-        md: Docs/Interop Services and Mule/docker.md
+        md: docs/Interop Services and Mule/docker.md
         targets:
             - all
 
     -   name: "Configuring High Availability Proxy"
         html: HAProxy.html
         category: Infrastructure
-        md: Docs/Interop Services and Mule/Configuring HAProxy.md
-        targets:
-            - all
-
-    -   name: 'Test Environment'
-        html: Test-Env.html
-        category: Infrastructure
-        md: Docs/AWS/Infrastructure/Test-Env/README.md
-        targets:
-            - all
-
-    -   name: 'Demo Environment'
-        html: Customer-Demo-Env.html
-        category: Infrastructure
-        md: Docs/AWS/Infrastructure/Customer-Demo-Env/README.md
+        md: docs/Interop Services and Mule/Configuring HAProxy.md
         targets:
             - all
 
@@ -384,165 +348,157 @@ pages:
         html: UseCaseTests.html
         category: Testing
         section_header: true
-        md: Docs/test/README.md
+        md: docs/test/README.md
         targets:
             - all
 
     -   name: 'Account Management Tests'
         html: AccountManagementTests.html
         category: Testing
-        md: 'Docs/test/account management tests.md'
+        md: 'docs/test/account management tests.md'
         targets:
             - all
 
     -   name: 'Customer Management Tests'
         html: CustomerManagementTests.html
         category: Testing
-        md: 'Docs/test/customer management tests.md'
+        md: 'docs/test/customer management tests.md'
         targets:
             - all
 
     -   name: 'DFSP Management Tests'
         html: DFSPManagementTests.html
         category: Testing
-        md: 'Docs/test/dfsp management tests.md'
+        md: 'docs/test/dfsp management tests.md'
         targets:
             - all
 
     -   name: 'Fees Tests'
         html: FeesTests.html
         category: Testing
-        md: 'Docs/test/fees tests.md'
+        md: 'docs/test/fees tests.md'
         targets:
             - all
 
     -   name: 'Pending Transaction Tests'
         html: PendingTransactionTests.html
         category: Testing
-        md: 'Docs/test/pending transaction tests.md'
+        md: 'docs/test/pending transaction tests.md'
         targets:
             - all
 
     -   name: 'Send Money Tests'
         html: SendMoneyTests.html
         category: Testing
-        md: 'Docs/test/send money tests.md'
+        md: 'docs/test/send money tests.md'
         targets:
             - all
 
     -   name: 'Scenario Automation'
         html: scenarioAutomation.html
         category: Testing
-        md: Docs/test/end-to-end/readme.md
+        md: docs/test/end-to-end/readme.md
         targets:
             - all
 
     -   name: 'Integration Automation'
         html: IntegrationAutomation.html
         category: Testing
-        md: Docs/test/ilp-integration/README.md
-        targets:
-            - all
-
-
-    -   name: 'Performance Automation'
-        html: PerformanceAutomation.html
-        category: Testing
-        md: Docs/Interop Services and Mule/L1P Performance Test.md
+        md: docs/test/ilp-integration/README.md
         targets:
             - all
 
     -   name: 'Resilience Modeling and Anaylysis'
         html: RMA.html
         category: Testing
-        md: Docs/test/rma.md
+        md: docs/test/rma.md
         targets:
             - all
             - stakeholder
 
-#/Docs/DFSP
+#/docs/DFSP
     -   name: 'DFSP'
         html: DFSP.html
         section_header: true
         category: DFSP
-        md: Docs/DFSP/README.md
+        md: docs/DFSP/README.md
         targets:
             - all
             - stakeholder
 
     -   name: 'Quotes'
         html: dfspquotes.html
-        md: Docs/DFSP/readme.MD
+        md: docs/DFSP/readme.MD
         targets:
             - all
 
     -   name: 'Directory'
         html: directory.html
         category: DFSP
-        md: Docs/DFSP/directory.md
+        md: docs/DFSP/directory.md
         targets:
             - all
 
     -   name: 'Identity'
         html: identity.html
         category: DFSP
-        md: Docs/DFSP/identity.md
+        md: docs/DFSP/identity.md
         targets:
             - all
 
     -   name: 'Notifications'
         html: notification.html
         category: DFSP
-        md: Docs/DFSP/notification.md
+        md: docs/DFSP/notification.md
         targets:
             - all
 
     -   name: 'Rules'
         html: rule.html
         category: DFSP
-        md: Docs/DFSP/rule.md
+        md: docs/DFSP/rule.md
         targets:
             - all
 
     -   name: 'Subscriptions'
         html: subscription.html
         category: DFSP
-        md: Docs/DFSP/subscription.md
+        md: docs/DFSP/subscription.md
         targets:
             - all
 
     -   name: 'Transfer'
         html: transfer.html
         category: DFSP
-        md: Docs/DFSP/transfer.md
+        md: docs/DFSP/transfer.md
         targets:
             - all
 
     -   name: 'Account'
         html: account.html
         category: DFSP
-        md: Docs/DFSP/account.md
+        md: docs/DFSP/account.md
         targets:
             - all
 
     -   name: 'Manage Account Holders'
         html: ManageAccoutHolders.html
         category: DFSP
-        md: Docs/DFSP/ManageAcccoutHolders/ReadMe.md
+        md: docs/DFSP/ManageAcccoutHolders/ReadMe.md
         targets:
             - all
 
 # -   name: 'Setting up the Development Environment'
 #     html: development.html
 #     category: DFSP
-#     md: Docs/DFSP/development.md
+#     md: docs/DFSP/development.md
 #     targets:
 #         - all
 
     -   name: 'USSD'
         html: USSD.html
         category: DFSP
-        md: Docs/DFSP/USSD/README.md
+        md: docs/DFSP/USSD/README.md
         targets:
             - all
 
@@ -550,7 +506,7 @@ pages:
     -   name: 'PKI Guide'
         html: pki.html
         category: Security
-        md: 'Docs/PKI Guide.md'
+        md: 'docs/PKI Guide.md'
         targets:
             - all
 
@@ -559,7 +515,7 @@ pages:
         html: terminology.html
         section_header: true
         category: Appendix
-        md: Docs/terminology.md
+        md: docs/terminology.md
         targets:
             - all
             - stakeholder
@@ -567,15 +523,15 @@ pages:
     -   name: 'Tools and Process Decisions'
         html: Decisions.html
         category: Appendix
-        md: Docs/decisions.md
+        md: docs/decisions.md
         targets:
             - all
             - stakeholder
 
     -   name: 'Exporting the Documents'
-        html: ExportDocs.html
+        html: Exportdocs.html
         category: Appendix
-        md: Docs/ExportDocs/README.md
+        md: docs/Exportdocs/README.md
         targets:
             - all
 
