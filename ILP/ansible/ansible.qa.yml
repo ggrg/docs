@@ -1,0 +1,163 @@
+# Ansible playbook for deploying the
+# ilp-connector, ilp-spsp-client-rest, and ilp-spsp-server
+
+# Note this must be run with the CLI param --extra-vars="docker_username=... docker_password=... docker_email=..."
+
+# This must also be run with the CLI param --inventory-file=... where that points to either the hosts or hosts-qa file
+- name: Configure DFSPs with ILP components
+  hosts: dfsps
+  vars:
+    base_url: "http://{{ hostvars[inventory_hostname].ansible_host }}"
+    ilp_address_neighborhood: "levelone"
+    ILP_LEDGER_ADMIN_ACCOUNT: "{{ base_url }}:8088/ilp/ledger/v1/accounts/admin"
+    ILP_LEDGER_ADMIN_USERNAME: admin
+    ILP_LEDGER_ADMIN_PASSWORD: admin
+    ILP_LEDGER_PREFIX: "{{ ilp_address_neighborhood}}.{{ inventory_hostname }}."
+    ILP_SPSP_SERVER_BACKEND: "{{ base_url }}:8088/spsp/backend"
+    ILP_CLIENT_INVOICE_URL_TEMPLATE: "{{ base_url }}:3043/v1/receivers/invoices/{invoiceId}"
+    ILP_CENTRAL_LEDGER_PREFIX: "{{ ilp_address_neighborhood }}.ist."
+    ILP_CONNECTOR: "{{ ilp_address_neighborhood }}.{{ inventory_hostname }}.{{ inventory_hostname }}-testconnector"
+    ILP_CONNECTOR_ACCOUNT: "{{ base_url }}:8088/ilp/ledger/v1/accounts/{{ inventory_hostname }}-testconnector"
+    ILP_CONNECTOR_PASSWORD: "1234"
+    ILP_CONNECTOR_CENTRAL_LEDGER_ACCOUNT: "{{ hostvars[inventory_hostname].ist_url }}/accounts/{{ inventory_hostname }}"
+    ILP_CONNECTOR_CENTRAL_LEDGER_PASSWORD: "{{ inventory_hostname }}"
+    ILP_CONNECTOR_PEERS: "{{ ILP_CENTRAL_LEDGER_PREFIX }}{{ peer_name }}"
+    CURRENCY: USD
+  tasks:
+
+  - name: What we are about to do
+    debug:
+      msg: "Deploy to {{ inventory_hostname }}: {{ hostvars[inventory_hostname].ansible_user }}@{{ hostvars[inventory_hostname].ansible_host}}"
+
+  - name: Install docker-py
+    pip:
+      name: "docker-py"
+    become: true
+
+  - name: Login to Docker repository
+    tags:
+      - client
+      - server
+      - connector
+    docker_login:
+      registry: "modusbox-level1-docker.jfrog.io"
+      username: "{{ docker_username }}"
+      password: "{{ docker_password }}"
+      email: "{{ docker_email }}"
+
+  - name: Start SPSP client REST API
+    tags:
+      - client
+    docker_container:
+      name: ilp-spsp-client-rest
+      image: "modusbox-level1-docker.jfrog.io/ilp-spsp-client-rest:v4.0.10"
+      state: started
+      pull: yes
+      recreate: yes
+      ports:
+        - "3042:3042"
+      log_driver: syslog
+      log_options:
+        "syslog-address": "tcp://0.0.0.0:514"
+        "syslog-facility": "daemon"
+        "tag": "ilp-spsp-client-rest"
+        "labels": "ilp-spsp-client-rest"
+        "env": "ilp-spsp-client-rest"
+      env:
+        spspclient_port: 3042
+        spspclient_prefix: "{{ILP_LEDGER_PREFIX}}"
+        spspclient_admin__account: "{{ILP_LEDGER_ADMIN_ACCOUNT}}"
+        spspclient_admin__username: "{{ILP_LEDGER_ADMIN_USERNAME}}"
+        spspclient_admin__password: "{{ILP_LEDGER_ADMIN_PASSWORD}}"
+        spspclient_invoiceUrlTemplate: "{{ILP_CLIENT_INVOICE_URL_TEMPLATE}}"
+        # make sure there is a space before the JSON value otherwise ansible will run it as python (?!?!?)
+        spspclient_ilp__connectors: >
+
+          ["{{ ILP_CONNECTOR }}"]
+        DEBUG: "*"
+
+  - name: Start SPSP server
+    tags:
+      - server
+    docker_container:
+      name: ilp-spsp-server
+      image: "modusbox-level1-docker.jfrog.io/ilp-spsp-server:v4.1.4"
+      state: started
+      pull: yes
+      recreate: yes
+      ports:
+        - "3043:3043"
+      log_driver: syslog
+      log_options:
+        "syslog-address": "tcp://0.0.0.0:514"
+        "syslog-facility": "daemon"
+        "tag": "ilp-spsp-server"
+        "labels": "ilp-spsp-server"
+        "env": "ilp-spsp-server"
+      env:
+        spsp_port: 3043
+        spsp_backend: "{{ILP_SPSP_SERVER_BACKEND}}"
+        spsp_prefix: "{{ILP_LEDGER_PREFIX}}"
+        spsp_admin__account: "{{ILP_LEDGER_ADMIN_ACCOUNT}}"
+        spsp_admin__username: "{{ILP_LEDGER_ADMIN_USERNAME}}"
+        spsp_admin__password: "{{ILP_LEDGER_ADMIN_PASSWORD}}"
+        DEBUG: "*"
+
+  - name: Start ILP connector
+    tags:
+      - connector
+    docker_container:
+      name: ilp-connector
+      image: "michielbdejong/ilp-connector:bs-backport-config-routes"
+      state: started
+      recreate: yes
+      pull: yes
+      log_driver: syslog
+      log_options:
+        "syslog-address": "tcp://0.0.0.0:514"
+        "syslog-facility": "daemon"
+        "tag": "ilp-connector"
+        "labels": "ilp-connector"
+        "env": "ilp-connector"
+      env:
+        # make sure there is a space before the JSON value otherwise ansible will run it as python (?!?!?)
+        CONNECTOR_LEDGERS: >
+
+          {
+            "{{ILP_LEDGER_PREFIX}}": {
+              "currency": "{{CURRENCY}}",
+              "plugin": "ilp-plugin-bells",
+              "options": {
+                "account": "{{ILP_CONNECTOR_ACCOUNT}}",
+                "password": "{{ILP_CONNECTOR_PASSWORD}}"
+              }
+            },
+            "{{ILP_CENTRAL_LEDGER_PREFIX}}": {
+              "currency": "{{CURRENCY}}",
+              "plugin": "ilp-plugin-bells",
+              "options": {
+                "account": "{{ILP_CONNECTOR_CENTRAL_LEDGER_ACCOUNT}}",
+                "password": "{{ILP_CONNECTOR_CENTRAL_LEDGER_PASSWORD}}"
+              }
+            }
+          }
+        CONNECTOR_ROUTES: >
+
+          [
+            {
+              "targetPrefix": "",
+              "connectorLedger": "{{ ILP_CENTRAL_LEDGER_PREFIX }}",
+              "connectorAccount": "{{ ILP_CENTRAL_LEDGER_PREFIX }}{{ peer_name }}"
+            }
+          ]
+        CONNECTOR_ROUTE_BROADCAST_ENABLED: 1
+        CONNECTOR_PEERS: "{{ILP_CONNECTOR_PEERS}}"
+        CONNECTOR_ROUTE_EXPIRY: 6000000000
+        CONNECTOR_ROUTE_CLEANUP_INTERVAL: 6000000
+        CONNECTOR_MIN_MESSAGE_WINDOW: 1
+        CONNECTOR_MAX_HOLD_TIME: 60
+        CONNECTOR_BACKEND: one-to-one
+        CONNECTOR_FX_SPREAD: 0
+        CONNECTOR_SLIPPAGE: 0
+        CONNECTOR_LOG_LEVEL: trace
+        DEBUG: "*"

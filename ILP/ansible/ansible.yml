@@ -1,0 +1,156 @@
+# Ansible playbook for deploying the
+# ilp-connector and ilp-service
+
+# Note this must be run with the CLI param --extra-vars="docker_username=... docker_password=... docker_email=..."
+
+# This must also be run with the CLI param --inventory-file=... where that points to either the hosts or hosts-qa file
+- name: Configure DFSPs with ILP components
+  hosts: dfsps
+  vars:
+    base_url: "http://{{ hostvars[inventory_hostname].ansible_host }}"
+    ilp_address_neighborhood: "levelone"
+    ILP_LEDGER_ROOT: "{{ base_url }}:8088/ilp/ledger/v1/"
+    ILP_LEDGER_ADMIN_ACCOUNT: "{{ ILP_LEDGER_ROOT }}accounts/admin"
+    ILP_LEDGER_ADMIN_USERNAME: admin
+    ILP_LEDGER_ADMIN_PASSWORD: admin
+    ILP_LEDGER_PREFIX: "{{ ilp_address_neighborhood}}.{{ inventory_hostname }}."
+    ILP_SERVICE_BACKEND: "{{ base_url }}:8088/scheme/adapter/v1"
+    ILP_CLIENT_INVOICE_URL_TEMPLATE: "{{ base_url }}:3043/v1/receivers/invoices/{invoiceId}"
+    ILP_CENTRAL_LEDGER_PREFIX: "{{ ilp_address_neighborhood }}.ist."
+    ILP_CONNECTOR: "{{ ilp_address_neighborhood }}.{{ inventory_hostname }}.{{ inventory_hostname }}-testconnector"
+    ILP_CONNECTOR_ACCOUNT: "{{ base_url }}:8088/ilp/ledger/v1/accounts/{{ inventory_hostname }}-testconnector"
+    ILP_CONNECTOR_USERNAME: "{{ inventory_hostname }}-testconnector"
+    ILP_CONNECTOR_PASSWORD: "1234"
+    ILP_CONNECTOR_CENTRAL_LEDGER_ACCOUNT: "{{ hostvars[inventory_hostname].ist_url }}/accounts/{{ inventory_hostname }}"
+    ILP_CONNECTOR_CENTRAL_LEDGER_PASSWORD: "{{ inventory_hostname }}"
+    ILP_CONNECTOR_CENTRAL_LEDGER_USERNAME: "{{ inventory_hostname }}"
+    ILP_CONNECTOR_PEERS: "{{ ILP_CENTRAL_LEDGER_PREFIX }}{{ peer_name }}"
+    MIN_BALANCE_ON_CENTRAL_LEDGER: "-100000000"
+    MIN_BALANCE_ON_DFSP_LEDGER: "-100000000"
+    CURRENCY: USD
+  tasks:
+
+  - name: What we are about to do
+    debug:
+      msg: "Deploy to {{ inventory_hostname }}: {{ hostvars[inventory_hostname].ansible_user }}@{{ hostvars[inventory_hostname].ansible_host}}"
+
+  - name: Install docker-py
+    become: true
+    pip:
+      name: "docker-py"
+
+  - name: Login to Docker repository
+    become: true
+    docker_login:
+      registry: "modusbox-level1-docker.jfrog.io"
+      username: "{{ docker_username }}"
+      password: "{{ docker_password }}"
+      email: "{{ docker_email }}"
+
+  - name: Start the ILP Service
+    tags:
+      - service
+    become: true
+    docker_container:
+      name: ilp-service
+      image: "modusbox-level1-docker.jfrog.io/ilp-service:v2.1.4"
+      state: started
+      pull: yes
+      recreate: yes
+      ports:
+        - "3045:3045"
+      log_driver: syslog
+      log_options:
+        "syslog-address": "tcp://0.0.0.0:514"
+        "syslog-facility": "daemon"
+        "tag": "ilp-service"
+        "labels": "ilp-service"
+        "env": "ilp-service"
+      env:
+        ILP_SERVICE_PORT: 3045
+        ILP_SERVICE_ILP_PREFIX: "{{ ILP_LEDGER_PREFIX }}"
+        ILP_SERVICE_LEDGER_ROOT: "{{ ILP_LEDGER_ROOT }}"
+        ILP_SERVICE_LEDGER_ADMIN_ACCOUNT: "{{ ILP_LEDGER_ADMIN_ACCOUNT }}"
+        ILP_SERVICE_LEDGER_ADMIN_USERNAME: "{{ ILP_LEDGER_ADMIN_USERNAME }}"
+        ILP_SERVICE_LEDGER_ADMIN_PASSWORD: "{{ ILP_LEDGER_ADMIN_PASSWORD }}"
+        ILP_SERVICE_CENTRAL_CONNECTOR_ACCOUNT: "{{ ILP_CONNECTOR_CENTRAL_LEDGER_ACCOUNT }}"
+        ILP_SERVICE_CENTRAL_CONNECTOR_PASSWORD: "{{ inventory_hostname }}"
+        ILP_SERVICE_CENTRAL_CONNECTOR_USERNAME: "{{ inventory_hostname }}"
+        ILP_SERVICE_CENTRAL_CONNECTOR_PREFIX: "{{ ILP_CENTRAL_LEDGER_PREFIX }}"
+        ILP_SERVICE_CONNECTOR_ACCOUNT: "{{ ILP_CONNECTOR_ACCOUNT }}"
+        ILP_SERVICE_BACKEND: "{{ ILP_SERVICE_BACKEND }}"
+        DEBUG: "*"
+
+  - name: Start ILP connector
+    tags:
+      - connector
+    become: true
+    docker_container:
+      name: ilp-connector
+      image: "interledger/js-ilp-connector:v21.1.3"
+      state: started
+      recreate: yes
+      pull: yes
+      log_driver: syslog
+      log_options:
+        "syslog-address": "tcp://0.0.0.0:514"
+        "syslog-facility": "daemon"
+        "tag": "ilp-connector"
+        "labels": "ilp-connector"
+        "env": "ilp-connector"
+      env:
+        # make sure there is a space before the JSON value otherwise ansible will run it as python (?!?!?)
+        CONNECTOR_LEDGERS: >
+
+          {
+            "{{ILP_LEDGER_PREFIX}}": {
+              "currency": "{{CURRENCY}}",
+              "plugin": "ilp-plugin-bells",
+              "options": {
+                "account": "{{ILP_CONNECTOR_ACCOUNT}}",
+                "password": "{{ILP_CONNECTOR_PASSWORD}}",
+                "username": "{{ILP_CONNECTOR_USERNAME}}",
+                "overrideInfo": {
+                  "scale": 2
+                }
+              },
+              "overrideInfo": {
+                "minBalance": "{{MIN_BALANCE_ON_DFSP_LEDGER}}"
+              }
+            },
+            "{{ILP_CENTRAL_LEDGER_PREFIX}}": {
+              "currency": "{{CURRENCY}}",
+              "plugin": "ilp-plugin-bells",
+              "options": {
+                "account": "{{ILP_CONNECTOR_CENTRAL_LEDGER_ACCOUNT}}",
+                "password": "{{ILP_CONNECTOR_CENTRAL_LEDGER_PASSWORD}}",
+                "username": "{{ILP_CONNECTOR_CENTRAL_LEDGER_USERNAME}}",
+                "overrideInfo": {
+                  "scale": 2
+                }
+              },
+              "overrideInfo": {
+                "minBalance": "{{MIN_BALANCE_ON_CENTRAL_LEDGER}}"
+              }
+            }
+          }
+        CONNECTOR_ROUTES: >
+
+          [{
+            "targetPrefix": "",
+            "connectorLedger": "{{ ILP_CENTRAL_LEDGER_PREFIX }}",
+            "connectorAccount": "{{ ILP_CENTRAL_LEDGER_PREFIX }}{{ peer_name }}"
+          }]
+        CONNECTOR_ROUTE_BROADCAST_ENABLED: 0
+        CONNECTOR_PEERS: "{{ILP_CONNECTOR_PEERS}}"
+        CONNECTOR_ROUTE_EXPIRY: 6000000000
+        CONNECTOR_ROUTE_CLEANUP_INTERVAL: 6000000
+        CONNECTOR_MIN_MESSAGE_WINDOW: 1
+        CONNECTOR_MAX_HOLD_TIME: 60
+        CONNECTOR_BACKEND: one-to-one
+        CONNECTOR_FX_SPREAD: 0
+        CONNECTOR_SLIPPAGE: 0
+        CONNECTOR_UNWISE_USE_SAME_TRANSFER_ID: 1
+        CONNECTOR_LOG_LEVEL: trace
+        DEBUG: "*"
+
