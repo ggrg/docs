@@ -29,7 +29,7 @@ The central services are a collection of separate services that help the DFSPs p
 - The [Fraud service](https://github.com/mojaloop/central-fraud-sharing) aids DFPS in identifying suspicious behavior.
 
 ## End-to-End Scenarios
-The aforementioned individual services can't alone describe how key scenarios work across the system. Therefore, for each of the [Mojaloop Scenarios](https://github.com/mojaloop/mojaloop/contribute/Scenarios.md), we provide a technical walk through.
+The aforementioned individual services can't alone describe how key scenarios work across the system. Therefore, for each of the [Mojaloop Scenarios](https://github.com/mojaloop/docs/blob/master/scenarios.md), we provide a technical walk through.
 
 1. Send Money to Anyone: [scenario](https://github.com/mojaloop/Docs/blob/master/scenarios.md#send-money-to-anyone),  [walkthrough](./LevelOneClient/scenarios/Send%20Payment.md)
 2. Buy Goods [scenario](https://github.com/mojaloop/Docs/blob/master/scenarios.md#buy-goods---pending-transactions), [message flow](./DFSP/PendingTransactions/README.md)
