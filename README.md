@@ -3,7 +3,7 @@ The _Docs_ repository documents the overall architecture, component design, mess
 
 Individual repositories in the [mojaloop GitHub organization](https://github.com/mojaloop/) each describe component-specific details including source and APIs.
 
-For more information on Mojaloop, see the https://mojaloop.io
+For more information on mojaloop, see the https://mojaloop.io
 
 New developers, see the [contributors guide](https://github.com/mojaloop/mojaloop/blob/master/contribute.md) for onboarding materials.
 
