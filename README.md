@@ -6,6 +6,7 @@ Individual repositories in the [mojaloop GitHub organization](https://github.com
 For more information on mojaloop, see the https://mojaloop.io
 
 New developers, see the [contributors guide](https://github.com/mojaloop/mojaloop/blob/master/contribute.md) for onboarding materials.
+[![Gitter](https://badges.gitter.im/mojaloop/docs.svg)](https://gitter.im/mojaloop/docs?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 ## Mojaloop Services
 The following architecture diagram shows the Mojaloop services:
