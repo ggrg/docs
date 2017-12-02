@@ -123,11 +123,14 @@ the DFSPs blinded behind a non-descriptive SPSP endpoint URL.
 Step 1. Sender wishes to send money to +26 123 4567 (receiver identified by mobile number)
 
 Step 2. Sending DFSP queries Central Directory for SPSP endpoint
+
 ```http
 GET /api/lookup/tel?identifer=tel%3A%2B261234567 HTTP/1.1
 Host: ist.ng
 ```
+
 Step 3. Central directory resolves identifier (account at DFSP1) and returns a local URL that is a proxy to the SPSP Server at DFSP1.
+
 ```http
 HTTP/1.1 200 Success
 Content-Type: application/json
@@ -135,6 +138,7 @@ Content-Type: application/json
   "spspReceiver" : "https://ist.ng/api/spsp/2911ca95-7bab-4699-b23a-6c64c03f3475"
 }
 ```
+
 **Note:** The URL gives nothing away about which DFSP is being proxied.
 
 Step 4. Sending DFSP initiates SPSP session at `https://ist.ng/api/spsp/2911ca95-7bab-4699-b23a-6c64c03f3475`
