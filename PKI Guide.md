@@ -15,7 +15,10 @@ CFSSL is a tool developed by CloudFlare. It's both a command line tool and an HT
 ***
 
 ### Background
-Secure Channels enable confidentiality and integrity of data across network connections.  In the context of Mojaloop,  a secure channel can be made possible by the implementation of service transport security via TLS to protect data in-transit and enable mutual authentication.  The centralization of trust in a TLS implementation is provided through a Public Key Infrastructure (PKI).  Note:  While the Central KMS may serve as a PKI as the Central Services evolve, an existing internal or hosted PKI can provide the management and distribution of certificates for service endpoints.
+Secure Channels enable confidentiality and integrity of data across network connections.  In the context of Mojaloop,  a secure channel can be made possible by the implementation of service transport security via TLS to protect data in-transit and enable mutual authentication.  The centralization of trust in a TLS implementation is provided through a Public Key Infrastructure (PKI).
+
+**Note:**  While the Central KMS may serve as a PKI as the Central Services evolve, an existing internal or hosted PKI can provide the management and distribution of certificates for service endpoints.
+
 TLS helps mitigate a number of identified threats discovered during Mojaloop Threat Modeling exercises:
 
 * **Tampering**: Network traffic sniffing and or manipulation across DFSP, Pathfinder and Central Services
@@ -37,7 +40,9 @@ TLS helps mitigate a number of identified threats discovered during Mojaloop Thr
     3. Credential Exposure by Central Services Employee
 
 ### Rationale
-The implementation of TLS is a deployment-specific consideration as the standards, configurations and reliance on a PKI are best defined by the implementor. Mojaloop team has demonstrated a PKI/TLS design which may be configured and implemented to meet the needs of a deployment scenario through the use of the CloudFlare PKI Toolkit.  This toolkit provides a central root of trust, an API for automation of certificate activities and configuration options which optimize the selection of safe choices while abstracting low-level details such as the selection and implementation of low-level cryptographic primitives.  An introduction to this toolkit with safe examples for the generation and testing of certificates is found below.
+The implementation of TLS is a deployment-specific consideration as the standards, configurations and reliance on a PKI are best defined by the implementor. Mojaloop team has demonstrated a PKI/TLS design which may be configured and implemented to meet the needs of a deployment scenario through the use of the CloudFlare PKI Toolkit.
+
+This toolkit provides a central root of trust, an API for automation of certificate activities and configuration options which optimize the selection of safe choices while abstracting low-level details such as the selection and implementation of low-level cryptographic primitives.  An introduction to this toolkit with safe examples for the generation and testing of certificates is found below.
 
 
 ### Install cfssl
@@ -46,6 +51,7 @@ To install the cfssl tool, please follow the instructions for Cloudflare's [cfss
 ### CA Config
 #### Initialize a certificate authority
 First, you need to configure the certificate signing request (csr), which we've named ```ca.json```. For the key algorithm, rsa and ecdsa are supported by cfssl, but you need to avoid using a small sized key.
+
 ```
 {
   "hosts": [
@@ -67,21 +73,27 @@ First, you need to configure the certificate signing request (csr), which we've 
   ]
 }
  ```
+
  Then you need to generate a cert and the related private key for the CA.
+
  ```
  cfssl gencert -initca ca.json | cfssljson -bare ca -
  ```
+
 You will receive the following files:
+
 ```
 ca-key.pem
 ca.csr
 ca.pem
 ```
-* ```ca.pem``` is your cert.
-* ```ca-key.pem``` is your related private key, which should be stored in a safe spot. It will allow you to sign any cert.
+
+* `ca.pem` is your cert.
+* `ca-key.pem` is your related private key, which should be stored in a safe spot. It will allow you to sign any cert.
 
 #### Run a CA server
 To run a CA server, you need the ```ca-key.pem``` and ```ca.pem``` files from the first step, and a config file, ```config_ca.json```, for the server.
+
 ```
 {
    "signing": {
@@ -105,17 +117,21 @@ To run a CA server, you need the ```ca-key.pem``` and ```ca.pem``` files from th
    }
  }
  ```
- * ```auth_key``` is the token used to authenticate the client's CSR.
- * ```expiry``` is the valid time period for the cert. A year is around 8760 hours.
- * ```name_whitelist``` is the regular expression for the domain names that can be signed by the CA.
+
+ * `auth_key` is the token used to authenticate the client's CSR.
+ * `expiry` is the valid time period for the cert. A year is around 8760 hours.
+ * `name_whitelist` is the regular expression for the domain names that can be signed by the CA.
 To run the server:
+
 ```
 cfssl serve -ca=ca.pem -ca-key=ca-key.pem -config=config_ca.json -port=6666
 ```
+
 The default IP and port number is: 127.0.0.1:8888.
 
 ### Client Config
-To generate a certificate for the client, you will need a config file -- ```config_clients.json ``` for cfssl.
+To generate a certificate for the client, you will need a config file -- `config_clients.json` for cfssl.
+
 ```
 {
     "auth_keys" : {
@@ -137,9 +153,11 @@ To generate a certificate for the client, you will need a config file -- ```conf
     }
  }
  ```
-* The authentication token in ```auth_keys``` must match the one in the server.
-* The server address in ```remotes``` must match the real server address.
-You will also need another config file -- ```central_ledger.json``` for the service.
+
+* The authentication token in `auth_keys` must match the one in the server.
+* The server address in `remotes` must match the real server address.
+You will also need another config file -- `central_ledger.json` for the service.
+
 ```
 {
     "hosts": [
@@ -160,23 +178,27 @@ You will also need another config file -- ```central_ledger.json``` for the serv
      ]
  }
  ```
- * The domain name in ```hosts``` must match the whitelist in ```config_ca.json```.
- * You should avoid using a small sized key in ```key```.
+
+ * The domain name in `hosts` must match the whitelist in `config_ca.json`.
+ * You should avoid using a small sized key in `key`.
 To generate a certificate for the service:
+
 ```
 cfssl gencert -config=config_clients.json central_ledger.json | cfssljson -bare central_ledger
 ```
+
 You will receive the following files:
+
 ```
 central_ledger-key.pem
 central_ledger.csr
 central_ledger.pem
 ```
-``` central_ledger.pem``` will be your service's cert, and ```central_ledger-key.pem``` will be your private key.
+
+`central_ledger.pem` will be your service's cert, and `central_ledger-key.pem` will be your private key.
 
 ### Key Suggestions
 During the certificate signing requests, we suggest you avoid using small keys. The minium requirement is shown in the following table:
-
 
 | Signature Key | RSA | ECC |
 | ------------- | --- | --- |
@@ -207,7 +229,6 @@ server.connection({
   tls
 })
 ```
-
 
 ##### Setting up with Node
 This step doesn't change much. The key and cert along with the client cert are added to an options object. When the server is created, they are added as options.

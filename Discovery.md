@@ -33,6 +33,7 @@ These phases can be defined by distinct entry and exit gates, and the specific i
 Using such an architecture, it is also possible to host the service at a URL that does not reveal any data about the receiver, allowing public discovery systems to be used without compromising the receiver's privacy.
 
 Example of privacy protecting SPSP receiver URL:
+
 - tel:+2612345678 - resolves to -> https://ist.ng/ea472-cd5346-87df2h6680 (using a public unsecured registry)
 - SPSP session initiated at https://ist.ng/ea472-cd5346-87df2h6680 requires authentication
 
@@ -103,6 +104,7 @@ The central directory will host a simple lookup service that resolves a receiver
 It should host different endpoints for each identifier type so that these can easily be changed in future if required and so the logic to differentiate between identifier types is built into the DFSPs from the start.
 
 **Example**
+
  * tel:+26123456789 -send-lookup-query-to-> https://ist.ng/api/tel
  * acct:123456789@dfsp1.ng -send-lookup-query-to-> https://ist.ng/api/acct
 
