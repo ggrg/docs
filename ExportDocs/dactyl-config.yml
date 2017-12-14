@@ -1,17 +1,17 @@
 # Usage: Run these two commands from the directory above docs:
-#   ./docs/Exportdocs/CopyImages.sh
-#   dactyl_build -t all -c docs/Exportdocs/dactyl-config.yml --pdf --leave_temp_files
+#   ./docs/ExportDocs/CopyImages.sh
+#   dactyl_build -t all -c docs/ExportDocs/dactyl-config.yml --pdf --leave_temp_files
 #--leave_temp_files
 content_path: .
 content_static_path: ./images
 temporary_files_path: .
-template_path: ./docs/Exportdocs/pdf_templates
-template_static_path: ./docs/Exportdocs/pdf_templates/template_assets
+template_path: ./docs/ExportDocs/pdf_templates
+template_static_path: ./docs/ExportDocs/pdf_templates/template_assets
 default_template: template-l1p_pdf_content.html
 default_pdf_template: template-l1p_pdf_content.html
 
 filter_paths:
-    - ./docs/Exportdocs/pdf_templates/filters
+    - ./docs/ExportDocs/pdf_templates/filters
 
 default_filters:
     - out_of_date
@@ -82,7 +82,7 @@ targets:
 pages:
 # /docs
     -   name: Mojaloop Overview
-        md: Mojaloop/README.md
+        md: mojaloop/README.md
         html: Mojaloop.html
         category: Overview
         section_header: true
@@ -246,7 +246,7 @@ pages:
     #     targets:
     #         - all
     #         - central
-    
+
     -   name: 'Working with transfers'
         html: execute-transfer-guide.html
         category: 'Central Ledger'
@@ -264,7 +264,7 @@ pages:
     -   name: 'Central Ledger Setup'
         html: central_ledger_Setup.html
         category: 'Central Ledger'
-        md: central-ledger/LevelOneOnboarding.md
+        md: central-ledger/Onboarding.md
         targets:
             - all
 
@@ -320,7 +320,7 @@ pages:
     -   name: 'Forensic Logging Sidecar Guide'
         html: SidecarGuide.html
         category: Infrastructure
-        md: sidecar-poc/SidecarGuide.md
+        md: forensic-logging-sidecar/README.md
         targets:
             - all
 
@@ -411,7 +411,7 @@ pages:
     -   name: 'Resilience Modeling and Anaylysis'
         html: RMA.html
         category: Testing
-        md: docs/test/rma.md
+        md: docs/test/RMA.md
         targets:
             - all
             - stakeholder
@@ -428,7 +428,7 @@ pages:
 
     -   name: 'Quotes'
         html: dfspquotes.html
-        md: docs/DFSP/readme.MD
+        md: docs/DFSP/README.md
         targets:
             - all
 
@@ -529,9 +529,9 @@ pages:
             - stakeholder
 
     -   name: 'Exporting the Documents'
-        html: Exportdocs.html
+        html: ExportDocs.html
         category: Appendix
-        md: docs/Exportdocs/README.md
+        md: docs/ExportDocs/README.md
         targets:
             - all
 
