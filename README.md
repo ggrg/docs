@@ -32,7 +32,7 @@ The central services are a collection of separate services that help the DFSPs p
 ## End-to-End Scenarios
 The aforementioned individual services can't alone describe how key scenarios work across the system. Therefore, for each of the [Mojaloop Scenarios](https://github.com/mojaloop/docs/blob/master/scenarios.md), we provide a technical walk through.
 
-1. Send Money to Anyone: [scenario](https://github.com/mojaloop/Docs/blob/master/scenarios.md#send-money-to-anyone),  [walkthrough](./LevelOneClient/scenarios/Send%20Payment.md)
+1. Send Money to Anyone: [scenario](https://github.com/mojaloop/Docs/blob/master/scenarios.md#send-money-to-anyone),  [walkthrough](https://github.com/mojaloop/docs/tree/master/DFSP#push-transfer-sequence-diagram)
 2. Buy Goods [scenario](https://github.com/mojaloop/Docs/blob/master/scenarios.md#buy-goods---pending-transactions), [message flow](./DFSP/PendingTransactions/README.md)
 3. Bulk Payment [scenario](https://github.com/mojaloop/Docs/blob/master/scenarios.md#bulk-payments), [message flow](./DFSP/BulkPayment/README.md)
 
@@ -40,7 +40,7 @@ The aforementioned individual services can't alone describe how key scenarios wo
 Individual services have their own tests, but the [testing strategy](https://github.com/mojaloop/mojaloop/blob/master/contribute/Testing-strategy.md) also includes the following system-wide tests:
 
 - [Scenario testing](https://github.com/mojaloop/Docs/blob/master/test/end-to-end/readme.md)
-- [End-to-end functional testing](https://github.com/mojaloop/interop-functional-tests/blob/master/README.md)
+- [End-to-end functional testing](https://github.com/mojaloop/docs/blob/master/test/ilp-integration/README.md)
 - [Performance testing](https://github.com/mojaloop/Docs/blob/master/test/performance/Performance%20Testing%20Summary.pdf)
 - [Resilience Modeling and Analysis (RMA)](https://github.com/mojaloop/Docs/blob/master/test/RMA.md)
 - Threat Modeling
