@@ -999,18 +999,21 @@ userID = vars.get(&quot;UserID1&quot;);
 
 
 // Open File(s)
-f = new FileOutputStream(FileServer.getFileServer().getBaseDir()+&quot;\\ScenarioUser1.csv&quot;, false); 
-p = new PrintStream(f); 
-
+//f = new FileOutputStream(FileServer.getFileServer().getBaseDir()+&quot;\\ScenarioUser1.csv&quot;, false); 
+//p = new PrintStream(f); 
+FileWriter fileWriter = new FileWriter(FileServer.getFileServer().getBaseDir()+&quot;\\ScenarioUser1out.csv&quot;, true);
+fileWriter.append(userID + &quot;, &quot; + userNumber + &quot;\r\n&quot;);
+fileWriter.flush();
+fileWriter.close();
 // Write header to file 
-p.println(&quot;UserID1,userNumber1&quot;);
+//p.println(&quot;UserID1,userNumber1&quot;);
 
 // Write data to file 
-p.println( userID + &quot;, &quot; + userNumber);
+//p.println( userID + &quot;, &quot; + userNumber);
 
 
 // Close File(s)
-p.close();f.close();</stringProp>
+//p.close();f.close();</stringProp>
           </BeanShellPostProcessor>
           <hashTree/>
         </hashTree>
@@ -1666,17 +1669,21 @@ userID = vars.get(&quot;UserID2&quot;);
 System.out.println(&quot;Directory path of Jmeter script file = &quot; + FileServer.getFileServer().getBaseDir());
 
 // Open File(s)
-f = new FileOutputStream(FileServer.getFileServer().getBaseDir()+&quot;\\ScenarioUser2.csv&quot;, false); 
-p = new PrintStream(f); 
-
+//f = new FileOutputStream(FileServer.getFileServer().getBaseDir()+&quot;\\ScenarioUser1.csv&quot;, false); 
+//p = new PrintStream(f); 
+FileWriter fileWriter = new FileWriter(FileServer.getFileServer().getBaseDir()+&quot;\\ScenarioUser2out.csv&quot;, true);
+fileWriter.append(userID + &quot;, &quot; + userNumber + &quot;\r\n&quot;);
+fileWriter.flush();
+fileWriter.close();
 // Write header to file 
-p.println(&quot;UserID2,userNumber2&quot;);
+//p.println(&quot;UserID1,userNumber1&quot;);
 
 // Write data to file 
-p.println( userID + &quot;, &quot; + userNumber);
+//p.println( userID + &quot;, &quot; + userNumber);
+
 
 // Close File(s)
-p.close();f.close();</stringProp>
+//p.close();f.close();</stringProp>
           </BeanShellPostProcessor>
           <hashTree/>
         </hashTree>
@@ -2331,17 +2338,21 @@ userID = vars.get(&quot;UserID3&quot;);
 System.out.println(&quot;Directory path of Jmeter script file = &quot; + FileServer.getFileServer().getBaseDir());
 
 // Open File(s)
-f = new FileOutputStream(FileServer.getFileServer().getBaseDir()+&quot;\\ScenarioUser3.csv&quot;, false); 
-p = new PrintStream(f); 
-
+//f = new FileOutputStream(FileServer.getFileServer().getBaseDir()+&quot;\\ScenarioUser1.csv&quot;, false); 
+//p = new PrintStream(f); 
+FileWriter fileWriter = new FileWriter(FileServer.getFileServer().getBaseDir()+&quot;\\ScenarioUser3out.csv&quot;, true);
+fileWriter.append(userID + &quot;, &quot; + userNumber + &quot;\r\n&quot;);
+fileWriter.flush();
+fileWriter.close();
 // Write header to file 
-p.println(&quot;UserID3,userNumber3&quot;);
+//p.println(&quot;UserID1,userNumber1&quot;);
 
 // Write data to file 
-p.println( userID + &quot;, &quot; + userNumber);
+//p.println( userID + &quot;, &quot; + userNumber);
+
 
 // Close File(s)
-p.close();f.close();</stringProp>
+//p.close();f.close();</stringProp>
           </BeanShellPostProcessor>
           <hashTree/>
         </hashTree>
@@ -2995,17 +3006,21 @@ userID = vars.get(&quot;UserID4&quot;);
 System.out.println(&quot;Directory path of Jmeter script file = &quot; + FileServer.getFileServer().getBaseDir());
 
 // Open File(s)
-f = new FileOutputStream(FileServer.getFileServer().getBaseDir()+&quot;\\ScenarioUser4.csv&quot;, false); 
-p = new PrintStream(f); 
-
+//f = new FileOutputStream(FileServer.getFileServer().getBaseDir()+&quot;\\ScenarioUser1.csv&quot;, false); 
+//p = new PrintStream(f); 
+FileWriter fileWriter = new FileWriter(FileServer.getFileServer().getBaseDir()+&quot;\\ScenarioUser4out.csv&quot;, true);
+fileWriter.append(userID + &quot;, &quot; + userNumber + &quot;\r\n&quot;);
+fileWriter.flush();
+fileWriter.close();
 // Write header to file 
-p.println(&quot;UserID4,userNumber4&quot;);
+//p.println(&quot;UserID1,userNumber1&quot;);
 
 // Write data to file 
-p.println( userID + &quot;, &quot; + userNumber);
+//p.println( userID + &quot;, &quot; + userNumber);
+
 
 // Close File(s)
-p.close();f.close();</stringProp>
+//p.close();f.close();</stringProp>
           </BeanShellPostProcessor>
           <hashTree/>
         </hashTree>
