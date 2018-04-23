@@ -66,10 +66,13 @@ alt Prepare Validation Failure
             id: <transferMessage.id>
             from: http://ledger/dfsp1,
             to: http://ledger/dfsp2,
+            type: application/json
             content: <transferMessage>,
             metadata: {
-                eventType: prepare,
-                eventAction: prepare,
+                event: {
+                    type: prepare,
+                    action: prepare
+                }
             }
         }
     end note
@@ -84,6 +87,22 @@ alt Prepare Validation Failure
     PREP_HANDLER <-> PREP_HANDLER: Validates to - DFSP2
     PREP_HANDLER <-> PREP_HANDLER: Validates message signature
     note right of PREP_HANDLER #red: Validation failure!
+    note right of PREP_HANDLER #yellow
+        Message:
+        {
+            id: <transferMessage.id>
+            from: http://ledger/dfsp1,
+            to: http://ledger/dfsp1,
+            type: application/json
+            content: <transferResponseMessage>,
+            metadata: {
+                event: {
+                    type: notification,
+                    action: prepare
+                }
+            }
+        }
+    end note
     PREP_HANDLER -> TOPIC_NOTIFICATIONS: Publishes Notification (failure) event for DFSP1
     deactivate PREP_HANDLER
     activate NOTIFY_HANDLER

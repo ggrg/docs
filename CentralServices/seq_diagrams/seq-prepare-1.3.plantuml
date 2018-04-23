@@ -66,10 +66,13 @@ alt Prepare Position Failure
             id: <transferMessage.id>
             from: http://ledger/dfsp1,
             to: http://ledger/dfsp2,
+            type: application/json
             content: <transferMessage>,
             metadata: {
-                eventType: prepare,
-                eventAction: prepare,
+                event: {
+                    type: prepare,
+                    action: prepare
+                }
             }
         }
     end note
@@ -89,10 +92,13 @@ alt Prepare Position Failure
             id: <transferMessage.id>
             from: http://ledger/dfsp1,
             to: http://ledger/dfsp2,
+            type: application/json
             content: <transferMessage>,
             metadata: {
-                eventType: position,
-                eventAction: prepare,
+                event: {
+                    type: position,
+                    action: prepare
+                }
             }
         }
     end note
@@ -112,10 +118,13 @@ alt Prepare Position Failure
             id: <transferMessage.id>
             from: http://ledger/dfsp1,
             to: http://ledger/dfsp2,
+            type: application/json
             content: <transferResponseMessage>,
             metadata: {
-                eventType: notification,
-                eventAction: prepare,
+                event: {
+                    type: notification,
+                    action: prepare
+                }
             }
         }
     end note
