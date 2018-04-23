@@ -83,7 +83,7 @@ alt Prepare Position Failure
     TOPIC_PREPARE_DFSP1 <-> TOPIC_PREPARE_DFSP1: Ensures that event is replicated as configured (ACKS=all)
     TOPIC_PREPARE_DFSP1 -> MLAPI: Responds replication acknoledgements have been received
     MLAPI -> DFSP1: Respond HTTP - 202 (Accepted)
-    deactivate API
+    deactivate MLAPI
     activate PREP_HANDLER
     TOPIC_PREPARE_DFSP1 -> PREP_HANDLER: Consumes Prepare event message for DFSP1
     PREP_HANDLER <-> PREP_HANDLER: Validates from - DFSP1
