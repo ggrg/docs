@@ -115,7 +115,9 @@ alt DFSP1 sends a Prepare Transfer request to DFSP2
     POS_HANDLER -> EVENT_DAO: Request to persist event information
     EVENT_DAO <-> DB: Persist event information
     EVENT_DAO -> POS_HANDLER: return success
-    POS_HANDLER <-> DB: Retrieves latest position from DB for DFSP1
+    POS_HANDLER -> POS_DAO: Request latest position from DB for DFSP1
+    POS_DAO <-> DB: Retrieves latest position from DB for DFSP1
+    POS_DAO -> POS_HANDLER: Return success
     POS_HANDLER <-> POS_HANDLER: Calculates latest position by decrementing transfer for prepare
     POS_HANDLER -> POS_DAO: Request to persist latest position for DFSP1
     POS_DAO <-> DB: Persists latest position to DB for DFSP1
