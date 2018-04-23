@@ -70,6 +70,8 @@ alt Prepare Position Failure
             content: <transferMessage>,
             metadata: {
                 event: {
+                    id: <uuid>,
+                    responseTo: <previous.uuid>,
                     type: prepare,
                     action: prepare,
                     createAt: <timestamp>
@@ -97,6 +99,8 @@ alt Prepare Position Failure
             content: <transferMessage>,
             metadata: {
                 event: {
+                    id: <uuid>,
+                    responseTo: <previous.uuid>,
                     type: position,
                     action: prepare,
                     createAt: <timestamp>
@@ -124,6 +128,8 @@ alt Prepare Position Failure
             content: <transferResponseMessage>,
             metadata: {
                 event: {
+                    id: <uuid>,
+                    responseTo: <previous.uuid>,
                     type: notification,
                     action: prepare,
                     createAt: <timestamp>

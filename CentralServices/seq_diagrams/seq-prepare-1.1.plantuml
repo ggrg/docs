@@ -70,6 +70,8 @@ alt DFSP1 sends a Prepare Transfer request to DFSP2
             content: <transferMessage>,
             metadata: {
                 event: {
+                    id: <uuid>,
+                    responseTo: <previous.uuid>,
                     type: prepare,
                     action: prepare,
                     createAt: <timestamp>
@@ -97,6 +99,8 @@ alt DFSP1 sends a Prepare Transfer request to DFSP2
             content: <transferMessage>,
             metadata: {
                 event: {
+                    id: <uuid>,
+                    responseTo: <previous.uuid>,
                     type: position,
                     action: prepare,
                     createAt: <timestamp>
@@ -126,6 +130,8 @@ alt DFSP1 sends a Prepare Transfer request to DFSP2
             content: <transferMessage>,
             metadata: {
                 event: {
+                    id: <uuid>,
+                    responseTo: <previous.uuid>,
                     type: transfer,
                     action: prepare,
                     createAt: <timestamp>
@@ -150,6 +156,8 @@ alt DFSP1 sends a Prepare Transfer request to DFSP2
             content: <transferResponseMessage>,
             metadata: {
                 event: {
+                    id: <uuid>,
+                    responseTo: <previous.uuid>,
                     type: notification,
                     action: prepare,
                     createAt: <timestamp>
@@ -168,6 +176,8 @@ alt DFSP1 sends a Prepare Transfer request to DFSP2
             content: <transferResponseMessage>,
             metadata: {
                 event: {
+                    id: <uuid>,
+                    responseTo: <previous.uuid>,
                     type: notification,
                     action: prepare,
                     createAt: <timestamp>
