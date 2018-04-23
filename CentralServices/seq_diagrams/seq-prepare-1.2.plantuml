@@ -1,0 +1,97 @@
+@startuml
+' declate title
+title 1.2 DFSP1 sends a Prepare Transfer request to DFSP2 - Prepare Validation Failure
+
+autonumber
+
+' Actor Keys:
+'   boundary - APIs/Interfaces, etc
+'   collections - Kafka Topics
+'   control - Kafka Consumers
+'   entity - Database Access Objects
+'   database - Database Persistance Store
+
+' declare actors
+actor DFSP1
+actor DFSP2
+boundary "ML API Adapter" as MLAPI
+control "ML API Notification Event Handler" as NOTIFY_HANDLER
+boundary "Central Service API" as CSAPI
+collections "Prepare-Topic-handler-dfsp1" as TOPIC_PREPARE_DFSP1
+control "Prepare Event Handler" as PREP_HANDLER
+collections "Position-Topic-handler-dfsp1" as TOPIC_POSITION_DFSP1
+control "Position Event Handler" as POS_HANDLER
+collections "Transfer-Topic-handler" as TOPIC_TRANSFERS
+control "Transfer Event Handler" as TRANS_HANDLER
+collections "Notification-Topic-handler" as TOPIC_NOTIFICATIONS
+entity "Position DAO" as POS_DAO
+entity "Event DAO" as EVENT_DAO
+entity "Transfer DAO" as TRANS_DAO
+entity "Notification DAO" as NOTIFY_DAO
+database "Central Store" as DB
+
+box "Financial Service Providers" #LightBlue
+	participant DFSP1
+	participant DFSP2
+end box
+
+box "ML API Adapter Service" #LightGreen
+	participant MLAPI
+	participant NOTIFY_HANDLER
+end box
+
+box "Central Service" #LightYellow
+    participant CSAPI
+	participant TOPIC_PREPARE_DFSP1
+    participant PREP_HANDLER
+    participant TOPIC_POSITION_DFSP1
+    participant POS_HANDLER
+    participant TOPIC_TRANSFERS
+    participant TRANS_HANDLER
+    participant TOPIC_NOTIFICATIONS
+    participant POS_DAO
+    participant EVENT_DAO
+    participant TRANS_DAO
+    participant NOTIFY_DAO
+    participant DB
+end box
+
+' start flow
+alt Prepare Validation Failure
+    activate MLAPI
+    DFSP1 -> MLAPI: POST - http://transfers
+    note right of MLAPI #yellow
+        Message:
+        {
+            id: <transferMessage.id>
+            from: http://ledger/dfsp1,
+            to: http://ledger/dfsp2,
+            content: <transferMessage>,
+            metadata: {
+                eventType: prepare,
+                eventAction: prepare,
+            }
+        }
+    end note
+    MLAPI -> TOPIC_PREPARE_DFSP1: Routes & Publishes Prepare event for DFSP1
+    TOPIC_PREPARE_DFSP1 <-> TOPIC_PREPARE_DFSP1: Ensures that event is replicated as configured (ACKS=all)
+    TOPIC_PREPARE_DFSP1 -> MLAPI: Responds replication acknoledgements have been received
+    MLAPI -> DFSP1: Respond HTTP - 202 (Accepted)
+    deactivate MLAPI
+    activate PREP_HANDLER
+    TOPIC_PREPARE_DFSP1 -> PREP_HANDLER: Consumes Prepare event message for DFSP1
+    PREP_HANDLER <-> PREP_HANDLER: Validates from - DFSP1
+    PREP_HANDLER <-> PREP_HANDLER: Validates to - DFSP2
+    PREP_HANDLER <-> PREP_HANDLER: Validates message signature
+    note right of PREP_HANDLER #red: Validation failure!
+    PREP_HANDLER -> TOPIC_NOTIFICATIONS: Publishes Notification (failure) event for DFSP1
+    deactivate PREP_HANDLER
+    activate NOTIFY_HANDLER
+    TOPIC_NOTIFICATIONS -> NOTIFY_HANDLER: Consumes Notifications event
+    NOTIFY_HANDLER -> CSAPI: Requests Notification details for DFSP1 - GET - HTTP://notifications/DFPS1
+    CSAPI <-> NOTIFY_DAO: Fetches Notifications details for DFSP1
+    CSAPI -> NOTIFY_HANDLER: Returns Notifications details for DFSP1
+    NOTIFY_HANDLER -> DFSP1: HTTP Callback with Prepare result to DFSP1
+    deactivate NOTIFY_HANDLER
+end
+@enduml

@@ -1,6 +1,6 @@
 @startuml
 ' declate title
-title DFSP1 sends a Prepare Transfer request to DFSP2
+title 1.1 DFSP1 sends a Prepare Transfer request to DFSP2
 
 autonumber
 
@@ -60,6 +60,19 @@ end box
 alt DFSP1 sends a Prepare Transfer request to DFSP2
     activate MLAPI
     DFSP1 -> MLAPI: POST - http://transfers
+    note right of MLAPI #yellow
+        Message:
+        {
+            id: <transferMessage.id>
+            from: http://ledger/dfsp1,
+            to: http://ledger/dfsp2,
+            content: <transferMessage>,
+            metadata: {
+                eventType: prepare,
+                eventAction: prepare,
+            }
+        }
+    end note
     MLAPI -> TOPIC_PREPARE_DFSP1: Routes & Publishes Prepare event for DFSP1
     TOPIC_PREPARE_DFSP1 <-> TOPIC_PREPARE_DFSP1: Ensures that event is replicated as configured (ACKS=all)
     TOPIC_PREPARE_DFSP1 -> MLAPI: Responds replication acknoledgements have been received
@@ -70,6 +83,19 @@ alt DFSP1 sends a Prepare Transfer request to DFSP2
     PREP_HANDLER <-> PREP_HANDLER: Validates from - DFSP1
     PREP_HANDLER <-> PREP_HANDLER: Validates to - DFSP2
     PREP_HANDLER <-> PREP_HANDLER: Validates message signature
+    note right of PREP_HANDLER #yellow
+        Message:
+        {
+            id: <transferMessage.id>
+            from: http://ledger/dfsp1,
+            to: http://ledger/dfsp2,
+            content: <transferMessage>,
+            metadata: {
+                eventType: position,
+                eventAction: prepare,
+            }
+        }
+    end note
     PREP_HANDLER -> TOPIC_POSITION_DFSP1: Routes & Publishes Position event for DFSP1
     deactivate PREP_HANDLER
     activate POS_HANDLER
@@ -82,6 +108,19 @@ alt DFSP1 sends a Prepare Transfer request to DFSP2
     POS_HANDLER -> POS_DAO: Request to persist latest position for DFSP1
     POS_DAO <-> DB: Persists latest position to DB for DFSP1
     POS_DAO -> POS_HANDLER: return success
+    note right of POS_HANDLER #yellow
+        Message:
+        {
+            id: <transferMessage.id>
+            from: http://ledger/dfsp1,
+            to: http://ledger/dfsp2,
+            content: <transferMessage>,
+            metadata: {
+                eventType: transfer,
+                eventAction: prepare,
+            }
+        }
+    end note
     POS_HANDLER -> TOPIC_TRANSFERS: Publishes Transfer event
     deactivate POS_HANDLER
     deactivate TRANS_HANDLER
@@ -89,69 +128,45 @@ alt DFSP1 sends a Prepare Transfer request to DFSP2
     TRANS_HANDLER -> TRANS_DAO: Request to Transfer status to DB
     TRANS_DAO <-> DB: return success
     TRANS_DAO -> TRANS_HANDLER: Persists Transfer status to DB
+    note right of TRANS_HANDLER #yellow
+        Message:
+        {
+            id: <transferMessage.id>
+            from: http://ledger/dfsp1,
+            to: http://ledger/dfsp1,
+            content: <transferResponseMessage>,
+            metadata: {
+                eventType: notification,
+                eventAction: prepare,
+            }
+        }
+    end note
     TRANS_HANDLER -> TOPIC_NOTIFICATIONS: Publishes Notifications event for DFSP1
+    note right of TRANS_HANDLER #yellow
+        Message:
+        {
+            id: <transferMessage.id>
+            from: http://ledger/dfsp1,
+            to: http://ledger/dfsp2,
+            content: <transferResponseMessage>,
+            metadata: {
+                eventType: notification,
+                eventAction: prepare,
+            }
+        }
+    end note
     TRANS_HANDLER -> TOPIC_NOTIFICATIONS: Publishes Notifications event for DFSP2
     deactivate TRANS_HANDLER
     activate NOTIFY_HANDLER
     TOPIC_NOTIFICATIONS -> NOTIFY_HANDLER: Consumes Notifications event
-    NOTIFY_HANDLER -> CSAPI: Requests Notification details for DFSP1
+    NOTIFY_HANDLER -> CSAPI: Requests Notification details for DFSP1 - GET - HTTP://notifications/DFPS1
     CSAPI <-> NOTIFY_DAO: Fetches Notifications details for DFSP1
     CSAPI -> NOTIFY_HANDLER: Returns Notifications details for DFSP1
     NOTIFY_HANDLER -> DFSP1: HTTP Callback with Prepare result to DFSP1
-    NOTIFY_HANDLER <-> NOTIFY_DAO: Fetches Notifications details for DFSP2
+    NOTIFY_HANDLER -> CSAPI: Requests Notification details for DFSP2 - GET - HTTP://notifications/DFPS2
+    CSAPI <-> NOTIFY_DAO: Fetches Notifications details for DFSP2
+    CSAPI -> NOTIFY_HANDLER: Returns Notifications details for DFSP2
     NOTIFY_HANDLER -> DFSP2: HTTP Callback with Prepare result to DFSP2
     deactivate NOTIFY_HANDLER
-else Prepare Validation Failure
-    activate MLAPI
-    DFSP1 -> MLAPI: POST - http://transfers
-    MLAPI -> TOPIC_PREPARE_DFSP1: Routes & Publishes Prepare event for DFSP1
-    TOPIC_PREPARE_DFSP1 <-> TOPIC_PREPARE_DFSP1: Ensures that event is replicated as configured (ACKS=all)
-    TOPIC_PREPARE_DFSP1 -> MLAPI: Responds replication acknoledgements have been received
-    MLAPI -> DFSP1: Respond HTTP - 202 (Accepted)
-    deactivate MLAPI
-    activate PREP_HANDLER
-    TOPIC_PREPARE_DFSP1 -> PREP_HANDLER: Consumes Prepare event message for DFSP1
-    PREP_HANDLER <-> PREP_HANDLER: Validates from - DFSP1
-    PREP_HANDLER <-> PREP_HANDLER: Validates to - DFSP2
-    PREP_HANDLER <-> PREP_HANDLER: Validates message signature
-    note right of PREP_HANDLER #red: Validation failure!
-    PREP_HANDLER -> TOPIC_NOTIFICATIONS: Publishes Notification (failure) event for DFSP1
-    deactivate PREP_HANDLER
-    activate NOTIFY_HANDLER
-    TOPIC_NOTIFICATIONS -> NOTIFY_HANDLER: Consumes Notifications event
-    NOTIFY_HANDLER <-> NOTIFY_DAO: Fetches Notifications details for DFSP1
-    NOTIFY_HANDLER -> DFSP1: HTTP Callback with Prepare result to DFSP1
-    NOTIFY_HANDLER <-> NOTIFY_DAO: Fetches Notifications details for DFSP2
-    NOTIFY_HANDLER -> DFSP2: HTTP Callback with Prepare result to DFSP2
-    deactivate NOTIFY_HANDLER
-else Prepare Position Failure
-    activate MLAPI
-    DFSP1 -> MLAPI: POST - http://transfers
-    MLAPI -> TOPIC_PREPARE_DFSP1: Routes & Publishes Prepare event for DFSP1
-    TOPIC_PREPARE_DFSP1 <-> TOPIC_PREPARE_DFSP1: Ensures that event is replicated as configured (ACKS=all)
-    TOPIC_PREPARE_DFSP1 -> MLAPI: Responds replication acknoledgements have been received
-    MLAPI -> DFSP1: Respond HTTP - 202 (Accepted)
-    deactivate API
-    activate PREP_HANDLER
-    TOPIC_PREPARE_DFSP1 -> PREP_HANDLER: Consumes Prepare event message for DFSP1
-    PREP_HANDLER <-> PREP_HANDLER: Validates from - DFSP1
-    PREP_HANDLER <-> PREP_HANDLER: Validates to - DFSP2
-    PREP_HANDLER <-> PREP_HANDLER: Validates message signature
-    PREP_HANDLER -> TOPIC_POSITION_DFSP1: Routes & Publishes Position event for DFSP1
-    deactivate PREP_HANDLER
-    activate POS_HANDLER
-    TOPIC_POSITION_DFSP1 -> POS_HANDLER: Consumes Position event message for DFSP1
-    POS_HANDLER -> EVENT_DAO: Request to persist event information
-    EVENT_DAO <-> DB: Persist event information
-    EVENT_DAO -> POS_HANDLER: return success
-    POS_HANDLER <-> DB: Retrieves latest position from DB for DFSP1
-    POS_HANDLER <-> POS_HANDLER: Calculates latest position by decrementing transfer for prepare
-    note right of POS_HANDLER #red: Validation failure!
-    POS_HANDLER -> TOPIC_NOTIFICATIONS: Publishes Notifications (Failure) event for DFSP2
-    deactivate POS_HANDLER
-    activate NOTIFY_HANDLER
-    TOPIC_NOTIFICATIONS -> NOTIFY_HANDLER: Consumes Notifications event
-    NOTIFY_HANDLER <-> NOTIFY_DAO: Fetches Notifications details for DFSP1
-    NOTIFY_HANDLER -> DFSP1: HTTP Callback with Prepare result to DFSP1
 end
 @enduml
