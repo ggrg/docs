@@ -71,7 +71,8 @@ alt DFSP1 sends a Prepare Transfer request to DFSP2
             metadata: {
                 event: {
                     type: prepare,
-                    action: prepare
+                    action: prepare,
+                    createAt: <timestamp>
                 }
             }
         }
@@ -97,7 +98,8 @@ alt DFSP1 sends a Prepare Transfer request to DFSP2
             metadata: {
                 event: {
                     type: position,
-                    action: prepare
+                    action: prepare,
+                    createAt: <timestamp>
                 }
             }
         }
@@ -125,7 +127,8 @@ alt DFSP1 sends a Prepare Transfer request to DFSP2
             metadata: {
                 event: {
                     type: transfer,
-                    action: prepare
+                    action: prepare,
+                    createAt: <timestamp>
                 }
             }
         }
@@ -148,7 +151,8 @@ alt DFSP1 sends a Prepare Transfer request to DFSP2
             metadata: {
                 event: {
                     type: notification,
-                    action: prepare
+                    action: prepare,
+                    createAt: <timestamp>
                 }
             }
         }
@@ -165,7 +169,8 @@ alt DFSP1 sends a Prepare Transfer request to DFSP2
             metadata: {
                 event: {
                     type: notification,
-                    action: prepare
+                    action: prepare,
+                    createAt: <timestamp>
                 }
             }
         }

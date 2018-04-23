@@ -71,7 +71,8 @@ alt Prepare Validation Failure
             metadata: {
                 event: {
                     type: prepare,
-                    action: prepare
+                    action: prepare,
+                    createAt: <timestamp>
                 }
             }
         }
@@ -98,7 +99,8 @@ alt Prepare Validation Failure
             metadata: {
                 event: {
                     type: notification,
-                    action: prepare
+                    action: prepare,
+                    createAt: <timestamp>
                 }
             }
         }
