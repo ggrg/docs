@@ -14,7 +14,7 @@ Percona XtraDB high availability cluster with MySQL database.
 * [**Notes**](#notes)
 
 ## Introduction
-As part of the Program Increment - 1 (PI-1) of the Mojaloop Productionization project, two major Proof of Concept(PoC) items were done; one a PoC for HA/Scalability for Transactional DB and another PoC for durable Message Stream Processing. This document gives a brief account of the approach taken to do performance, scalability and resiliency testing and the scenarios involved. There are also charts and numbers provided based on the results of these tests done towards the end of PI-1. The metrics recorded during this exercise could serve as a baseline for comparison during future performance tests.
+As part of the Program Increment - 1 (PI-1) of the Mojaloop Productionisation project, two major Proof of Concept(PoC) items were done; one a PoC for HA/Scalability for Transactional DB and another PoC for durable Message Stream Processing. This document gives a brief account of the approach taken to do performance, scalability and resiliency testing and the scenarios involved. There are also charts and numbers provided based on the results of these tests done towards the end of PI-1. The metrics recorded during this exercise could serve as a baseline for comparison during future performance tests.
 
 ## Getting Started
 - Please follow the instructions in the [README.md](https://github.com/mojaloop/central-ledger/blob/develop-baseline/README.md) for setting up a local environment.
