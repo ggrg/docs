@@ -17,13 +17,13 @@ actor DFSP2
 boundary "ML API Adapter" as MLAPI
 control "ML API Notification Event Handler" as NOTIFY_HANDLER
 boundary "Central Service API" as CSAPI
-collections "Prepare-Topic-handler-dfsp1" as TOPIC_PREPARE_DFSP1
+collections "Prepare-Topic-dfsp1" as TOPIC_PREPARE_DFSP1
 control "Prepare Event Handler" as PREP_HANDLER
-collections "Position-Topic-handler-dfsp1" as TOPIC_POSITION_DFSP1
+collections "Position-Topic-dfsp1" as TOPIC_POSITION_DFSP1
 control "Position Event Handler" as POS_HANDLER
-collections "Transfer-Topic-handler" as TOPIC_TRANSFERS
+collections "Transfer-Topic" as TOPIC_TRANSFERS
 control "Transfer Event Handler" as TRANS_HANDLER
-collections "Notification-Topic-handler" as TOPIC_NOTIFICATIONS
+collections "Notification-Topic" as TOPIC_NOTIFICATIONS
 entity "Position DAO" as POS_DAO
 entity "Event DAO" as EVENT_DAO
 entity "Transfer DAO" as TRANS_DAO
