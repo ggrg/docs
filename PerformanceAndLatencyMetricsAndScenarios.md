@@ -84,3 +84,4 @@ Following the above steps during the testing and verification process on the tra
 - The JMeter scripts were run from a AWS VM that was on the same Data Center as that of the target system to ensure consistent numbers.
 - Control tests were executed on the Amazon Web Services Cluster specifically setup to establish a baseline.
 - There is a need to identify the range that is relevant for this project for variables such as *'number of threads'* (10-500?), *'loop count'*, *'scalability factor'* and such others.
+- For the Scenario-1, three m4.xlarge AWS VMs were used and for Scenario-2, three i3.xlarge AWS VMs were used.
