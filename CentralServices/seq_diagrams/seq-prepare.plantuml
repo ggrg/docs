@@ -2,6 +2,12 @@
 ' declate title
 title DFSP1 sends a Prepare Transfer request to DFSP2
 
+' keys:
+' boundary - APIs
+' collections - Kafka Topics
+' control - Kafka Consumers
+' entity - Database Access Objects
+
 ' declare actors
 actor DFSP1
 actor DFSP2
@@ -14,7 +20,6 @@ collections "Transfer-Topic-handler" as TOPIC_TRANSFERS
 control "Transfer Event Handler" as TRANS_HANDLER
 collections "Notification-Topic-handler" as TOPIC_NOTIFICATIONS
 control "ML API Notification Event Handler" as NOTIFY_HANDLER
-boundary "ML API Adapter" as API
 entity "Position DAO" as POS_DAO
 entity "Event DAO" as EVENT_DAO
 entity "Transfer DAO" as TRANS_DAO
