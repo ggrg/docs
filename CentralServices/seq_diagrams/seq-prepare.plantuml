@@ -2,11 +2,12 @@
 ' declate title
 title DFSP1 sends a Prepare Transfer request to DFSP2
 
-' keys:
-' boundary - APIs
-' collections - Kafka Topics
-' control - Kafka Consumers
-' entity - Database Access Objects
+' Actor Keys:
+'   boundary - APIs/Interfaces, etc
+'   collections - Kafka Topics
+'   control - Kafka Consumers
+'   entity - Database Access Objects
+'   database - Database Persistance Store
 
 ' declare actors
 actor DFSP1
