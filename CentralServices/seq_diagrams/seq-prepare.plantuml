@@ -109,7 +109,7 @@ else Prepare Position Failure
     EVENT_DAO -> POS_HANDLER: return success
     POS_HANDLER <-> DB: Retrieves latest position from DB for DFSP1
     POS_HANDLER <-> POS_HANDLER: Calculates latest position by decrementing transfer for prepare
-    note right of PREP_HANDLER #red: Validation failure!
+    note right of POS_HANDLER #red: Validation failure!
     POS_HANDLER -> TOPIC_NOTIFICATIONS: Publishes Notifications (Failure) event for DFSP2
     deactivate POS_HANDLER
     activate NOTIFY_HANDLER
