@@ -2,6 +2,8 @@
 ' declate title
 title DFSP1 sends a Prepare Transfer request to DFSP2
 
+autonumber
+
 ' Actor Keys:
 '   boundary - APIs/Interfaces, etc
 '   collections - Kafka Topics
@@ -12,7 +14,9 @@ title DFSP1 sends a Prepare Transfer request to DFSP2
 ' declare actors
 actor DFSP1
 actor DFSP2
-boundary "ML API Adapter" as API
+boundary "ML API Adapter" as MLAPI
+control "ML API Notification Event Handler" as NOTIFY_HANDLER
+boundary "Central Service API" as CSAPI
 collections "Prepare-Topic-handler-dfsp1" as TOPIC_PREPARE_DFSP1
 control "Prepare Event Handler" as PREP_HANDLER
 collections "Position-Topic-handler-dfsp1" as TOPIC_POSITION_DFSP1
@@ -20,22 +24,47 @@ control "Position Event Handler" as POS_HANDLER
 collections "Transfer-Topic-handler" as TOPIC_TRANSFERS
 control "Transfer Event Handler" as TRANS_HANDLER
 collections "Notification-Topic-handler" as TOPIC_NOTIFICATIONS
-control "ML API Notification Event Handler" as NOTIFY_HANDLER
 entity "Position DAO" as POS_DAO
 entity "Event DAO" as EVENT_DAO
 entity "Transfer DAO" as TRANS_DAO
 entity "Notification DAO" as NOTIFY_DAO
 database "Central Store" as DB
 
+box "Financial Service Providers" #LightBlue
+	participant DFSP1
+	participant DFSP2
+end box
+
+box "ML API Adapter Service" #LightGreen
+	participant MLAPI
+	participant NOTIFY_HANDLER
+end box
+
+box "Internal Service" #LightYellow
+    participant CSAPI
+	participant TOPIC_PREPARE_DFSP1
+    participant PREP_HANDLER
+    participant TOPIC_POSITION_DFSP1
+    participant POS_HANDLER
+    participant TOPIC_TRANSFERS
+    participant TRANS_HANDLER
+    participant TOPIC_NOTIFICATIONS
+    participant POS_DAO
+    participant EVENT_DAO
+    participant TRANS_DAO
+    participant NOTIFY_DAO
+    participant DB
+end box
+
 ' start flow
 alt DFSP1 sends a Prepare Transfer request to DFSP2
-    activate API
-    DFSP1 -> API: POST - http://transfers
-    API -> TOPIC_PREPARE_DFSP1: Routes & Publishes Prepare event for DFSP1
+    activate MLAPI
+    DFSP1 -> MLAPI: POST - http://transfers
+    MLAPI -> TOPIC_PREPARE_DFSP1: Routes & Publishes Prepare event for DFSP1
     TOPIC_PREPARE_DFSP1 <-> TOPIC_PREPARE_DFSP1: Ensures that event is replicated as configured (ACKS=all)
-    TOPIC_PREPARE_DFSP1 -> API: Responds replication acknoledgements have been received
-    API -> DFSP1: Respond HTTP - 202 (Accepted)
-    deactivate API
+    TOPIC_PREPARE_DFSP1 -> MLAPI: Responds replication acknoledgements have been received
+    MLAPI -> DFSP1: Respond HTTP - 202 (Accepted)
+    deactivate MLAPI
     activate PREP_HANDLER
     TOPIC_PREPARE_DFSP1 -> PREP_HANDLER: Consumes Prepare event message for DFSP1
     PREP_HANDLER <-> PREP_HANDLER: Validates from - DFSP1
@@ -65,19 +94,21 @@ alt DFSP1 sends a Prepare Transfer request to DFSP2
     deactivate TRANS_HANDLER
     activate NOTIFY_HANDLER
     TOPIC_NOTIFICATIONS -> NOTIFY_HANDLER: Consumes Notifications event
-    NOTIFY_HANDLER <-> NOTIFY_DAO: Fetches Notifications details for DFSP1
+    NOTIFY_HANDLER -> CSAPI: Requests Notification details for DFSP1
+    CSAPI <-> NOTIFY_DAO: Fetches Notifications details for DFSP1
+    CSAPI -> NOTIFY_HANDLER: Returns Notifications details for DFSP1
     NOTIFY_HANDLER -> DFSP1: HTTP Callback with Prepare result to DFSP1
     NOTIFY_HANDLER <-> NOTIFY_DAO: Fetches Notifications details for DFSP2
     NOTIFY_HANDLER -> DFSP2: HTTP Callback with Prepare result to DFSP2
     deactivate NOTIFY_HANDLER
 else Prepare Validation Failure
-    activate API
-    DFSP1 -> API: POST - http://transfers
-    API -> TOPIC_PREPARE_DFSP1: Routes & Publishes Prepare event for DFSP1
+    activate MLAPI
+    DFSP1 -> MLAPI: POST - http://transfers
+    MLAPI -> TOPIC_PREPARE_DFSP1: Routes & Publishes Prepare event for DFSP1
     TOPIC_PREPARE_DFSP1 <-> TOPIC_PREPARE_DFSP1: Ensures that event is replicated as configured (ACKS=all)
-    TOPIC_PREPARE_DFSP1 -> API: Responds replication acknoledgements have been received
-    API -> DFSP1: Respond HTTP - 202 (Accepted)
-    deactivate API
+    TOPIC_PREPARE_DFSP1 -> MLAPI: Responds replication acknoledgements have been received
+    MLAPI -> DFSP1: Respond HTTP - 202 (Accepted)
+    deactivate MLAPI
     activate PREP_HANDLER
     TOPIC_PREPARE_DFSP1 -> PREP_HANDLER: Consumes Prepare event message for DFSP1
     PREP_HANDLER <-> PREP_HANDLER: Validates from - DFSP1
@@ -94,12 +125,12 @@ else Prepare Validation Failure
     NOTIFY_HANDLER -> DFSP2: HTTP Callback with Prepare result to DFSP2
     deactivate NOTIFY_HANDLER
 else Prepare Position Failure
-    activate API
-    DFSP1 -> API: POST - http://transfers
-    API -> TOPIC_PREPARE_DFSP1: Routes & Publishes Prepare event for DFSP1
+    activate MLAPI
+    DFSP1 -> MLAPI: POST - http://transfers
+    MLAPI -> TOPIC_PREPARE_DFSP1: Routes & Publishes Prepare event for DFSP1
     TOPIC_PREPARE_DFSP1 <-> TOPIC_PREPARE_DFSP1: Ensures that event is replicated as configured (ACKS=all)
-    TOPIC_PREPARE_DFSP1 -> API: Responds replication acknoledgements have been received
-    API -> DFSP1: Respond HTTP - 202 (Accepted)
+    TOPIC_PREPARE_DFSP1 -> MLAPI: Responds replication acknoledgements have been received
+    MLAPI -> DFSP1: Respond HTTP - 202 (Accepted)
     deactivate API
     activate PREP_HANDLER
     TOPIC_PREPARE_DFSP1 -> PREP_HANDLER: Consumes Prepare event message for DFSP1
