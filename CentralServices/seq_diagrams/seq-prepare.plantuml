@@ -40,7 +40,7 @@ box "ML API Adapter Service" #LightGreen
 	participant NOTIFY_HANDLER
 end box
 
-box "Internal Service" #LightYellow
+box "Central Service" #LightYellow
     participant CSAPI
 	participant TOPIC_PREPARE_DFSP1
     participant PREP_HANDLER
