@@ -71,10 +71,9 @@ alt Prepare Validation Failure
             metadata: {
                 event: {
                     id: <uuid>,
-                    responseTo: <previous.uuid>,
                     type: prepare,
                     action: prepare,
-                    createAt: <timestamp>
+                    createdAt: <timestamp>
                 }
             }
         }
@@ -90,6 +89,9 @@ alt Prepare Validation Failure
     PREP_HANDLER <-> PREP_HANDLER: Validates to - DFSP2
     PREP_HANDLER <-> PREP_HANDLER: Validates message signature
     note right of PREP_HANDLER #red: Validation failure!
+    PREP_HANDLER -> EVENT_DAO: Request to persist event information
+    EVENT_DAO <-> DB: Persist event information
+    EVENT_DAO -> PREP_HANDLER: return success
     note right of PREP_HANDLER #yellow
         Message:
         {
@@ -104,7 +106,7 @@ alt Prepare Validation Failure
                     responseTo: <previous.uuid>,
                     type: notification,
                     action: prepare,
-                    createAt: <timestamp>
+                    createdAt: <timestamp>
                 }
             }
         }

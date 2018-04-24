@@ -71,10 +71,9 @@ alt DFSP1 sends a Prepare Transfer request to DFSP2
             metadata: {
                 event: {
                     id: <uuid>,
-                    responseTo: <previous.uuid>,
                     type: prepare,
                     action: prepare,
-                    createAt: <timestamp>
+                    createdAt: <timestamp>
                 }
             }
         }
@@ -103,7 +102,7 @@ alt DFSP1 sends a Prepare Transfer request to DFSP2
                     responseTo: <previous.uuid>,
                     type: position,
                     action: prepare,
-                    createAt: <timestamp>
+                    createdAt: <timestamp>
                 }
             }
         }
@@ -112,9 +111,6 @@ alt DFSP1 sends a Prepare Transfer request to DFSP2
     deactivate PREP_HANDLER
     activate POS_HANDLER
     TOPIC_POSITION_DFSP1 -> POS_HANDLER: Consumes Position event message for DFSP1
-    POS_HANDLER -> EVENT_DAO: Request to persist event information
-    EVENT_DAO <-> DB: Persist event information
-    EVENT_DAO -> POS_HANDLER: return success
     POS_HANDLER -> POS_DAO: Request latest position from DB for DFSP1
     POS_DAO <-> DB: Retrieves latest position from DB for DFSP1
     POS_DAO -> POS_HANDLER: Return success
@@ -122,6 +118,9 @@ alt DFSP1 sends a Prepare Transfer request to DFSP2
     POS_HANDLER -> POS_DAO: Request to persist latest position for DFSP1
     POS_DAO <-> DB: Persists latest position to DB for DFSP1
     POS_DAO -> POS_HANDLER: return success
+    POS_HANDLER -> EVENT_DAO: Request to persist event information
+    EVENT_DAO <-> DB: Persist event information
+    EVENT_DAO -> POS_HANDLER: return success
     note right of POS_HANDLER #yellow
         Message:
         {
@@ -136,7 +135,7 @@ alt DFSP1 sends a Prepare Transfer request to DFSP2
                     responseTo: <previous.uuid>,
                     type: transfer,
                     action: prepare,
-                    createAt: <timestamp>
+                    createdAt: <timestamp>
                 }
             }
         }
@@ -162,7 +161,7 @@ alt DFSP1 sends a Prepare Transfer request to DFSP2
                     responseTo: <previous.uuid>,
                     type: notification,
                     action: prepare,
-                    createAt: <timestamp>
+                    createdAt: <timestamp>
                 }
             }
         }
@@ -182,7 +181,7 @@ alt DFSP1 sends a Prepare Transfer request to DFSP2
                     responseTo: <previous.uuid>,
                     type: notification,
                     action: prepare,
-                    createAt: <timestamp>
+                    createdAt: <timestamp>
                 }
             }
         }
