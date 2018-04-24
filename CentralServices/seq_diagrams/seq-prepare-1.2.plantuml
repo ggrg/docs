@@ -116,7 +116,9 @@ alt Prepare Validation Failure
     activate NOTIFY_HANDLER
     TOPIC_NOTIFICATIONS -> NOTIFY_HANDLER: Consumes Notifications event
     NOTIFY_HANDLER -> CSAPI: Requests Notification details for DFSP1 - GET - HTTP://notifications/DFPS1
-    CSAPI <-> NOTIFY_DAO: Fetches Notifications details for DFSP1
+    CSAPI -> NOTIFY_DAO: Fetches Notifications details for DFSP1
+    NOTIFY_DAO <-> DB: Fetches Notifications details for DFSP1
+    NOTIFY_DAO -> CSAPI: Returns Notifications details for DFSP1
     CSAPI -> NOTIFY_HANDLER: Returns Notifications details for DFSP1
     NOTIFY_HANDLER -> DFSP1: HTTP Callback with Prepare result to DFSP1
     deactivate NOTIFY_HANDLER
