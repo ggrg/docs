@@ -64,8 +64,8 @@ alt DFSP1 sends a Prepare Transfer request to DFSP2
         Message:
         {
             id: <transferMessage.id>
-            from: http://ledger/dfsp1,
-            to: http://ledger/dfsp2,
+            from: dfsp1,
+            to: dfsp2,
             type: application/json
             content: <transferMessage>,
             metadata: {
@@ -87,13 +87,18 @@ alt DFSP1 sends a Prepare Transfer request to DFSP2
     TOPIC_PREPARE_DFSP1 -> PREP_HANDLER: Consumes Prepare event message for DFSP1
     PREP_HANDLER <-> PREP_HANDLER: Validates from - DFSP1
     PREP_HANDLER <-> PREP_HANDLER: Validates to - DFSP2
-    PREP_HANDLER <-> PREP_HANDLER: Validates message signature
+    PREP_HANDLER -> TRANS_DAO: Request to retrieve Transfer (if it exists)
+    TRANS_DAO <-> DB: return Transfer if it exists
+    TRANS_DAO -> PREP_HANDLER: return Transfer if it exists
+    PREP_HANDLER <-> PREP_HANDLER: Validates duplicate Check
+    PREP_HANDLER <-> PREP_HANDLER: Validates crypto-condition
+    PREP_HANDLER <-> PREP_HANDLER: Validates message signature (to be confirmed in future requirement)
     note right of PREP_HANDLER #yellow
         Message:
         {
             id: <transferMessage.id>
-            from: http://ledger/dfsp1,
-            to: http://ledger/dfsp2,
+            from: dfsp1,
+            to: dfsp2,
             type: application/json
             content: <transferMessage>,
             metadata: {
@@ -114,7 +119,8 @@ alt DFSP1 sends a Prepare Transfer request to DFSP2
     POS_HANDLER -> POS_DAO: Request latest position from DB for DFSP1
     POS_DAO <-> DB: Retrieves latest position from DB for DFSP1
     POS_DAO -> POS_HANDLER: Return success
-    POS_HANDLER <-> POS_HANDLER: Calculates latest position by decrementing transfer for prepare
+    POS_HANDLER <-> POS_HANDLER: Calculates latest position (lpos) by incrementing transfer for prepare
+    POS_HANDLER <-> POS_HANDLER: Validate Calculated latest position against the net-debit cap (netcap) - Rule: lpos < netcap
     POS_HANDLER -> POS_DAO: Request to persist latest position for DFSP1
     POS_DAO <-> DB: Persists latest position to DB for DFSP1
     POS_DAO -> POS_HANDLER: return success
@@ -125,8 +131,8 @@ alt DFSP1 sends a Prepare Transfer request to DFSP2
         Message:
         {
             id: <transferMessage.id>
-            from: http://ledger/dfsp1,
-            to: http://ledger/dfsp2,
+            from: dfsp1,
+            to: dfsp2,
             type: application/json
             content: <transferMessage>,
             metadata: {
@@ -151,8 +157,8 @@ alt DFSP1 sends a Prepare Transfer request to DFSP2
         Message:
         {
             id: <transferMessage.id>
-            from: http://ledger/dfsp1,
-            to: http://ledger/dfsp1,
+            from: dfsp1,
+            to: dfsp1,
             type: application/json
             content: <transferResponseMessage>,
             metadata: {
@@ -171,8 +177,8 @@ alt DFSP1 sends a Prepare Transfer request to DFSP2
         Message:
         {
             id: <transferMessage.id>
-            from: http://ledger/dfsp1,
-            to: http://ledger/dfsp2,
+            from: dfsp1,
+            to: dfsp2,
             type: application/json
             content: <transferResponseMessage>,
             metadata: {

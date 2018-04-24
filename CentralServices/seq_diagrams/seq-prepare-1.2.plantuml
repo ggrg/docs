@@ -64,8 +64,8 @@ alt Prepare Validation Failure
         Message:
         {
             id: <transferMessage.id>
-            from: http://ledger/dfsp1,
-            to: http://ledger/dfsp2,
+            from: dfsp1,
+            to: dfsp2,
             type: application/json
             content: <transferMessage>,
             metadata: {
@@ -87,7 +87,12 @@ alt Prepare Validation Failure
     TOPIC_PREPARE_DFSP1 -> PREP_HANDLER: Consumes Prepare event message for DFSP1
     PREP_HANDLER <-> PREP_HANDLER: Validates from - DFSP1
     PREP_HANDLER <-> PREP_HANDLER: Validates to - DFSP2
-    PREP_HANDLER <-> PREP_HANDLER: Validates message signature
+    PREP_HANDLER -> TRANS_DAO: Request to retrieve Transfer (if it exists)
+    TRANS_DAO <-> DB: return Transfer if it exists
+    TRANS_DAO -> PREP_HANDLER: return Transfer if it exists
+    PREP_HANDLER <-> PREP_HANDLER: Validates duplicate Check
+    PREP_HANDLER <-> PREP_HANDLER: Validates crypto-condition
+    PREP_HANDLER <-> PREP_HANDLER: Validates message signature (to be confirmed in future requirement)
     note right of PREP_HANDLER #red: Validation failure!
     PREP_HANDLER -> EVENT_DAO: Request to persist event information
     EVENT_DAO <-> DB: Persist event information
@@ -96,8 +101,8 @@ alt Prepare Validation Failure
         Message:
         {
             id: <transferMessage.id>
-            from: http://ledger/dfsp1,
-            to: http://ledger/dfsp1,
+            from: dfsp1,
+            to: dfsp1,
             type: application/json
             content: <transferResponseMessage>,
             metadata: {
