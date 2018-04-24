@@ -59,7 +59,14 @@ end box
 ' start flow
 alt DFSP1 sends a Prepare Transfer request to DFSP2
     activate MLAPI
+    note right of DFSP1 #yellow
+        JSON Request:
+        {
+           transferMessage
+        }
+    end note
     DFSP1 -> MLAPI: POST - http://transfers
+    MLAPI -> MLAPI: validates incoming token, and the originator matches DFSP1
     note right of MLAPI #yellow
         Message:
         {

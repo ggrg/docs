@@ -59,6 +59,12 @@ end box
 ' start flow
 alt Prepare Position Failure
     activate MLAPI
+    note right of DFSP1 #yellow
+        JSON Request:
+        {
+           transferMessage
+        }
+    end note
     DFSP1 -> MLAPI: POST - http://transfers
     note right of MLAPI #yellow
         Message:
@@ -87,7 +93,7 @@ alt Prepare Position Failure
     TOPIC_PREPARE_DFSP1 -> PREP_HANDLER: Consumes Prepare event message for DFSP1
     PREP_HANDLER <-> PREP_HANDLER: Validates from - DFSP1
     PREP_HANDLER <-> PREP_HANDLER: Validates to - DFSP2
-    PREP_HANDLER -> TRANS_DAO: Request to retrieve Transfer (if it exists)
+    PREP_HANDLER -> TRANS_DAO: Request to retrieve Transfer (if it exists with transferMessage.id)
     TRANS_DAO <-> DB: return Transfer if it exists
     TRANS_DAO -> PREP_HANDLER: return Transfer if it exists
     PREP_HANDLER <-> PREP_HANDLER: Validates duplicate Check
@@ -144,7 +150,7 @@ alt Prepare Position Failure
             }
         }
     end note
-    POS_HANDLER -> TOPIC_NOTIFICATIONS: Publishes Notifications (Failure) event for DFSP2
+    POS_HANDLER -> TOPIC_NOTIFICATIONS: Publishes Notifications (Failure) event for DFSP1
     deactivate POS_HANDLER
     activate NOTIFY_HANDLER
     TOPIC_NOTIFICATIONS -> NOTIFY_HANDLER: Consumes Notifications event
