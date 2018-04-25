@@ -59,21 +59,59 @@ end box
 ' start flow
 alt Prepare Validation Failure
     activate MLAPI
+    note right of DFSP1 #yellow
+        Headers - transferHeaders:
+            - Content-Length
+            - Content-Type
+            - Date
+            - X-Forwarded-For
+            - FSPIOP-Source
+            - FSPIOP-Destination
+            - FSPIOP-Encryption
+            - FSPIOP-Signature
+            - FSPIOP-URI
+            - FSPIOP-HTTP-Method
+        Payload - transferMessage:
+        {
+            "transferId": <uuid>,
+            "payeeFsp": dfsp1,
+            "payerFsp": dfsp1,
+            "amount": {
+                "currency": "AED",
+                "amount": "string"
+            },
+            "ilpPacket": "string",
+            "condition": "string",
+            "expiration": "string",
+            "extensionList": {
+                "extension": [
+                {
+                    "key": "string",
+                    "value": "string"
+                }
+                ]
+            }
+        }
+    end note
     DFSP1 -> MLAPI: POST - http://transfers
     note right of MLAPI #yellow
         Message:
         {
-            id: <transferMessage.id>
-            from: dfsp1,
-            to: dfsp2,
+            id: <transferMessage.transferId>
+            from: <transferMessage.payerFsp>,
+            to: <transferMessage.payeeFsp>,
             type: application/json
-            content: <transferMessage>,
+            content: {
+                headers: <transferHeaders>,
+                payload: <transferMessage>
+            },
             metadata: {
                 event: {
                     id: <uuid>,
                     type: prepare,
                     action: prepare,
-                    createdAt: <timestamp>
+                    createdAt: <timestamp>,
+                    status: ?
                 }
             }
         }
@@ -100,18 +138,30 @@ alt Prepare Validation Failure
     note right of PREP_HANDLER #yellow
         Message:
         {
-            id: <transferMessage.id>
-            from: dfsp1,
-            to: dfsp1,
+            id: <transferMessage.transferId>
+            from: <ledgerName>,
+            to: <transferMessage.payerFsp>,
             type: application/json
-            content: <transferResponseMessage>,
+            content: {
+                headers: <transferHeaders>,
+                payload: {
+                    "errorInformation": {
+                        "errorCode": <error-codes>,
+                        "errorDescription": <error-description>,
+                        "extensionList": <transferMessage.extensionList>
+                }
+            },
             metadata: {
                 event: {
                     id: <uuid>,
                     responseTo: <previous.uuid>,
                     type: notification,
                     action: prepare,
-                    createdAt: <timestamp>
+                    createdAt: <timestamp>,
+                    status: {
+                        type: functional
+                        code: failure
+                    }
                 }
             }
         }

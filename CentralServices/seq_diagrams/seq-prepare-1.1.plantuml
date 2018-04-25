@@ -60,9 +60,37 @@ end box
 alt DFSP1 sends a Prepare Transfer request to DFSP2
     activate MLAPI
     note right of DFSP1 #yellow
-        JSON Request:
+        Headers - transferHeaders:
+            - Content-Length
+            - Content-Type
+            - Date
+            - X-Forwarded-For
+            - FSPIOP-Source
+            - FSPIOP-Destination
+            - FSPIOP-Encryption
+            - FSPIOP-Signature
+            - FSPIOP-URI
+            - FSPIOP-HTTP-Method
+        Payload - transferMessage:
         {
-           transferMessage
+            "transferId": <uuid>,
+            "payeeFsp": dfsp1,
+            "payerFsp": dfsp1,
+            "amount": {
+                "currency": "AED",
+                "amount": "string"
+            },
+            "ilpPacket": "string",
+            "condition": "string",
+            "expiration": "string",
+            "extensionList": {
+                "extension": [
+                {
+                    "key": "string",
+                    "value": "string"
+                }
+                ]
+            }
         }
     end note
     DFSP1 -> MLAPI: POST - http://transfers
@@ -70,17 +98,21 @@ alt DFSP1 sends a Prepare Transfer request to DFSP2
     note right of MLAPI #yellow
         Message:
         {
-            id: <transferMessage.id>
-            from: dfsp1,
-            to: dfsp2,
+            id: <transferMessage.transferId>
+            from: <transferMessage.payerFsp>,
+            to: <transferMessage.payeeFsp>,
             type: application/json
-            content: <transferMessage>,
+            content: {
+                headers: <transferHeaders>,
+                payload: <transferMessage>
+            },
             metadata: {
                 event: {
                     id: <uuid>,
                     type: prepare,
                     action: prepare,
-                    createdAt: <timestamp>
+                    createdAt: <timestamp>,
+                    status: success
                 }
             }
         }
@@ -103,18 +135,22 @@ alt DFSP1 sends a Prepare Transfer request to DFSP2
     note right of PREP_HANDLER #yellow
         Message:
         {
-            id: <transferMessage.id>
-            from: dfsp1,
-            to: dfsp2,
+            id: <transferMessage.transferId>
+            from: <transferMessage.payerFsp>,
+            to: <transferMessage.payeeFsp>,
             type: application/json
-            content: <transferMessage>,
+            content: {
+                headers: <transferHeaders>,
+                payload: <transferMessage>
+            },
             metadata: {
                 event: {
                     id: <uuid>,
                     responseTo: <previous.uuid>,
                     type: position,
                     action: prepare,
-                    createdAt: <timestamp>
+                    createdAt: <timestamp>,
+                    status: success
                 }
             }
         }
@@ -137,18 +173,22 @@ alt DFSP1 sends a Prepare Transfer request to DFSP2
     note right of POS_HANDLER #yellow
         Message:
         {
-            id: <transferMessage.id>
-            from: dfsp1,
-            to: dfsp2,
+            id: <transferMessage.transferId>
+            from: <transferMessage.payerFsp>,
+            to: <transferMessage.payeeFsp>,
             type: application/json
-            content: <transferMessage>,
+            content: {
+                headers: <transferHeaders>,
+                payload: <transferMessage>
+            },
             metadata: {
                 event: {
                     id: <uuid>,
                     responseTo: <previous.uuid>,
                     type: transfer,
                     action: prepare,
-                    createdAt: <timestamp>
+                    createdAt: <timestamp>,
+                    status: success
                 }
             }
         }
@@ -163,18 +203,22 @@ alt DFSP1 sends a Prepare Transfer request to DFSP2
     note right of TRANS_HANDLER #yellow
         Message:
         {
-            id: <transferMessage.id>
-            from: dfsp1,
-            to: dfsp1,
+            id: <transferMessage.transferId>
+            from: <transferMessage.payerFsp>,
+            to: <transferMessage.payerFsp>,
             type: application/json
-            content: <transferResponseMessage>,
+            content: {
+                headers: <transferHeaders>,
+                payload: <transferMessage>
+            },
             metadata: {
                 event: {
                     id: <uuid>,
                     responseTo: <previous.uuid>,
                     type: notification,
                     action: prepare,
-                    createdAt: <timestamp>
+                    createdAt: <timestamp>,
+                    status: success
                 }
             }
         }
@@ -183,18 +227,22 @@ alt DFSP1 sends a Prepare Transfer request to DFSP2
     note right of TRANS_HANDLER #yellow
         Message:
         {
-            id: <transferMessage.id>
-            from: dfsp1,
-            to: dfsp2,
+            id: <transferMessage.transferId>
+            from: <transferMessage.payerFsp>,
+            to: <transferMessage.payeeFsp>,
             type: application/json
-            content: <transferResponseMessage>,
+            content: {
+                headers: <transferHeaders>,
+                payload: <transferMessage>
+            },
             metadata: {
                 event: {
                     id: <uuid>,
                     responseTo: <previous.uuid>,
                     type: notification,
                     action: prepare,
-                    createdAt: <timestamp>
+                    createdAt: <timestamp>,
+                    status: success
                 }
             }
         }
