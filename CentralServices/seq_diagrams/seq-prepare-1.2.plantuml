@@ -60,17 +60,19 @@ end box
 alt Prepare Validation Failure
     activate MLAPI
     note right of DFSP1 #yellow
-        Headers - transferHeaders:
-            - Content-Length
-            - Content-Type
-            - Date
-            - X-Forwarded-For
-            - FSPIOP-Source
-            - FSPIOP-Destination
-            - FSPIOP-Encryption
-            - FSPIOP-Signature
-            - FSPIOP-URI
-            - FSPIOP-HTTP-Method
+        Headers - transferHeaders: {
+            Content-Length: <Content-Length>,
+            Content-Type: <Content-Type>,
+            Date: <Date>,
+            X-Forwarded-For: <X-Forwarded-For>,
+            FSPIOP-Source: <FSPIOP-Source>,
+            FSPIOP-Destination: <FSPIOP-Destination>,
+            FSPIOP-Encryption: <FSPIOP-Encryption>,
+            FSPIOP-Signature: <FSPIOP-Signature>,
+            FSPIOP-URI: <FSPIOP-URI>,
+            FSPIOP-HTTP-Method: <FSPIOP-HTTP-Method>
+        }
+
         Payload - transferMessage:
         {
             "transferId": <uuid>,
