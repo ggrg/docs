@@ -246,7 +246,7 @@ alt DFSP1 sends a Prepare Transfer request to Payee
     POS_HANDLER -> TOPIC_TRANSFERS: Publishes Transfer event
     deactivate POS_HANDLER
 
-    deactivate TRANS_HANDLER
+    activate TRANS_HANDLER
     TOPIC_TRANSFERS -> TRANS_HANDLER: Consumes Transfer event
     alt Persist Event Information
         TRANS_HANDLER -> EVENT_DAO: Request to persist event information
