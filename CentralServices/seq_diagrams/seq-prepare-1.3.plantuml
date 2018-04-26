@@ -59,7 +59,7 @@ box "Central Service" #LightYellow
 end box
 
 ' start flow
-alt Prepare Position Failure
+group Prepare Position Failure
     activate MLAPI
     note right of DFSP1 #yellow
         Headers - transferHeaders: {
@@ -128,7 +128,7 @@ alt Prepare Position Failure
 
     activate PREP_HANDLER
     TOPIC_PREPARE_DFSP1 -> PREP_HANDLER: Consumes Prepare event message for Payer
-    alt Validate Prepare Transfer
+    group Validate Prepare Transfer
         PREP_HANDLER <-> PREP_HANDLER: Request to persist event information (refer to 1.1 for detail)
         PREP_HANDLER <-> PREP_HANDLER: Validates from - Payer (refer to 1.1 for detail)
         PREP_HANDLER <-> PREP_HANDLER: Validates to - Payee (refer to 1.1 for detail)
@@ -164,19 +164,19 @@ alt Prepare Position Failure
 
     activate POS_HANDLER
     TOPIC_POSITION_DFSP1 -> POS_HANDLER: Consumes Position event message for Payer
-    alt Persist Event Information
+    group Persist Event Information
         POS_HANDLER -> EVENT_DAO: Request to persist event information
         EVENT_DAO <-> DB: Persist event information
         EVENT_DAO -> POS_HANDLER: return success
     end
 
-    alt Persist Prepare Transfer State with transferState='pending'
+    group Persist Prepare Transfer State with transferState='pending'
         POS_HANDLER -> TRANS_DAO: Request to persist transfer
         TRANS_DAO <-> DB: Persist transfer
         TRANS_DAO -> POS_HANDLER: return success
     end
 
-    alt Calculate position and persist change
+    group Calculate position and persist change
         POS_HANDLER -> POS_DAO: Request latest position from DB for Payer
         POS_DAO <-> DB: Retrieves latest position from DB for Payer
         POS_DAO -> POS_HANDLER: Return latest position
@@ -229,10 +229,10 @@ alt Prepare Position Failure
     POS_HANDLER -> ERRORS_NOTIFICATIONS: Publishes Notification (failure) event for Payer (handled by seperate process)
     deactivate POS_HANDLER
 
-    alt Send notification for Payer
+    group Send notification for Payer
         activate NOTIFY_HANDLER
         TOPIC_NOTIFICATIONS -> NOTIFY_HANDLER: Consumes Notifications event
-        alt Persist Event Information
+        group Persist Event Information
             NOTIFY_HANDLER -> CSAPI: Requests to persist event information - POST - HTTP://events/
             CSAPI -> EVENT_DAO: Request to persist event information
             EVENT_DAO <-> DB: Persist event information

@@ -59,7 +59,7 @@ box "Central Service" #LightYellow
 end box
 
 ' start flow
-alt Prepare Validation Failure
+group Prepare Validation Failure
     activate MLAPI
     note right of DFSP1 #yellow
         Headers - transferHeaders: {
@@ -131,7 +131,7 @@ alt Prepare Validation Failure
 
     activate PREP_HANDLER
     TOPIC_PREPARE_DFSP1 -> PREP_HANDLER: Consumes Prepare event message for Payer
-    alt Validate Prepare Transfer
+    group Validate Prepare Transfer
         PREP_HANDLER <-> PREP_HANDLER: Request to persist event information (refer to 1.1 for detail)
         PREP_HANDLER <-> PREP_HANDLER: Validates from - Payer (refer to 1.1 for detail)
         PREP_HANDLER <-> PREP_HANDLER: Validates to - Payee (refer to 1.1 for detail)
@@ -183,10 +183,10 @@ alt Prepare Validation Failure
     PREP_HANDLER -> ERRORS_NOTIFICATIONS: Publishes Notification (failure) event for Payer (handled by seperate process)
     deactivate PREP_HANDLER
 
-    alt Send notification for Payer
+    group Send notification for Payer
         activate NOTIFY_HANDLER
         TOPIC_NOTIFICATIONS -> NOTIFY_HANDLER: Consumes Notifications event
-        alt Persist Event Information
+        group Persist Event Information
             NOTIFY_HANDLER -> CSAPI: Requests to persist event information - POST - HTTP://events/
             CSAPI -> EVENT_DAO: Request to persist event information
             EVENT_DAO <-> DB: Persist event information

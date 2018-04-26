@@ -61,7 +61,7 @@ box "Central Service" #LightYellow
 end box
 
 ' start flow
-alt DFSP1 sends a Prepare Transfer request to Payee
+group DFSP1 sends a Prepare Transfer request to Payee
     activate MLAPI
     note right of DFSP1 #yellow
         Headers - transferHeaders: {
@@ -134,25 +134,25 @@ alt DFSP1 sends a Prepare Transfer request to Payee
 
     activate PREP_HANDLER
     TOPIC_PREPARE_DFSP1 -> PREP_HANDLER: Consumes Prepare event message for Payer
-    alt Persist Event Information
+    group Persist Event Information
         PREP_HANDLER -> EVENT_DAO: Request to persist event information
         EVENT_DAO <-> DB: Persist event information
         EVENT_DAO -> PREP_HANDLER: return success
     end
-    alt Validate Prepare Transfer
-        alt Validate Payer
+    group Validate Prepare Transfer
+        group Validate Payer
             PREP_HANDLER -> PARTICIPANT_DAO: Request to retrieve Payer Participant details (if it exists)
             PARTICIPANT_DAO <-> DB: return Participant details if it exists
             PARTICIPANT_DAO -> PREP_HANDLER: return Participant details if it exists
             PREP_HANDLER <-> PREP_HANDLER: Validates payer
         end
-        alt Validate Payee
+        group Validate Payee
             PREP_HANDLER -> PARTICIPANT_DAO: Request to retrieve Payee Participant details (if it exists)
             PARTICIPANT_DAO <-> DB: return Participant details if it exists
             PARTICIPANT_DAO -> PREP_HANDLER: return Participant details if it exists
             PREP_HANDLER <-> PREP_HANDLER: Validates payee
         end
-        alt Duplicate check
+        group Duplicate check
             PREP_HANDLER -> TRANS_DAO: Request to retrieve Transfer (if it exists)
             TRANS_DAO <-> DB: return Transfer if it exists
             TRANS_DAO -> PREP_HANDLER: return Transfer if it exists
@@ -193,19 +193,19 @@ alt DFSP1 sends a Prepare Transfer request to Payee
     activate POS_HANDLER
     TOPIC_POSITION_DFSP1 -> POS_HANDLER: Consumes Position event message for Payer
 
-    alt Persist Event Information
+    group Persist Event Information
         POS_HANDLER -> EVENT_DAO: Request to persist event information
         EVENT_DAO <-> DB: Persist event information
         EVENT_DAO -> POS_HANDLER: return success
     end
 
-    alt Persist Prepare Transfer State with transferState='pending'
+    group Persist Prepare Transfer State with transferState='pending'
         POS_HANDLER -> TRANS_DAO: Request to persist transfer
         TRANS_DAO <-> DB: Persist transfer
         TRANS_DAO -> POS_HANDLER: return success
     end
 
-    alt Calculate position and persist change
+    group Calculate position and persist change
         POS_HANDLER -> POS_DAO: Request latest position from DB for Payer
         POS_DAO <-> DB: Retrieves latest position from DB for Payer
         POS_DAO -> POS_HANDLER: Return latest position
@@ -248,12 +248,12 @@ alt DFSP1 sends a Prepare Transfer request to Payee
 
     activate TRANS_HANDLER
     TOPIC_TRANSFERS -> TRANS_HANDLER: Consumes Transfer event
-    alt Persist Event Information
+    group Persist Event Information
         TRANS_HANDLER -> EVENT_DAO: Request to persist event information
         EVENT_DAO <-> DB: Persist event information
         EVENT_DAO -> TRANS_HANDLER: return success
     end
-    alt Update Prepare Transfer State with transferState='accepted'
+    group Update Prepare Transfer State with transferState='accepted'
         TRANS_HANDLER -> TRANS_DAO: Request to update transfer
         TRANS_DAO <-> DB: Update transfer
         TRANS_DAO -> TRANS_HANDLER: return success
@@ -314,10 +314,10 @@ alt DFSP1 sends a Prepare Transfer request to Payee
     TRANS_HANDLER -> TOPIC_NOTIFICATIONS: Publishes Notifications event for Payee
     deactivate TRANS_HANDLER
 
-    alt Send notification for Payer
+    group Send notification for Payer
         activate NOTIFY_HANDLER
         TOPIC_NOTIFICATIONS -> NOTIFY_HANDLER: Consumes Notifications event
-        alt Persist Event Information
+        group Persist Event Information
             NOTIFY_HANDLER -> CSAPI: Requests to persist event information - POST - HTTP://events/
             CSAPI -> EVENT_DAO: Request to persist event information
             EVENT_DAO <-> DB: Persist event information
@@ -333,10 +333,10 @@ alt DFSP1 sends a Prepare Transfer request to Payee
         deactivate NOTIFY_HANDLER
     end
 
-    alt Send notification for Payee
+    group Send notification for Payee
         activate NOTIFY_HANDLER
         TOPIC_NOTIFICATIONS -> NOTIFY_HANDLER: Consumes Notifications event
-        alt Persist Event Information
+        group Persist Event Information
             NOTIFY_HANDLER -> CSAPI: Requests to persist event information - POST - HTTP://events/
             CSAPI -> EVENT_DAO: Request to persist event information
             EVENT_DAO <-> DB: Persist event information
