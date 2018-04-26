@@ -128,8 +128,8 @@ group Prepare Position Failure
 
     activate PREP_HANDLER
     TOPIC_PREPARE_DFSP1 -> PREP_HANDLER: Consumes Prepare event message for Payer
+    PREP_HANDLER <-> PREP_HANDLER: Request to persist event information (refer to 1.1 for detail)
     group Validate Prepare Transfer
-        PREP_HANDLER <-> PREP_HANDLER: Request to persist event information (refer to 1.1 for detail)
         PREP_HANDLER <-> PREP_HANDLER: Validates from - Payer (refer to 1.1 for detail)
         PREP_HANDLER <-> PREP_HANDLER: Validates to - Payee (refer to 1.1 for detail)
         PREP_HANDLER <-> PREP_HANDLER: Validates duplicate Check (refer to 1.1 for detail)
@@ -164,17 +164,8 @@ group Prepare Position Failure
 
     activate POS_HANDLER
     TOPIC_POSITION_DFSP1 -> POS_HANDLER: Consumes Position event message for Payer
-    group Persist Event Information
-        POS_HANDLER -> EVENT_DAO: Request to persist event information
-        EVENT_DAO <-> DB: Persist event information
-        EVENT_DAO -> POS_HANDLER: return success
-    end
-
-    group Persist Prepare Transfer State with transferState='pending'
-        POS_HANDLER -> TRANS_DAO: Request to persist transfer
-        TRANS_DAO <-> DB: Persist transfer
-        TRANS_DAO -> POS_HANDLER: return success
-    end
+    POS_HANDLER <-> POS_HANDLER: Request to persist event information (refer to 1.1 for detail)
+    POS_HANDLER <-> POS_HANDLER: Persist Prepare Transfer State with transferState='pending' (refer to 1.1 for detail)
 
     group Calculate position and persist change
         POS_HANDLER -> POS_DAO: Request latest position from DB for Payer

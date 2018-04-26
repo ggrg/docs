@@ -131,8 +131,8 @@ group Prepare Validation Failure
 
     activate PREP_HANDLER
     TOPIC_PREPARE_DFSP1 -> PREP_HANDLER: Consumes Prepare event message for Payer
+    PREP_HANDLER <-> PREP_HANDLER: Request to persist event information (refer to 1.1 for detail)
     group Validate Prepare Transfer
-        PREP_HANDLER <-> PREP_HANDLER: Request to persist event information (refer to 1.1 for detail)
         PREP_HANDLER <-> PREP_HANDLER: Validates from - Payer (refer to 1.1 for detail)
         PREP_HANDLER <-> PREP_HANDLER: Validates to - Payee (refer to 1.1 for detail)
         PREP_HANDLER <-> PREP_HANDLER: Validates duplicate Check (refer to 1.1 for detail)
@@ -186,13 +186,7 @@ group Prepare Validation Failure
     group Send notification for Payer
         activate NOTIFY_HANDLER
         TOPIC_NOTIFICATIONS -> NOTIFY_HANDLER: Consumes Notifications event
-        group Persist Event Information
-            NOTIFY_HANDLER -> CSAPI: Requests to persist event information - POST - HTTP://events/
-            CSAPI -> EVENT_DAO: Request to persist event information
-            EVENT_DAO <-> DB: Persist event information
-            EVENT_DAO -> CSAPI: return success
-            CSAPI -> NOTIFY_HANDLER: return success
-        end
+        NOTIFY_HANDLER <-> NOTIFY_HANDLER: Request to persist event information (refer to 1.1 for detail)
         NOTIFY_HANDLER -> CSAPI: Requests Notification details for Payer - GET - HTTP://notifications/DFPS1
         CSAPI -> NOTIFY_DAO: Fetches Notifications details for Payer
         NOTIFY_DAO <-> DB: Fetches Notifications details for Payer
