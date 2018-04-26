@@ -12,8 +12,8 @@ autonumber
 '   database - Database Persistance Store
 
 ' declare actors
-actor DFSP1
-actor DFSP2
+actor "Payer" as DFSP1
+actor "Payee" as DFSP2
 boundary "ML API Adapter" as MLAPI
 control "ML API Notification Event Handler" as NOTIFY_HANDLER
 boundary "Central Service API" as CSAPI
@@ -24,18 +24,20 @@ control "Position Event Handler" as POS_HANDLER
 collections "Transfer-Topic" as TOPIC_TRANSFERS
 control "Transfer Event Handler" as TRANS_HANDLER
 collections "Notification-Topic" as TOPIC_NOTIFICATIONS
+' collections "Errors-Topic" as ERRORS_NOTIFICATIONS
 entity "Position DAO" as POS_DAO
 entity "Event DAO" as EVENT_DAO
 entity "Transfer DAO" as TRANS_DAO
 entity "Notification DAO" as NOTIFY_DAO
+entity "Participant DAO" as PARTICIPANT_DAO
 database "Central Store" as DB
 
-box "Financial Service Providers" #LightBlue
+box "Financial Service Providers" #lightGray
 	participant DFSP1
 	participant DFSP2
 end box
 
-box "ML API Adapter Service" #LightGreen
+box "ML API Adapter Service" #LightBlue
 	participant MLAPI
 	participant NOTIFY_HANDLER
 end box
@@ -49,15 +51,17 @@ box "Central Service" #LightYellow
     participant TOPIC_TRANSFERS
     participant TRANS_HANDLER
     participant TOPIC_NOTIFICATIONS
+    ' participant ERRORS_NOTIFICATIONS
     participant POS_DAO
     participant EVENT_DAO
     participant TRANS_DAO
     participant NOTIFY_DAO
+    participant PARTICIPANT_DAO
     participant DB
 end box
 
 ' start flow
-alt DFSP1 sends a Prepare Transfer request to DFSP2
+alt DFSP1 sends a Prepare Transfer request to Payee
     activate MLAPI
     note right of DFSP1 #yellow
         Headers - transferHeaders: {
@@ -87,16 +91,16 @@ alt DFSP1 sends a Prepare Transfer request to DFSP2
             "expiration": "string",
             "extensionList": {
                 "extension": [
-                {
-                    "key": "string",
-                    "value": "string"
-                }
+                    {
+                        "key": "string",
+                        "value": "string"
+                    }
                 ]
             }
         }
     end note
     DFSP1 -> MLAPI: POST - http://transfers
-    MLAPI -> MLAPI: validates incoming token, and the originator matches DFSP1
+    MLAPI -> MLAPI: validates incoming token, and the originator matches Payer
     note right of MLAPI #yellow
         Message:
         {
@@ -114,26 +118,49 @@ alt DFSP1 sends a Prepare Transfer request to DFSP2
                     type: prepare,
                     action: prepare,
                     createdAt: <timestamp>,
-                    status: success
+                    state: {
+                        status: "success",
+                        code: 0
+                    }
                 }
             }
         }
     end note
-    MLAPI -> TOPIC_PREPARE_DFSP1: Routes & Publishes Prepare event for DFSP1
+    MLAPI -> TOPIC_PREPARE_DFSP1: Routes & Publishes Prepare event for Payer
     TOPIC_PREPARE_DFSP1 <-> TOPIC_PREPARE_DFSP1: Ensures that event is replicated as configured (ACKS=all)
     TOPIC_PREPARE_DFSP1 -> MLAPI: Responds replication acknoledgements have been received
     MLAPI -> DFSP1: Respond HTTP - 202 (Accepted)
     deactivate MLAPI
+
     activate PREP_HANDLER
-    TOPIC_PREPARE_DFSP1 -> PREP_HANDLER: Consumes Prepare event message for DFSP1
-    PREP_HANDLER <-> PREP_HANDLER: Validates from - DFSP1
-    PREP_HANDLER <-> PREP_HANDLER: Validates to - DFSP2
-    PREP_HANDLER -> TRANS_DAO: Request to retrieve Transfer (if it exists)
-    TRANS_DAO <-> DB: return Transfer if it exists
-    TRANS_DAO -> PREP_HANDLER: return Transfer if it exists
-    PREP_HANDLER <-> PREP_HANDLER: Validates duplicate Check
-    PREP_HANDLER <-> PREP_HANDLER: Validates crypto-condition
-    PREP_HANDLER <-> PREP_HANDLER: Validates message signature (to be confirmed in future requirement)
+    TOPIC_PREPARE_DFSP1 -> PREP_HANDLER: Consumes Prepare event message for Payer
+    alt Persist Event Information
+        PREP_HANDLER -> EVENT_DAO: Request to persist event information
+        EVENT_DAO <-> DB: Persist event information
+        EVENT_DAO -> PREP_HANDLER: return success
+    end
+    alt Validate Prepare Transfer
+        alt Validate Payer
+            PREP_HANDLER -> PARTICIPANT_DAO: Request to retrieve Payer Participant details (if it exists)
+            PARTICIPANT_DAO <-> DB: return Participant details if it exists
+            PARTICIPANT_DAO -> PREP_HANDLER: return Participant details if it exists
+            PREP_HANDLER <-> PREP_HANDLER: Validates payer
+        end
+        alt Validate Payee
+            PREP_HANDLER -> PARTICIPANT_DAO: Request to retrieve Payee Participant details (if it exists)
+            PARTICIPANT_DAO <-> DB: return Participant details if it exists
+            PARTICIPANT_DAO -> PREP_HANDLER: return Participant details if it exists
+            PREP_HANDLER <-> PREP_HANDLER: Validates payee
+        end
+        alt Duplicate check
+            PREP_HANDLER -> TRANS_DAO: Request to retrieve Transfer (if it exists)
+            TRANS_DAO <-> DB: return Transfer if it exists
+            TRANS_DAO -> PREP_HANDLER: return Transfer if it exists
+            PREP_HANDLER <-> PREP_HANDLER: Validates duplicate Check
+        end
+        PREP_HANDLER <-> PREP_HANDLER: Validates crypto-condition
+        PREP_HANDLER <-> PREP_HANDLER: Validates message signature (to be confirmed in future requirement)
+    end
     note right of PREP_HANDLER #yellow
         Message:
         {
@@ -152,26 +179,44 @@ alt DFSP1 sends a Prepare Transfer request to DFSP2
                     type: position,
                     action: prepare,
                     createdAt: <timestamp>,
-                    status: success
+                    state: {
+                        status: "success",
+                        code: 0
+                    }
                 }
             }
         }
     end note
-    PREP_HANDLER -> TOPIC_POSITION_DFSP1: Routes & Publishes Position event for DFSP1
+    PREP_HANDLER -> TOPIC_POSITION_DFSP1: Routes & Publishes Position event for Payer
     deactivate PREP_HANDLER
+
     activate POS_HANDLER
-    TOPIC_POSITION_DFSP1 -> POS_HANDLER: Consumes Position event message for DFSP1
-    POS_HANDLER -> POS_DAO: Request latest position from DB for DFSP1
-    POS_DAO <-> DB: Retrieves latest position from DB for DFSP1
-    POS_DAO -> POS_HANDLER: Return success
-    POS_HANDLER <-> POS_HANDLER: Calculates latest position (lpos) by incrementing transfer for prepare
-    POS_HANDLER <-> POS_HANDLER: Validate Calculated latest position against the net-debit cap (netcap) - Rule: lpos < netcap
-    POS_HANDLER -> POS_DAO: Request to persist latest position for DFSP1
-    POS_DAO <-> DB: Persists latest position to DB for DFSP1
-    POS_DAO -> POS_HANDLER: return success
-    POS_HANDLER -> EVENT_DAO: Request to persist event information
-    EVENT_DAO <-> DB: Persist event information
-    EVENT_DAO -> POS_HANDLER: return success
+    TOPIC_POSITION_DFSP1 -> POS_HANDLER: Consumes Position event message for Payer
+
+    alt Persist Event Information
+        POS_HANDLER -> EVENT_DAO: Request to persist event information
+        EVENT_DAO <-> DB: Persist event information
+        EVENT_DAO -> POS_HANDLER: return success
+    end
+
+    alt Persist Prepare Transfer State with transferState='pending'
+        POS_HANDLER -> TRANS_DAO: Request to persist transfer
+        TRANS_DAO <-> DB: Persist transfer
+        TRANS_DAO -> POS_HANDLER: return success
+    end
+
+    alt Calculate position and persist change
+        POS_HANDLER -> POS_DAO: Request latest position from DB for Payer
+        POS_DAO <-> DB: Retrieves latest position from DB for Payer
+        POS_DAO -> POS_HANDLER: Return latest position
+
+        POS_HANDLER <-> POS_HANDLER: Calculates latest position (lpos) by incrementing transfer for prepare
+        POS_HANDLER <-> POS_HANDLER: Validate Calculated latest position against the net-debit cap (netcap) - Rule: lpos < netcap
+        
+        POS_HANDLER -> POS_DAO: Request to persist latest position for Payer
+        POS_DAO <-> DB: Persists latest position to DB for Payer
+        POS_DAO -> POS_HANDLER: return success
+    end
     note right of POS_HANDLER #yellow
         Message:
         {
@@ -190,18 +235,29 @@ alt DFSP1 sends a Prepare Transfer request to DFSP2
                     type: transfer,
                     action: prepare,
                     createdAt: <timestamp>,
-                    status: success
+                    state: {
+                        status: "success",
+                        code: 0
+                    }
                 }
             }
         }
     end note
     POS_HANDLER -> TOPIC_TRANSFERS: Publishes Transfer event
     deactivate POS_HANDLER
+
     deactivate TRANS_HANDLER
     TOPIC_TRANSFERS -> TRANS_HANDLER: Consumes Transfer event
-    TRANS_HANDLER -> TRANS_DAO: Request to Transfer status to DB
-    TRANS_DAO <-> DB: return success
-    TRANS_DAO -> TRANS_HANDLER: Persists Transfer status to DB
+    alt Persist Event Information
+        TRANS_HANDLER -> EVENT_DAO: Request to persist event information
+        EVENT_DAO <-> DB: Persist event information
+        EVENT_DAO -> TRANS_HANDLER: return success
+    end
+    alt Update Prepare Transfer State with transferState='accepted'
+        TRANS_HANDLER -> TRANS_DAO: Request to update transfer
+        TRANS_DAO <-> DB: Update transfer
+        TRANS_DAO -> TRANS_HANDLER: return success
+    end
     note right of TRANS_HANDLER #yellow
         Message:
         {
@@ -220,12 +276,15 @@ alt DFSP1 sends a Prepare Transfer request to DFSP2
                     type: notification,
                     action: prepare,
                     createdAt: <timestamp>,
-                    status: success
+                    state: {
+                        status: "success",
+                        code: 0
+                    }
                 }
             }
         }
     end note
-    TRANS_HANDLER -> TOPIC_NOTIFICATIONS: Publishes Notifications event for DFSP1
+    TRANS_HANDLER -> TOPIC_NOTIFICATIONS: Publishes Notifications event for Payer
     note right of TRANS_HANDLER #yellow
         Message:
         {
@@ -244,27 +303,53 @@ alt DFSP1 sends a Prepare Transfer request to DFSP2
                     type: notification,
                     action: prepare,
                     createdAt: <timestamp>,
-                    status: success
+                    state: {
+                        status: "success",
+                        code: 0
+                    }
                 }
             }
         }
     end note
-    TRANS_HANDLER -> TOPIC_NOTIFICATIONS: Publishes Notifications event for DFSP2
+    TRANS_HANDLER -> TOPIC_NOTIFICATIONS: Publishes Notifications event for Payee
     deactivate TRANS_HANDLER
-    activate NOTIFY_HANDLER
-    TOPIC_NOTIFICATIONS -> NOTIFY_HANDLER: Consumes Notifications event
-    NOTIFY_HANDLER -> CSAPI: Requests Notification details for DFSP1 - GET - HTTP://notifications/DFPS1
-    CSAPI -> NOTIFY_DAO: Fetches Notifications details for DFSP1
-    NOTIFY_DAO <-> DB: Fetches Notifications details for DFSP1
-    NOTIFY_DAO -> CSAPI: Returns Notifications details for DFSP1
-    CSAPI -> NOTIFY_HANDLER: Returns Notifications details for DFSP1
-    NOTIFY_HANDLER -> DFSP1: HTTP Callback with Prepare result to DFSP1
-    NOTIFY_HANDLER -> CSAPI: Requests Notification details for DFSP2 - GET - HTTP://notifications/DFPS2
-    CSAPI <-> NOTIFY_DAO: Fetches Notifications details for DFSP2
-    NOTIFY_DAO <-> DB: Fetches Notifications details for DFSP1
-    NOTIFY_DAO -> CSAPI: Returns Notifications details for DFSP1
-    CSAPI -> NOTIFY_HANDLER: Returns Notifications details for DFSP2
-    NOTIFY_HANDLER -> DFSP2: HTTP Callback with Prepare result to DFSP2
-    deactivate NOTIFY_HANDLER
+
+    alt Send notification for Payer
+        activate NOTIFY_HANDLER
+        TOPIC_NOTIFICATIONS -> NOTIFY_HANDLER: Consumes Notifications event
+        alt Persist Event Information
+            NOTIFY_HANDLER -> CSAPI: Requests to persist event information - POST - HTTP://events/
+            CSAPI -> EVENT_DAO: Request to persist event information
+            EVENT_DAO <-> DB: Persist event information
+            EVENT_DAO -> CSAPI: return success
+            CSAPI -> NOTIFY_HANDLER: return success
+        end
+        NOTIFY_HANDLER -> CSAPI: Requests Notification details for Payer - GET - HTTP://notifications/DFPS1
+        CSAPI -> NOTIFY_DAO: Fetches Notifications details for Payer
+        NOTIFY_DAO <-> DB: Fetches Notifications details for Payer
+        NOTIFY_DAO -> CSAPI: Returns Notifications details for Payer
+        CSAPI -> NOTIFY_HANDLER: Returns Notifications details for Payer
+        NOTIFY_HANDLER -> DFSP1: HTTP Callback with Prepare result to Payer
+        deactivate NOTIFY_HANDLER
+    end
+
+    alt Send notification for Payee
+        activate NOTIFY_HANDLER
+        TOPIC_NOTIFICATIONS -> NOTIFY_HANDLER: Consumes Notifications event
+        alt Persist Event Information
+            NOTIFY_HANDLER -> CSAPI: Requests to persist event information - POST - HTTP://events/
+            CSAPI -> EVENT_DAO: Request to persist event information
+            EVENT_DAO <-> DB: Persist event information
+            EVENT_DAO -> CSAPI: return success
+            CSAPI -> NOTIFY_HANDLER: return success
+        end
+        NOTIFY_HANDLER -> CSAPI: Requests Notification details for Payee - GET - HTTP://notifications/DFPS2
+        CSAPI <-> NOTIFY_DAO: Fetches Notifications details for Payee
+        NOTIFY_DAO <-> DB: Fetches Notifications details for Payer
+        NOTIFY_DAO -> CSAPI: Returns Notifications details for Payer
+        CSAPI -> NOTIFY_HANDLER: Returns Notifications details for Payer
+        NOTIFY_HANDLER -> DFSP2: HTTP Callback with Prepare result to Payer
+        deactivate NOTIFY_HANDLER
+    end
 end
 @enduml

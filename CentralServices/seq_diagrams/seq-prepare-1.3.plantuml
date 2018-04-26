@@ -24,18 +24,19 @@ control "Position Event Handler" as POS_HANDLER
 collections "Transfer-Topic" as TOPIC_TRANSFERS
 control "Transfer Event Handler" as TRANS_HANDLER
 collections "Notification-Topic" as TOPIC_NOTIFICATIONS
+collections "Errors-Topic" as ERRORS_NOTIFICATIONS
 entity "Position DAO" as POS_DAO
 entity "Event DAO" as EVENT_DAO
 entity "Transfer DAO" as TRANS_DAO
 entity "Notification DAO" as NOTIFY_DAO
 database "Central Store" as DB
 
-box "Financial Service Providers" #LightBlue
+box "Financial Service Providers" #LightGray
 	participant DFSP1
 	participant DFSP2
 end box
 
-box "ML API Adapter Service" #LightGreen
+box "ML API Adapter Service" #LightBlue
 	participant MLAPI
 	participant NOTIFY_HANDLER
 end box
@@ -49,6 +50,7 @@ box "Central Service" #LightYellow
     participant TOPIC_TRANSFERS
     participant TRANS_HANDLER
     participant TOPIC_NOTIFICATIONS
+    participant ERRORS_NOTIFICATIONS
     participant POS_DAO
     participant EVENT_DAO
     participant TRANS_DAO
@@ -60,9 +62,39 @@ end box
 alt Prepare Position Failure
     activate MLAPI
     note right of DFSP1 #yellow
-        JSON Request:
+        Headers - transferHeaders: {
+            Content-Length: <Content-Length>,
+            Content-Type: <Content-Type>,
+            Date: <Date>,
+            X-Forwarded-For: <X-Forwarded-For>,
+            FSPIOP-Source: <FSPIOP-Source>,
+            FSPIOP-Destination: <FSPIOP-Destination>,
+            FSPIOP-Encryption: <FSPIOP-Encryption>,
+            FSPIOP-Signature: <FSPIOP-Signature>,
+            FSPIOP-URI: <FSPIOP-URI>,
+            FSPIOP-HTTP-Method: <FSPIOP-HTTP-Method>
+        }
+
+        Payload - transferMessage:
         {
-           transferMessage
+            "transferId": <uuid>,
+            "payeeFsp": dfsp1,
+            "payerFsp": dfsp1,
+            "amount": {
+                "currency": "AED",
+                "amount": "string"
+            },
+            "ilpPacket": "string",
+            "condition": "string",
+            "expiration": "string",
+            "extensionList": {
+                "extension": [
+                    {
+                        "key": "string",
+                        "value": "string"
+                    }
+                ]
+            }
         }
     end note
     DFSP1 -> MLAPI: POST - http://transfers
@@ -79,27 +111,32 @@ alt Prepare Position Failure
                     id: <uuid>,
                     type: prepare,
                     action: prepare,
-                    createdAt: <timestamp>
+                    createdAt: <timestamp>,
+                    state: {
+                        status: "success",
+                        code: 0
+                    }
                 }
             }
         }
     end note
-    MLAPI -> TOPIC_PREPARE_DFSP1: Routes & Publishes Prepare event for DFSP1
+    MLAPI -> TOPIC_PREPARE_DFSP1: Routes & Publishes Prepare event for Payer
     TOPIC_PREPARE_DFSP1 <-> TOPIC_PREPARE_DFSP1: Ensures that event is replicated as configured (ACKS=all)
     TOPIC_PREPARE_DFSP1 -> MLAPI: Responds replication acknoledgements have been received
     MLAPI -> DFSP1: Respond HTTP - 202 (Accepted)
     deactivate MLAPI
+
     activate PREP_HANDLER
-    TOPIC_PREPARE_DFSP1 -> PREP_HANDLER: Consumes Prepare event message for DFSP1
-    PREP_HANDLER <-> PREP_HANDLER: Validates from - DFSP1
-    PREP_HANDLER <-> PREP_HANDLER: Validates to - DFSP2
-    PREP_HANDLER -> TRANS_DAO: Request to retrieve Transfer (if it exists with transferMessage.id)
-    TRANS_DAO <-> DB: return Transfer if it exists
-    TRANS_DAO -> PREP_HANDLER: return Transfer if it exists
-    PREP_HANDLER <-> PREP_HANDLER: Validates duplicate Check
-    PREP_HANDLER <-> PREP_HANDLER: Validates crypto-condition
-    PREP_HANDLER <-> PREP_HANDLER: Validates message signature (to be confirmed in future requirement)
-        note right of PREP_HANDLER #yellow
+    TOPIC_PREPARE_DFSP1 -> PREP_HANDLER: Consumes Prepare event message for Payer
+    alt Validate Prepare Transfer
+        PREP_HANDLER <-> PREP_HANDLER: Request to persist event information (refer to 1.1 for detail)
+        PREP_HANDLER <-> PREP_HANDLER: Validates from - Payer (refer to 1.1 for detail)
+        PREP_HANDLER <-> PREP_HANDLER: Validates to - Payee (refer to 1.1 for detail)
+        PREP_HANDLER <-> PREP_HANDLER: Validates duplicate Check (refer to 1.1 for detail)
+        PREP_HANDLER <-> PREP_HANDLER: Validates crypto-condition (refer to 1.1 for detail)
+        PREP_HANDLER <-> PREP_HANDLER: Validates message signature (to be confirmed in future requirement) (refer to 1.1 for detail)
+    end
+    note right of PREP_HANDLER #yellow
         Message:
         {
             id: <transferMessage.id>
@@ -113,52 +150,102 @@ alt Prepare Position Failure
                     responseTo: <previous.uuid>,
                     type: position,
                     action: prepare,
-                    createdAt: <timestamp>
+                    createdAt: <timestamp>,
+                    state: {
+                        status: "success"
+                        code: 0
+                    }
                 }
             }
         }
     end note
-    PREP_HANDLER -> TOPIC_POSITION_DFSP1: Routes & Publishes Position event for DFSP1
+    PREP_HANDLER -> TOPIC_POSITION_DFSP1: Routes & Publishes Position event for Payer
     deactivate PREP_HANDLER
+
     activate POS_HANDLER
-    TOPIC_POSITION_DFSP1 -> POS_HANDLER: Consumes Position event message for DFSP1
-    POS_HANDLER -> POS_DAO: Request latest position from DB for DFSP1
-    POS_DAO <-> DB: Retrieves latest position from DB for DFSP1
-    POS_DAO -> POS_HANDLER: Return success
-    POS_HANDLER <-> POS_HANDLER: Calculates latest position (lpos) by incrementing transfer for prepare
-    POS_HANDLER <-> POS_HANDLER: Validate Calculated latest position against the net-debit cap (netcap) - Rule: lpos < netcap
-    note right of POS_HANDLER #red: Validation failure!
-    POS_HANDLER -> EVENT_DAO: Request to persist event information
-    EVENT_DAO <-> DB: Persist event information
-    EVENT_DAO -> POS_HANDLER: return success
+    TOPIC_POSITION_DFSP1 -> POS_HANDLER: Consumes Position event message for Payer
+    alt Persist Event Information
+        POS_HANDLER -> EVENT_DAO: Request to persist event information
+        EVENT_DAO <-> DB: Persist event information
+        EVENT_DAO -> POS_HANDLER: return success
+    end
+
+    alt Persist Prepare Transfer State with transferState='pending'
+        POS_HANDLER -> TRANS_DAO: Request to persist transfer
+        TRANS_DAO <-> DB: Persist transfer
+        TRANS_DAO -> POS_HANDLER: return success
+    end
+
+    alt Calculate position and persist change
+        POS_HANDLER -> POS_DAO: Request latest position from DB for Payer
+        POS_DAO <-> DB: Retrieves latest position from DB for Payer
+        POS_DAO -> POS_HANDLER: Return latest position
+
+        POS_HANDLER <-> POS_HANDLER: Calculates latest position (lpos) by incrementing transfer for prepare
+        POS_HANDLER <-> POS_HANDLER: Validate Calculated latest position against the net-debit cap (netcap) - Rule: lpos < netcap
+        
+        note right of POS_HANDLER #red: Validation failure!
+    end
+    ' POS_HANDLER -> EVENT_DAO: Request to persist event information
+    ' EVENT_DAO <-> DB: Persist event information
+    ' EVENT_DAO -> POS_HANDLER: return success
     note right of POS_HANDLER #yellow
         Message:
         {
-            id: <transferMessage.id>
-            from: dfsp1,
-            to: dfsp2,
+            id: <transferMessage.transferId>
+            from: <ledgerName>,
+            to: <transferMessage.payerFsp>,
             type: application/json
-            content: <transferResponseMessage>,
+            content: {
+                headers: <transferHeaders>,
+                payload: {
+                    "errorInformation": {
+                        "errorCode": 4001,
+                        "errorDescription": "Payer FSP insufficient liquidity",
+                        "extensionList": <transferMessage.extensionList>
+                }
+            },
             metadata: {
                 event: {
                     id: <uuid>,
                     responseTo: <previous.uuid>,
                     type: notification,
                     action: prepare,
-                    createdAt: <timestamp>
+                    createdAt: <timestamp>,
+                    status: {
+                        type: functional
+                        code: failure
+                    }
+                    state: {
+                        status: 'error',
+                        code: <errorInformation.errorCode>
+                        description: <errorInformation.errorDescription>
+                    }
                 }
             }
         }
     end note
-    POS_HANDLER -> TOPIC_NOTIFICATIONS: Publishes Notifications (Failure) event for DFSP1
+    POS_HANDLER -> TOPIC_NOTIFICATIONS: Publishes Notifications (failure) event for Payer
+    POS_HANDLER -> ERRORS_NOTIFICATIONS: Publishes Notification (failure) event for Payer (handled by seperate process)
     deactivate POS_HANDLER
-    activate NOTIFY_HANDLER
-    TOPIC_NOTIFICATIONS -> NOTIFY_HANDLER: Consumes Notifications event
-    NOTIFY_HANDLER -> CSAPI: Requests Notification details for DFSP1 - GET - HTTP://notifications/DFPS1
-    CSAPI -> NOTIFY_DAO: Fetches Notifications details for DFSP1
-    NOTIFY_DAO <-> DB: Fetches Notifications details for DFSP1
-    NOTIFY_DAO -> CSAPI: Returns Notifications details for DFSP1
-    CSAPI -> NOTIFY_HANDLER: Returns Notifications details for DFSP1
-    NOTIFY_HANDLER -> DFSP1: HTTP Callback with Prepare result to DFSP1
+
+    alt Send notification for Payer
+        activate NOTIFY_HANDLER
+        TOPIC_NOTIFICATIONS -> NOTIFY_HANDLER: Consumes Notifications event
+        alt Persist Event Information
+            NOTIFY_HANDLER -> CSAPI: Requests to persist event information - POST - HTTP://events/
+            CSAPI -> EVENT_DAO: Request to persist event information
+            EVENT_DAO <-> DB: Persist event information
+            EVENT_DAO -> CSAPI: return success
+            CSAPI -> NOTIFY_HANDLER: return success
+        end
+        NOTIFY_HANDLER -> CSAPI: Requests Notification details for Payer - GET - HTTP://notifications/DFPS1
+        CSAPI -> NOTIFY_DAO: Fetches Notifications details for Payer
+        NOTIFY_DAO <-> DB: Fetches Notifications details for Payer
+        NOTIFY_DAO -> CSAPI: Returns Notifications details for Payer
+        CSAPI -> NOTIFY_HANDLER: Returns Notifications details for Payer
+        NOTIFY_HANDLER -> DFSP1: HTTP Callback with Prepare result to Payer
+        deactivate NOTIFY_HANDLER
+    end
 end
 @enduml

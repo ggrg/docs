@@ -24,18 +24,19 @@ control "Position Event Handler" as POS_HANDLER
 collections "Transfer-Topic" as TOPIC_TRANSFERS
 control "Transfer Event Handler" as TRANS_HANDLER
 collections "Notification-Topic" as TOPIC_NOTIFICATIONS
+collections "Errors-Topic" as ERRORS_NOTIFICATIONS
 entity "Position DAO" as POS_DAO
 entity "Event DAO" as EVENT_DAO
 entity "Transfer DAO" as TRANS_DAO
 entity "Notification DAO" as NOTIFY_DAO
 database "Central Store" as DB
 
-box "Financial Service Providers" #LightBlue
+box "Financial Service Providers" #LightGray
 	participant DFSP1
 	participant DFSP2
 end box
 
-box "ML API Adapter Service" #LightGreen
+box "ML API Adapter Service" #LightBlue
 	participant MLAPI
 	participant NOTIFY_HANDLER
 end box
@@ -49,6 +50,7 @@ box "Central Service" #LightYellow
     participant TOPIC_TRANSFERS
     participant TRANS_HANDLER
     participant TOPIC_NOTIFICATIONS
+    participant ERRORS_NOTIFICATIONS
     participant POS_DAO
     participant EVENT_DAO
     participant TRANS_DAO
@@ -87,10 +89,10 @@ alt Prepare Validation Failure
             "expiration": "string",
             "extensionList": {
                 "extension": [
-                {
-                    "key": "string",
-                    "value": "string"
-                }
+                    {
+                        "key": "string",
+                        "value": "string"
+                    }
                 ]
             }
         }
@@ -113,30 +115,34 @@ alt Prepare Validation Failure
                     type: prepare,
                     action: prepare,
                     createdAt: <timestamp>,
-                    status: ?
+                    state: {
+                        status: "success"
+                        code: 0
+                    }
                 }
             }
         }
     end note
-    MLAPI -> TOPIC_PREPARE_DFSP1: Routes & Publishes Prepare event for DFSP1
+    MLAPI -> TOPIC_PREPARE_DFSP1: Routes & Publishes Prepare event for Payer
     TOPIC_PREPARE_DFSP1 <-> TOPIC_PREPARE_DFSP1: Ensures that event is replicated as configured (ACKS=all)
     TOPIC_PREPARE_DFSP1 -> MLAPI: Responds replication acknoledgements have been received
     MLAPI -> DFSP1: Respond HTTP - 202 (Accepted)
     deactivate MLAPI
+
     activate PREP_HANDLER
-    TOPIC_PREPARE_DFSP1 -> PREP_HANDLER: Consumes Prepare event message for DFSP1
-    PREP_HANDLER <-> PREP_HANDLER: Validates from - DFSP1
-    PREP_HANDLER <-> PREP_HANDLER: Validates to - DFSP2
-    PREP_HANDLER -> TRANS_DAO: Request to retrieve Transfer (if it exists)
-    TRANS_DAO <-> DB: return Transfer if it exists
-    TRANS_DAO -> PREP_HANDLER: return Transfer if it exists
-    PREP_HANDLER <-> PREP_HANDLER: Validates duplicate Check
-    PREP_HANDLER <-> PREP_HANDLER: Validates crypto-condition
-    PREP_HANDLER <-> PREP_HANDLER: Validates message signature (to be confirmed in future requirement)
+    TOPIC_PREPARE_DFSP1 -> PREP_HANDLER: Consumes Prepare event message for Payer
+    alt Validate Prepare Transfer
+        PREP_HANDLER <-> PREP_HANDLER: Request to persist event information (refer to 1.1 for detail)
+        PREP_HANDLER <-> PREP_HANDLER: Validates from - Payer (refer to 1.1 for detail)
+        PREP_HANDLER <-> PREP_HANDLER: Validates to - Payee (refer to 1.1 for detail)
+        PREP_HANDLER <-> PREP_HANDLER: Validates duplicate Check (refer to 1.1 for detail)
+        PREP_HANDLER <-> PREP_HANDLER: Validates crypto-condition (refer to 1.1 for detail)
+        PREP_HANDLER <-> PREP_HANDLER: Validates message signature (to be confirmed in future requirement) (refer to 1.1 for detail)
+    end
     note right of PREP_HANDLER #red: Validation failure!
-    PREP_HANDLER -> EVENT_DAO: Request to persist event information
-    EVENT_DAO <-> DB: Persist event information
-    EVENT_DAO -> PREP_HANDLER: return success
+    ' PREP_HANDLER -> EVENT_DAO: Request to persist event information
+    ' EVENT_DAO <-> DB: Persist event information
+    ' EVENT_DAO -> PREP_HANDLER: return success
     note right of PREP_HANDLER #yellow
         Message:
         {
@@ -148,8 +154,8 @@ alt Prepare Validation Failure
                 headers: <transferHeaders>,
                 payload: {
                     "errorInformation": {
-                        "errorCode": <error-codes>,
-                        "errorDescription": <error-description>,
+                        "errorCode": <possible codes: [3100, 3105, 3106, 3201, 3202, 3203, 3300, 3301]>
+                        "errorDescription": "<refer to section 35.1.3 for description>",
                         "extensionList": <transferMessage.extensionList>
                 }
             },
@@ -164,20 +170,36 @@ alt Prepare Validation Failure
                         type: functional
                         code: failure
                     }
+                    state: {
+                        status: 'error',
+                        code: <errorInformation.errorCode>
+                        description: <errorInformation.errorDescription>
+                    }
                 }
             }
         }
     end note
-    PREP_HANDLER -> TOPIC_NOTIFICATIONS: Publishes Notification (failure) event for DFSP1
+    PREP_HANDLER -> TOPIC_NOTIFICATIONS: Publishes Notification (failure) event for Payer
+    PREP_HANDLER -> ERRORS_NOTIFICATIONS: Publishes Notification (failure) event for Payer (handled by seperate process)
     deactivate PREP_HANDLER
-    activate NOTIFY_HANDLER
-    TOPIC_NOTIFICATIONS -> NOTIFY_HANDLER: Consumes Notifications event
-    NOTIFY_HANDLER -> CSAPI: Requests Notification details for DFSP1 - GET - HTTP://notifications/DFPS1
-    CSAPI -> NOTIFY_DAO: Fetches Notifications details for DFSP1
-    NOTIFY_DAO <-> DB: Fetches Notifications details for DFSP1
-    NOTIFY_DAO -> CSAPI: Returns Notifications details for DFSP1
-    CSAPI -> NOTIFY_HANDLER: Returns Notifications details for DFSP1
-    NOTIFY_HANDLER -> DFSP1: HTTP Callback with Prepare result to DFSP1
-    deactivate NOTIFY_HANDLER
+
+    alt Send notification for Payer
+        activate NOTIFY_HANDLER
+        TOPIC_NOTIFICATIONS -> NOTIFY_HANDLER: Consumes Notifications event
+        alt Persist Event Information
+            NOTIFY_HANDLER -> CSAPI: Requests to persist event information - POST - HTTP://events/
+            CSAPI -> EVENT_DAO: Request to persist event information
+            EVENT_DAO <-> DB: Persist event information
+            EVENT_DAO -> CSAPI: return success
+            CSAPI -> NOTIFY_HANDLER: return success
+        end
+        NOTIFY_HANDLER -> CSAPI: Requests Notification details for Payer - GET - HTTP://notifications/DFPS1
+        CSAPI -> NOTIFY_DAO: Fetches Notifications details for Payer
+        NOTIFY_DAO <-> DB: Fetches Notifications details for Payer
+        NOTIFY_DAO -> CSAPI: Returns Notifications details for Payer
+        CSAPI -> NOTIFY_HANDLER: Returns Notifications details for Payer
+        NOTIFY_HANDLER -> DFSP1: HTTP Callback with Prepare result to Payer
+        deactivate NOTIFY_HANDLER
+    end
 end
 @enduml
