@@ -180,6 +180,11 @@ group Prepare Position Failure
     ' POS_HANDLER -> EVENT_DAO: Request to persist event information
     ' EVENT_DAO <-> DB: Persist event information
     ' EVENT_DAO -> POS_HANDLER: return success
+    group Persist Transfer State with transferState='ABORTED' on position check failure
+        POS_HANDLER -> TRANS_DAO: Request to persist transfer
+        TRANS_DAO <-> DB: Persist transfer
+        TRANS_DAO -> POS_HANDLER: return success
+    end
     note right of POS_HANDLER #yellow
         Message:
         {

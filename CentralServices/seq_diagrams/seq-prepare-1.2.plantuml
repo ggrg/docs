@@ -139,6 +139,13 @@ group Prepare Validation Failure
         PREP_HANDLER <-> PREP_HANDLER: Validates crypto-condition (refer to 1.1 for detail)
         PREP_HANDLER <-> PREP_HANDLER: Validates message signature (to be confirmed in future requirement) (refer to 1.1 for detail)
     end
+
+    group Persist Transfer State with transferState='ABORTED' on validation failure
+        PREP_HANDLER -> TRANS_DAO: Request to persist transfer
+        TRANS_DAO <-> DB: Persist transfer
+        TRANS_DAO -> PREP_HANDLER: return success
+    end
+
     note right of PREP_HANDLER #red: Validation failure!
     ' PREP_HANDLER -> EVENT_DAO: Request to persist event information
     ' EVENT_DAO <-> DB: Persist event information

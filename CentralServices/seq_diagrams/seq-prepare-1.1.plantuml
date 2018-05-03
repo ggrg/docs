@@ -140,6 +140,7 @@ group DFSP1 sends a Prepare Transfer request to Payee
             EVENT_DAO <-> DB: Persist event information
             EVENT_DAO -> PREP_HANDLER: return success
         end
+
         group Validate Prepare Transfer
             group Validate Payer
                 PREP_HANDLER -> PARTICIPANT_DAO: Request to retrieve Payer Participant details (if it exists)
@@ -162,6 +163,13 @@ group DFSP1 sends a Prepare Transfer request to Payee
             PREP_HANDLER <-> PREP_HANDLER: Validates crypto-condition
             PREP_HANDLER <-> PREP_HANDLER: Validates message signature (to be confirmed in future requirement)
         end
+
+        group Persist Transfer State with transferState='RECEIVED' on validation pass
+            PREP_HANDLER -> TRANS_DAO: Request to persist transfer
+            TRANS_DAO <-> DB: Persist transfer
+            TRANS_DAO -> PREP_HANDLER: return success
+        end
+
         note right of PREP_HANDLER #yellow
             Message:
             {
@@ -221,6 +229,7 @@ group DFSP1 sends a Prepare Transfer request to Payee
         end
 
         loop for each message in batch
+
             group Validate Prepare Transfer
                 group Validate Payer
                     PREP_HANDLER <-> PREP_HANDLER: Validates Payer against in-memory var $LIST_PARTICIPANTS_DETAILS_PAYER
@@ -234,6 +243,13 @@ group DFSP1 sends a Prepare Transfer request to Payee
                 PREP_HANDLER <-> PREP_HANDLER: Validates crypto-condition
                 PREP_HANDLER <-> PREP_HANDLER: Validates message signature (to be confirmed in future requirement)
             end
+
+            group Persist Transfer State with transferState='RECEIVED' on validation pass
+                PREP_HANDLER -> TRANS_DAO: Request to persist transfer
+                TRANS_DAO <-> DB: Persist transfer
+                TRANS_DAO -> PREP_HANDLER: return success
+            end
+
             note right of PREP_HANDLER #yellow
                 Message:
                 {
@@ -275,24 +291,25 @@ group DFSP1 sends a Prepare Transfer request to Payee
             EVENT_DAO -> POS_HANDLER: return success
         end
 
-        group Persist Prepare Transfer State with transferState='pending'
-            POS_HANDLER -> TRANS_DAO: Request to persist transfer
-            TRANS_DAO <-> DB: Persist transfer
-            TRANS_DAO -> POS_HANDLER: return success
-        end
-
         group Calculate position and persist change
             POS_HANDLER -> POS_DAO: Request latest position from DB for Payer
             POS_DAO <-> DB: Retrieves latest position from DB for Payer
             POS_DAO -> POS_HANDLER: Return latest position
 
-            POS_HANDLER <-> POS_HANDLER: Calculates latest position (lpos) by incrementing transfer for prepare
+            POS_HANDLER <-> POS_HANDLER: Calculates latest position (lpos) for prepare
             POS_HANDLER <-> POS_HANDLER: Validate Calculated latest position against the net-debit cap (netcap) - Rule: lpos < netcap
             
             POS_HANDLER -> POS_DAO: Request to persist latest position for Payer
             POS_DAO <-> DB: Persists latest position to DB for Payer
             POS_DAO -> POS_HANDLER: return success
         end
+
+        group Persist Transfer State with transferState='RESERVED' on position check pass
+            POS_HANDLER -> TRANS_DAO: Request to persist transfer
+            TRANS_DAO <-> DB: Persist transfer
+            TRANS_DAO -> POS_HANDLER: return success
+        end
+
         note right of POS_HANDLER #yellow
             Message:
             {
@@ -329,12 +346,6 @@ group DFSP1 sends a Prepare Transfer request to Payee
             EVENT_DAO -> POS_HANDLER: return success
         end
 
-        group Persist Prepare Batch Transfer State with transferState='pending'
-            POS_HANDLER -> TRANS_DAO: Request to persist batch transfer
-            TRANS_DAO <-> DB: Persist batch transfer
-            TRANS_DAO -> POS_HANDLER: return success
-        end
-
         loop for each message in batch
             group Calculate position and persist change
                 POS_HANDLER -> POS_DAO: Request latest position from DB for Payer
@@ -347,6 +358,11 @@ group DFSP1 sends a Prepare Transfer request to Payee
                 POS_HANDLER -> POS_DAO: Request to persist latest position for Payer
                 POS_DAO <-> DB: Persists latest position to DB for Payer
                 POS_DAO -> POS_HANDLER: return success
+            end
+            group Persist Transfer State with transferState='RESERVED' on position check pass
+                POS_HANDLER -> TRANS_DAO: Request to persist batch transfer
+                TRANS_DAO <-> DB: Persist batch transfer
+                TRANS_DAO -> POS_HANDLER: return success
             end
             note right of POS_HANDLER #yellow
                 Message:
@@ -382,16 +398,18 @@ group DFSP1 sends a Prepare Transfer request to Payee
     activate TRANS_HANDLER
     alt Transfer Handler consume Single Message
         TOPIC_TRANSFERS -> TRANS_HANDLER: Consumes Transfer event
+
         group Persist Event Information
             TRANS_HANDLER -> EVENT_DAO: Request to persist event information
             EVENT_DAO <-> DB: Persist event information
             EVENT_DAO -> TRANS_HANDLER: return success
         end
-        group Update Prepare Transfer State with transferState='accepted'
-            TRANS_HANDLER -> TRANS_DAO: Request to update transfer
-            TRANS_DAO <-> DB: Update transfer
-            TRANS_DAO -> TRANS_HANDLER: return success
-        end
+
+        ' group Update Prepare Transfer State with transferState='RESERVED'
+        '     TRANS_HANDLER -> TRANS_DAO: Request to update transfer
+        '     TRANS_DAO <-> DB: Update transfer
+        '     TRANS_DAO -> TRANS_HANDLER: return success
+        ' end
         
         note right of TRANS_HANDLER #yellow
             Message:
@@ -456,11 +474,11 @@ group DFSP1 sends a Prepare Transfer request to Payee
             EVENT_DAO -> POS_HANDLER: return success
         end
 
-        group Update Prepare batch Transfer State with transferState='accepted'
-            TRANS_HANDLER -> TRANS_DAO: Request to update batch transfer
-            TRANS_DAO <-> DB: Update batch transfer
-            TRANS_DAO -> TRANS_HANDLER: return success
-        end
+        ' group Update Prepare batch Transfer State with transferState='RESERVED'
+        '     TRANS_HANDLER -> TRANS_DAO: Request to update batch transfer
+        '     TRANS_DAO <-> DB: Update batch transfer
+        '     TRANS_DAO -> TRANS_HANDLER: return success
+        ' end
 
         loop for each message in batch
             note right of TRANS_HANDLER #yellow
