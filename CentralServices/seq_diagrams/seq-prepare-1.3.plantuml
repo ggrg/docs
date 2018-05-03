@@ -133,6 +133,7 @@ group Prepare Position Failure
         PREP_HANDLER <-> PREP_HANDLER: Validates from - Payer (refer to 1.1 for detail)
         PREP_HANDLER <-> PREP_HANDLER: Validates to - Payee (refer to 1.1 for detail)
         PREP_HANDLER <-> PREP_HANDLER: Validates duplicate Check (refer to 1.1 for detail)
+        PREP_HANDLER <-> PREP_HANDLER: Validates amount (refer to 1.1 for detail)
         PREP_HANDLER <-> PREP_HANDLER: Validates crypto-condition (refer to 1.1 for detail)
         PREP_HANDLER <-> PREP_HANDLER: Validates message signature (to be confirmed in future requirement) (refer to 1.1 for detail)
     end

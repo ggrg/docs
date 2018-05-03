@@ -160,6 +160,7 @@ group DFSP1 sends a Prepare Transfer request to Payee
                 TRANS_DAO -> PREP_HANDLER: return Transfer if it exists
                 PREP_HANDLER <-> PREP_HANDLER: Validates duplicate Check
             end
+            PREP_HANDLER <-> PREP_HANDLER: Validates amount
             PREP_HANDLER <-> PREP_HANDLER: Validates crypto-condition
             PREP_HANDLER <-> PREP_HANDLER: Validates message signature (to be confirmed in future requirement)
         end
@@ -240,6 +241,7 @@ group DFSP1 sends a Prepare Transfer request to Payee
                 group Duplicate check
                     PREP_HANDLER <-> PREP_HANDLER: Validates duplicate Check against in-memory var $LIST_TRANSFERS
                 end
+                PREP_HANDLER <-> PREP_HANDLER: Validates amount
                 PREP_HANDLER <-> PREP_HANDLER: Validates crypto-condition
                 PREP_HANDLER <-> PREP_HANDLER: Validates message signature (to be confirmed in future requirement)
             end
