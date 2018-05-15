@@ -1,0 +1,206 @@
+@startuml
+' declate title
+title 1.2.0. DFSP1 sends a Prepare Transfer request to DFSP2 - Prepare Validation Failure
+
+autonumber
+
+' Actor Keys:
+'   boundary - APIs/Interfaces, etc
+'   collections - Kafka Topics
+'   control - Kafka Consumers
+'   entity - Database Access Objects
+'   database - Database Persistance Store
+
+' declare actors
+actor "DFSP1\nPayer" as DFSP1
+actor "DFSP2\nPayee" as DFSP2
+boundary "ML API Adapter" as MLAPI
+control "ML API Notification Event Handler" as NOTIFY_HANDLER
+boundary "Central Service API" as CSAPI
+collections "Prepare-Topic-dfsp1" as TOPIC_PREPARE_DFSP1
+control "Prepare Event Handler" as PREP_HANDLER
+' collections "Position-Topic-dfsp1" as TOPIC_POSITION_DFSP1
+' control "Position Event Handler" as POS_HANDLER
+' collections "Transfer-Topic" as TOPIC_TRANSFERS
+' control "Transfer Event Handler" as TRANS_HANDLER
+collections "Notification-Topic" as TOPIC_NOTIFICATIONS
+collections "Errors-Topic" as ERRORS_NOTIFICATIONS
+' entity "Position DAO" as POS_DAO
+' entity "Event DAO" as EVENT_DAO
+entity "Transfer DAO" as TRANS_DAO
+' entity "Notification DAO" as NOTIFY_DAO
+database "Central Store" as DB
+
+box "Financial Service Providers" #LightGray
+	participant DFSP1
+	participant DFSP2
+end box
+
+box "ML API Adapter Service" #LightBlue
+	participant MLAPI
+	participant NOTIFY_HANDLER
+end box
+
+box "Central Service" #LightYellow
+    participant CSAPI
+	participant TOPIC_PREPARE_DFSP1
+    participant PREP_HANDLER
+    ' participant TOPIC_POSITION_DFSP1
+    ' participant POS_HANDLER
+    ' participant TOPIC_TRANSFERS
+    ' participant TRANS_HANDLER
+    participant TOPIC_NOTIFICATIONS
+    participant ERRORS_NOTIFICATIONS
+    ' participant POS_DAO
+    ' participant EVENT_DAO
+    participant TRANS_DAO
+    ' participant NOTIFY_DAO
+    participant DB
+end box
+
+' start flow
+activate NOTIFY_HANDLER
+activate PREP_HANDLER
+group Prepare Validation Failure
+    note right of DFSP1 #yellow
+        Headers - transferHeaders: {
+            Content-Length: <Content-Length>,
+            Content-Type: <Content-Type>,
+            Date: <Date>,
+            X-Forwarded-For: <X-Forwarded-For>,
+            FSPIOP-Source: <FSPIOP-Source>,
+            FSPIOP-Destination: <FSPIOP-Destination>,
+            FSPIOP-Encryption: <FSPIOP-Encryption>,
+            FSPIOP-Signature: <FSPIOP-Signature>,
+            FSPIOP-URI: <FSPIOP-URI>,
+            FSPIOP-HTTP-Method: <FSPIOP-HTTP-Method>
+        }
+
+        Payload - transferMessage:
+        {
+            "transferId": <uuid>,
+            "payeeFsp": dfsp1,
+            "payerFsp": dfsp1,
+            "amount": {
+                "currency": "AED",
+                "amount": "string"
+            },
+            "ilpPacket": "string",
+            "condition": "string",
+            "expiration": "string",
+            "extensionList": {
+                "extension": [
+                    {
+                        "key": "string",
+                        "value": "string"
+                    }
+                ]
+            }
+        }
+    end note
+    DFSP1 -> MLAPI: POST - http://transfers
+    activate MLAPI
+    note right of MLAPI #yellow
+        Message:
+        {
+            id: <transferMessage.transferId>
+            from: <transferMessage.payerFsp>,
+            to: <transferMessage.payeeFsp>,
+            type: application/json
+            content: {
+                headers: <transferHeaders>,
+                payload: <transferMessage>
+            },
+            metadata: {
+                event: {
+                    id: <uuid>,
+                    type: prepare,
+                    action: prepare,
+                    createdAt: <timestamp>,
+                    state: {
+                        status: "success"
+                        code: 0
+                    }
+                }
+            }
+        }
+    end note
+    MLAPI -> TOPIC_PREPARE_DFSP1: <color #FF0000>**Route & Publish Prepare event for Payer**</color>
+    activate TOPIC_PREPARE_DFSP1
+    TOPIC_PREPARE_DFSP1 <-> TOPIC_PREPARE_DFSP1: Ensure event is replicated as configured (ACKS=all)
+    TOPIC_PREPARE_DFSP1 --> MLAPI: Respond replication acknoledgements have been received
+    deactivate TOPIC_PREPARE_DFSP1
+    MLAPI --> DFSP1: Respond HTTP - 202 (Accepted)
+    deactivate MLAPI
+
+    TOPIC_PREPARE_DFSP1 <- PREP_HANDLER: Consume Prepare event message for Payer
+    activate TOPIC_PREPARE_DFSP1
+    deactivate TOPIC_PREPARE_DFSP1
+    |||
+    ref over PREP_HANDLER :  Persist Event Information {1.1.1.} \n
+    |||
+    ref over PREP_HANDLER :  Validate Prepare Transfer {1.1.1.} \n
+    |||
+    group Persist Transfer State (with transferState='ABORTED' on validation failure)
+        PREP_HANDLER -> TRANS_DAO: Request to persist transfer
+        activate TRANS_DAO
+        TRANS_DAO -> DB: Persist transfer
+        activate DB
+        deactivate DB
+        TRANS_DAO --> PREP_HANDLER: Return success
+        deactivate TRANS_DAO
+    end
+
+    note right of PREP_HANDLER #red: Validation failure!
+    ' PREP_HANDLER -> EVENT_DAO: Request to persist event information
+    ' EVENT_DAO <-> DB: Persist event information
+    ' EVENT_DAO -> PREP_HANDLER: Return success
+    note right of PREP_HANDLER #yellow
+        Message:
+        {
+            id: <transferMessage.transferId>
+            from: <ledgerName>,
+            to: <transferMessage.payerFsp>,
+            type: application/json
+            content: {
+                headers: <transferHeaders>,
+                payload: {
+                    "errorInformation": {
+                        "errorCode": <possible codes: [3100, 3105, 3106, 3201, 3202, 3203, 3300, 3301]>
+                        "errorDescription": "<refer to section 35.1.3 for description>",
+                        "extensionList": <transferMessage.extensionList>
+                }
+            },
+            metadata: {
+                event: {
+                    id: <uuid>,
+                    responseTo: <previous.uuid>,
+                    type: notification,
+                    action: prepare,
+                    createdAt: <timestamp>,
+                    status: {
+                        type: functional
+                        code: failure
+                    }
+                    state: {
+                        status: 'error',
+                        code: <errorInformation.errorCode>
+                        description: <errorInformation.errorDescription>
+                    }
+                }
+            }
+        }
+    end note
+    PREP_HANDLER -> TOPIC_NOTIFICATIONS: Publish Notification (failure) event for Payer
+    activate TOPIC_NOTIFICATIONS
+    deactivate TOPIC_NOTIFICATIONS
+    PREP_HANDLER -> ERRORS_NOTIFICATIONS: Publish Notification (failure) event for Payer (handled by seperate process)
+    activate ERRORS_NOTIFICATIONS
+    deactivate ERRORS_NOTIFICATIONS
+    |||
+    ref over DFSP1, TOPIC_NOTIFICATIONS : Send notification to Participant (Payer) {1.1.4.} \n
+    |||
+end
+deactivate PREP_HANDLER
+deactivate NOTIFY_HANDLER
+@enduml
