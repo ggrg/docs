@@ -1,0 +1,241 @@
+@startuml
+' declate title
+title 1.1.1. Prepare Handler Consume
+
+autonumber
+
+' Actor Keys:
+'   boundary - APIs/Interfaces, etc
+'   collections - Kafka Topics
+'   control - Kafka Consumers
+'   entity - Database Access Objects
+'   database - Database Persistance Store
+
+' declare actors
+collections "Prepare-Topic-dfsp1" as TOPIC_PREPARE_DFSP1
+control "Prepare Event Handler" as PREP_HANDLER
+collections "Position-Topic-dfsp1" as TOPIC_POSITION_DFSP1
+entity "Event DAO" as EVENT_DAO
+entity "Transfer DAO" as TRANS_DAO
+entity "Participant DAO" as PARTICIPANT_DAO
+database "Central Store" as DB
+
+box "Central Service" #LightYellow
+    participant TOPIC_PREPARE_DFSP1
+    participant PREP_HANDLER
+    participant TOPIC_POSITION_DFSP1
+    participant EVENT_DAO
+    participant TRANS_DAO
+    participant PARTICIPANT_DAO
+    participant DB
+end box
+
+' start flow
+activate PREP_HANDLER
+group Prepare Handler Consume
+    alt Consume Single Message
+        TOPIC_PREPARE_DFSP1 <- PREP_HANDLER: Consume Prepare event message for Payer
+        activate TOPIC_PREPARE_DFSP1
+        deactivate TOPIC_PREPARE_DFSP1
+        group Persist Event Information
+            PREP_HANDLER -> EVENT_DAO: Request to persist event information
+            activate EVENT_DAO
+            EVENT_DAO -> DB: Persist event information
+            activate DB
+            deactivate DB
+            EVENT_DAO --> PREP_HANDLER: Return success
+            deactivate EVENT_DAO
+        end
+
+        group Validate Prepare Transfer
+            group Validate Payer
+                PREP_HANDLER -> PARTICIPANT_DAO: Request to retrieve Payer Participant details (if it exists)
+                activate PARTICIPANT_DAO
+                PARTICIPANT_DAO -> DB: Request Participant details
+                activate DB
+                PARTICIPANT_DAO <-- DB: Return Participant details if it exists
+                deactivate DB
+                PARTICIPANT_DAO --> PREP_HANDLER: Return Participant details if it exists
+                deactivate PARTICIPANT_DAO
+                PREP_HANDLER <-> PREP_HANDLER: Validate Payer
+            end
+            group Validate Payee
+                PREP_HANDLER -> PARTICIPANT_DAO: Request to retrieve Payee Participant details (if it exists)
+                activate PARTICIPANT_DAO
+                PARTICIPANT_DAO -> DB: Request Participant details
+                activate DB
+                PARTICIPANT_DAO <-- DB: Return Participant details if it exists
+                deactivate DB
+                PARTICIPANT_DAO --> PREP_HANDLER: Return Participant details if it exists
+                deactivate PARTICIPANT_DAO
+                PREP_HANDLER <-> PREP_HANDLER: Validate Payee
+            end
+            group Duplicate check
+                PREP_HANDLER -> TRANS_DAO: Request to retrieve Transfer (if it exists)
+                activate TRANS_DAO
+                TRANS_DAO -> DB: Request Transfer
+                activate DB
+                TRANS_DAO <-- DB: Return Transfer if it exists
+                deactivate DB
+                TRANS_DAO --> PREP_HANDLER: Return Transfer if it exists
+                deactivate TRANS_DAO
+                PREP_HANDLER <-> PREP_HANDLER: Validate duplicate Check
+            end
+            PREP_HANDLER <-> PREP_HANDLER: Validate amount
+            PREP_HANDLER <-> PREP_HANDLER: Validate crypto-condition
+            PREP_HANDLER <-> PREP_HANDLER: Validate message signature (to be confirmed in future requirement)
+        end
+
+        group Persist Transfer State (with transferState='RECEIVED' on validation pass)
+            PREP_HANDLER -> TRANS_DAO: Request to persist transfer
+            activate TRANS_DAO
+            TRANS_DAO -> DB: Persist transfer
+            activate DB
+            deactivate DB
+            TRANS_DAO --> PREP_HANDLER: Return success
+            deactivate TRANS_DAO
+        end
+
+        note right of PREP_HANDLER #yellow
+            Message:
+            {
+                id: <transferMessage.transferId>
+                from: <transferMessage.payerFsp>,
+                to: <transferMessage.payeeFsp>,
+                type: application/json
+                content: {
+                    headers: <transferHeaders>,
+                    payload: <transferMessage>
+                },
+                metadata: {
+                    event: {
+                        id: <uuid>,
+                        responseTo: <previous.uuid>,
+                        type: position,
+                        action: prepare,
+                        createdAt: <timestamp>,
+                        state: {
+                            status: "success",
+                            code: 0
+                        }
+                    }
+                }
+            }
+        end note
+        PREP_HANDLER -> TOPIC_POSITION_DFSP1: Route & Publish Position event for Payer
+        activate TOPIC_POSITION_DFSP1
+        deactivate TOPIC_POSITION_DFSP1
+
+    else Consume Batch Messages
+        TOPIC_PREPARE_DFSP1 <- PREP_HANDLER: Consume Prepare event batch of messages for Payer
+        activate TOPIC_PREPARE_DFSP1
+        deactivate TOPIC_PREPARE_DFSP1
+        group Persist batch Event Information
+            PREP_HANDLER -> EVENT_DAO: Request to persist event information for batch of messages
+            activate EVENT_DAO
+            EVENT_DAO -> DB: Persist event batch information
+            activate DB
+            deactivate DB
+            EVENT_DAO ---> PREP_HANDLER: Return success
+            deactivate EVENT_DAO
+        end
+
+        group Fetch batch Payer information
+            PREP_HANDLER -> PARTICIPANT_DAO: Request to retrieve batch of Payer Participant details (if it exists)
+            activate PARTICIPANT_DAO
+            PARTICIPANT_DAO -> DB: Request Participant details
+            activate DB
+            PARTICIPANT_DAO <-- DB: Return Participant details if it exists
+            deactivate DB
+            PARTICIPANT_DAO --> PREP_HANDLER: Return Participant details if it exists
+            deactivate PARTICIPANT_DAO
+            PREP_HANDLER <-> PREP_HANDLER: Validate Payer
+            PREP_HANDLER -> PREP_HANDLER: store result set in var: $LIST_PARTICIPANTS_DETAILS_PAYER
+        end
+
+        group Fetch batch Payee information
+            PREP_HANDLER -> PARTICIPANT_DAO: Request to retrieve batch of Payee Participant details (if it exists)
+            activate PARTICIPANT_DAO
+            PARTICIPANT_DAO -> DB: Request Participant details
+            activate DB
+            PARTICIPANT_DAO <-- DB: Return Participant details if it exists
+            deactivate DB
+            PARTICIPANT_DAO --> PREP_HANDLER: Return Participant details if it exists
+            deactivate PARTICIPANT_DAO
+            PREP_HANDLER <-> PREP_HANDLER: Validate Payee
+            PREP_HANDLER -> PREP_HANDLER: store result set in var: $LIST_PARTICIPANTS_DETAILS_PAYEE
+        end
+
+        group Fetch batch of transfers
+            PREP_HANDLER -> TRANS_DAO: Request to retrieve batch of Transfers (if it exists)
+            activate TRANS_DAO
+            TRANS_DAO -> DB: Request batch of Transfers
+            activate DB
+            TRANS_DAO <-- DB: Return batch of Transfers (if it exists)
+            deactivate DB
+            TRANS_DAO --> PREP_HANDLER: Return batch of Transfer (if it exists)
+            deactivate TRANS_DAO
+            PREP_HANDLER -> PREP_HANDLER: store result set in var: $LIST_TRANSFERS
+        end
+
+        loop for each message in batch
+
+            group Validate Prepare Transfer
+                group Validate Payer
+                    PREP_HANDLER <-> PREP_HANDLER: Validate Payer against in-memory var $LIST_PARTICIPANTS_DETAILS_PAYER
+                end
+                group Validate Payee
+                    PREP_HANDLER <-> PREP_HANDLER: Validate Payee against in-memory var $LIST_PARTICIPANTS_DETAILS_PAYEE
+                end
+                group Duplicate check
+                    PREP_HANDLER <-> PREP_HANDLER: Validate duplicate Check against in-memory var $LIST_TRANSFERS
+                end
+                PREP_HANDLER <-> PREP_HANDLER: Validate amount
+                PREP_HANDLER <-> PREP_HANDLER: Validate crypto-condition
+                PREP_HANDLER <-> PREP_HANDLER: Validate message signature (to be confirmed in future requirement)
+            end
+
+            group Persist Transfer State (with transferState='RECEIVED' on validation pass)
+                PREP_HANDLER -> TRANS_DAO: Request to persist transfer
+                activate TRANS_DAO
+                TRANS_DAO -> DB: Persist transfer
+                activate DB
+                deactivate DB
+                TRANS_DAO --> PREP_HANDLER: Return success
+                deactivate TRANS_DAO
+            end
+
+            note right of PREP_HANDLER #yellow
+                Message:
+                {
+                    id: <transferMessage.transferId>
+                    from: <transferMessage.payerFsp>,
+                    to: <transferMessage.payeeFsp>,
+                    type: application/json
+                    content: {
+                        headers: <transferHeaders>,
+                        payload: <transferMessage>
+                    },
+                    metadata: {
+                        event: {
+                            id: <uuid>,
+                            responseTo: <previous.uuid>,
+                            type: position,
+                            action: prepare,
+                            createdAt: <timestamp>,
+                            state: {
+                                status: "success",
+                                code: 0
+                            }
+                        }
+                    }
+                }
+            end note
+            PREP_HANDLER -> TOPIC_POSITION_DFSP1: Route & Publish Position event for Payer
+            activate TOPIC_POSITION_DFSP1
+            deactivate TOPIC_POSITION_DFSP1
+        end
+    end
+end
+deactivate PREP_HANDLER
+@enduml
