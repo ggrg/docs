@@ -15,7 +15,8 @@ autonumber
 collections "Prepare-Topic-dfsp1" as TOPIC_PREPARE_DFSP1
 control "Prepare Event Handler" as PREP_HANDLER
 collections "Position-Topic-dfsp1" as TOPIC_POSITION_DFSP1
-collections "Events-Topic" as TOPIC_EVENTS
+collections "Event-Topic" as TOPIC_EVENTS
+collections "Notification-Topic" as TOPIC_NOTIFICATIONS
 entity "Transfer DAO" as TRANS_DAO
 entity "Participant DAO" as PARTICIPANT_DAO
 database "Central Store" as DB
@@ -25,6 +26,7 @@ box "Central Service" #LightYellow
     participant PREP_HANDLER
     participant TOPIC_POSITION_DFSP1
     participant TOPIC_EVENTS
+    participant TOPIC_NOTIFICATIONS
     participant TRANS_DAO
     participant PARTICIPANT_DAO
     participant DB
