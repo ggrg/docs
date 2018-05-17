@@ -15,7 +15,7 @@ autonumber
 collections "Prepare-Topic-dfsp1" as TOPIC_PREPARE_DFSP1
 control "Prepare Event Handler" as PREP_HANDLER
 collections "Position-Topic-dfsp1" as TOPIC_POSITION_DFSP1
-entity "Event DAO" as EVENT_DAO
+collections "Events-Topic" as TOPIC_EVENTS
 entity "Transfer DAO" as TRANS_DAO
 entity "Participant DAO" as PARTICIPANT_DAO
 database "Central Store" as DB
@@ -24,7 +24,7 @@ box "Central Service" #LightYellow
     participant TOPIC_PREPARE_DFSP1
     participant PREP_HANDLER
     participant TOPIC_POSITION_DFSP1
-    participant EVENT_DAO
+    participant TOPIC_EVENTS
     participant TRANS_DAO
     participant PARTICIPANT_DAO
     participant DB
@@ -38,13 +38,10 @@ group Prepare Handler Consume
         activate TOPIC_PREPARE_DFSP1
         deactivate TOPIC_PREPARE_DFSP1
         group Persist Event Information
-            PREP_HANDLER -> EVENT_DAO: Request to persist event information
-            activate EVENT_DAO
-            EVENT_DAO -> DB: Persist event information
-            activate DB
-            deactivate DB
-            EVENT_DAO --> PREP_HANDLER: Return success
-            deactivate EVENT_DAO
+            |||
+            PREP_HANDLER -> TOPIC_EVENTS: Publish event information
+            ref over PREP_HANDLER, TOPIC_EVENTS :  Event Handler Consume {9.1.0.} \n
+            |||
         end
 
         group Validate Prepare Transfer
@@ -52,6 +49,9 @@ group Prepare Handler Consume
                 PREP_HANDLER -> PARTICIPANT_DAO: Request to retrieve Payer Participant details (if it exists)
                 activate PARTICIPANT_DAO
                 PARTICIPANT_DAO -> DB: Request Participant details
+                hnote over DB #lightyellow
+                    particpants
+                end note
                 activate DB
                 PARTICIPANT_DAO <-- DB: Return Participant details if it exists
                 deactivate DB
@@ -63,6 +63,9 @@ group Prepare Handler Consume
                 PREP_HANDLER -> PARTICIPANT_DAO: Request to retrieve Payee Participant details (if it exists)
                 activate PARTICIPANT_DAO
                 PARTICIPANT_DAO -> DB: Request Participant details
+                hnote over DB #lightyellow
+                    particpants
+                end note
                 activate DB
                 PARTICIPANT_DAO <-- DB: Return Participant details if it exists
                 deactivate DB
@@ -74,6 +77,9 @@ group Prepare Handler Consume
                 PREP_HANDLER -> TRANS_DAO: Request to retrieve Transfer (if it exists)
                 activate TRANS_DAO
                 TRANS_DAO -> DB: Request Transfer
+                hnote over DB #lightyellow
+                    transfers
+                end note
                 activate DB
                 TRANS_DAO <-- DB: Return Transfer if it exists
                 deactivate DB
@@ -85,65 +91,122 @@ group Prepare Handler Consume
             PREP_HANDLER <-> PREP_HANDLER: Validate crypto-condition
             PREP_HANDLER <-> PREP_HANDLER: Validate message signature (to be confirmed in future requirement)
         end
+        alt Validation success
+            group Persist Transfer State (with transferState='RECEIVED' on validation pass)
+                PREP_HANDLER -> TRANS_DAO: Request to persist transfer
+                activate TRANS_DAO
+                TRANS_DAO -> DB: Persist transfer
+                hnote over DB #lightyellow
+                    transferStateChange
+                end note
+                activate DB
+                deactivate DB
+                TRANS_DAO --> PREP_HANDLER: Return success
+                deactivate TRANS_DAO
+            end
 
-        group Persist Transfer State (with transferState='RECEIVED' on validation pass)
-            PREP_HANDLER -> TRANS_DAO: Request to persist transfer
-            activate TRANS_DAO
-            TRANS_DAO -> DB: Persist transfer
-            activate DB
-            deactivate DB
-            TRANS_DAO --> PREP_HANDLER: Return success
-            deactivate TRANS_DAO
-        end
-
-        note right of PREP_HANDLER #yellow
-            Message:
-            {
-                id: <transferMessage.transferId>
-                from: <transferMessage.payerFsp>,
-                to: <transferMessage.payeeFsp>,
-                type: application/json
-                content: {
-                    headers: <transferHeaders>,
-                    payload: <transferMessage>
-                },
-                metadata: {
-                    event: {
-                        id: <uuid>,
-                        responseTo: <previous.uuid>,
-                        type: position,
-                        action: prepare,
-                        createdAt: <timestamp>,
-                        state: {
-                            status: "success",
-                            code: 0
+            note right of PREP_HANDLER #yellow
+                Message:
+                {
+                    id: <transferMessage.transferId>
+                    from: <transferMessage.payerFsp>,
+                    to: <transferMessage.payeeFsp>,
+                    type: application/json
+                    content: {
+                        headers: <transferHeaders>,
+                        payload: <transferMessage>
+                    },
+                    metadata: {
+                        event: {
+                            id: <uuid>,
+                            responseTo: <previous.uuid>,
+                            type: position,
+                            action: prepare,
+                            createdAt: <timestamp>,
+                            state: {
+                                status: "success",
+                                code: 0
+                            }
                         }
                     }
                 }
-            }
-        end note
-        PREP_HANDLER -> TOPIC_POSITION_DFSP1: Route & Publish Position event for Payer
-        activate TOPIC_POSITION_DFSP1
-        deactivate TOPIC_POSITION_DFSP1
+            end note
+            PREP_HANDLER -> TOPIC_POSITION_DFSP1: Route & Publish Position event for Payer
+            activate TOPIC_POSITION_DFSP1
+            deactivate TOPIC_POSITION_DFSP1
+        else Validation failure
+            group Persist Transfer State (with transferState='ABORTED' on validation fail)
+                PREP_HANDLER -> TRANS_DAO: Request to persist transfer
+                activate TRANS_DAO
+                TRANS_DAO -> DB: Persist transfer
+                hnote over DB #lightyellow
+                    transferStateChange
+                end note
+                activate DB
+                deactivate DB
+                TRANS_DAO --> PREP_HANDLER: Return success
+                deactivate TRANS_DAO
+            end
+            note right of PREP_HANDLER #yellow
+                Message:
+                {
+                    id: <transferMessage.transferId>
+                    from: <ledgerName>,
+                    to: <transferMessage.payerFsp>,
+                    type: application/json
+                    content: {
+                        headers: <transferHeaders>,
+                        payload: {
+                            "errorInformation": {
+                                "errorCode": <possible codes: [3100, 3105, 3106, 3201, 3202, 3203, 3300, 3301]>
+                                "errorDescription": "<refer to section 35.1.3 for description>",
+                                "extensionList": <transferMessage.extensionList>
+                        }
+                    },
+                    metadata: {
+                        event: {
+                            id: <uuid>,
+                            responseTo: <previous.uuid>,
+                            type: notification,
+                            action: prepare,
+                            createdAt: <timestamp>,
+                            status: {
+                                type: functional
+                                code: failure
+                            }
+                            state: {
+                                status: 'error',
+                                code: <errorInformation.errorCode>
+                                description: <errorInformation.errorDescription>
+                            }
+                        }
+                    }
+                }
+            end note
+            PREP_HANDLER -> TOPIC_NOTIFICATIONS: Publish Notification (failure) event for Payer
+            |||
+            ref over PREP_HANDLER, TOPIC_NOTIFICATIONS :  Send Notifixations to Participant {1.1.4.} \n
+            |||
+        end
 
     else Consume Batch Messages
         TOPIC_PREPARE_DFSP1 <- PREP_HANDLER: Consume Prepare event batch of messages for Payer
         activate TOPIC_PREPARE_DFSP1
         deactivate TOPIC_PREPARE_DFSP1
-        group Persist batch Event Information
-            PREP_HANDLER -> EVENT_DAO: Request to persist event information for batch of messages
-            activate EVENT_DAO
-            EVENT_DAO -> DB: Persist event batch information
-            activate DB
-            deactivate DB
-            EVENT_DAO ---> PREP_HANDLER: Return success
-            deactivate EVENT_DAO
+        group Persist Event Information
+            |||
+            PREP_HANDLER -> TOPIC_EVENTS: Publish event information
+            ref over PREP_HANDLER, TOPIC_EVENTS :  Event Handler Consume {9.1.0.} \n
+            |||
         end
 
         group Fetch batch Payer information
             PREP_HANDLER -> PARTICIPANT_DAO: Request to retrieve batch of Payer Participant details (if it exists)
             activate PARTICIPANT_DAO
             PARTICIPANT_DAO -> DB: Request Participant details
+            hnote over DB #lightyellow
+                participants
+            end note
             activate DB
             PARTICIPANT_DAO <-- DB: Return Participant details if it exists
             deactivate DB
@@ -157,6 +220,9 @@ group Prepare Handler Consume
             PREP_HANDLER -> PARTICIPANT_DAO: Request to retrieve batch of Payee Participant details (if it exists)
             activate PARTICIPANT_DAO
             PARTICIPANT_DAO -> DB: Request Participant details
+            hnote over DB #lightyellow
+                participants
+            end note
             activate DB
             PARTICIPANT_DAO <-- DB: Return Participant details if it exists
             deactivate DB
@@ -170,6 +236,9 @@ group Prepare Handler Consume
             PREP_HANDLER -> TRANS_DAO: Request to retrieve batch of Transfers (if it exists)
             activate TRANS_DAO
             TRANS_DAO -> DB: Request batch of Transfers
+            hnote over DB #lightyellow
+                transfers
+            end note
             activate DB
             TRANS_DAO <-- DB: Return batch of Transfers (if it exists)
             deactivate DB
@@ -199,6 +268,9 @@ group Prepare Handler Consume
                 PREP_HANDLER -> TRANS_DAO: Request to persist transfer
                 activate TRANS_DAO
                 TRANS_DAO -> DB: Persist transfer
+                hnote over DB #lightyellow
+                    transferStateChange
+                end note
                 activate DB
                 deactivate DB
                 TRANS_DAO --> PREP_HANDLER: Return success
