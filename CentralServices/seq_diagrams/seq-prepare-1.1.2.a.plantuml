@@ -39,7 +39,10 @@ group Position Handler Consume
     activate TOPIC_POSITION_DFSP1
     deactivate TOPIC_POSITION_DFSP1
     group Persist Event Information
-        POS_HANDLER -> TOPIC_EVENTS: Request to persist event information
+        |||
+        POS_HANDLER -> TOPIC_EVENTS: Publish event information
+        ref over POS_HANDLER, TOPIC_EVENTS :  Event Handler Consume {9.1.0.} \n
+        |||
     end
 
     alt Calulate & Validate Latest Position (success)
@@ -166,10 +169,6 @@ group Position Handler Consume
                         type: notification,
                         action: prepare,
                         createdAt: <timestamp>,
-                        status: {
-                            type: functional
-                            code: failure
-                        }
                         state: {
                             status: 'error',
                             code: <errorInformation.errorCode>

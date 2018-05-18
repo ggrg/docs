@@ -171,10 +171,6 @@ group Prepare Handler Consume
                         type: notification,
                         action: prepare,
                         createdAt: <timestamp>,
-                        status: {
-                            type: functional
-                            code: failure
-                        }
                         state: {
                             status: 'error',
                             code: <errorInformation.errorCode>
