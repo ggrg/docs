@@ -51,7 +51,7 @@ group Prepare Handler Consume
             activate PARTICIPANT_DAO
             PARTICIPANT_DAO -> DB: Request Participant details
             hnote over DB #lightyellow
-                particpants
+                particpant
             end note
             activate DB
             PARTICIPANT_DAO <-- DB: Return Participant details if it exists
@@ -65,7 +65,7 @@ group Prepare Handler Consume
             activate PARTICIPANT_DAO
             PARTICIPANT_DAO -> DB: Request Participant details
             hnote over DB #lightyellow
-                particpants
+                particpant
             end note
             activate DB
             PARTICIPANT_DAO <-- DB: Return Participant details if it exists
@@ -79,7 +79,7 @@ group Prepare Handler Consume
             activate TRANS_DAO
             TRANS_DAO -> DB: Request Transfer
             hnote over DB #lightyellow
-                transfers
+                transfer    
             end note
             activate DB
             TRANS_DAO <-- DB: Return Transfer if it exists

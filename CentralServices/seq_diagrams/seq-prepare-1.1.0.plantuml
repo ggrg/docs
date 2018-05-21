@@ -83,7 +83,7 @@ group DFSP1 sends a Prepare Transfer request to DFSP2
         Payload - transferMessage:
         {
             "transferId": <uuid>,
-            "payeeFsp": dfsp1,
+            "payeeFsp": dfsp2,
             "payerFsp": dfsp1,
             "amount": {
                 "currency": "AED",
@@ -151,7 +151,7 @@ group DFSP1 sends a Prepare Transfer request to DFSP2
     TRANS_HANDLER -> TOPIC_NOTIFICATIONS: Produce message
     |||
     TOPIC_NOTIFICATIONS <- NOTIFY_HANDLER: Consume message
-    ref over DFSP2, TOPIC_NOTIFICATIONS : Send notification to Participant (Payee) {1.1.4.a, {1.1.4.b} \n
+    ref over DFSP2, TOPIC_NOTIFICATIONS : Send notification to Participant (Payee) {1.1.4.a, 1.1.4.b} \n
     NOTIFY_HANDLER -> DFSP2: Send callback notification
     |||
 end

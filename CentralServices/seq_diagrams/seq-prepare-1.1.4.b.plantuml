@@ -67,12 +67,12 @@ group Send notification to Participant
             transferPosition
         end note
         DB -> NOTIFY_DAO: Retrieved Notification details for Participant
-        deactivate DB
+        'deactivate DB
         NOTIFY_DAO --> CSAPI: Return Notifications details for Participant
         deactivate NOTIFY_DAO
         CSAPI --> NOTIFY_HANDLER: Return Notifications details for Participant
         deactivate CSAPI
-        NOTIFY_HANDLER -> DFSP: HTTP Callback with Prepare result to Participant
+        NOTIFY_HANDLER -> DFSP: HTTP Callback with Prepare result to Participant to specified URL
     end
 end
 deactivate NOTIFY_HANDLER
