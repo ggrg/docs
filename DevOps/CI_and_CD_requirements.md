@@ -11,13 +11,13 @@
     - test-integration - runs integration tests by spinning up docker containers
     - test-functional - runs functional tests by spinning up docker containers
     - test-spec - runs specification tests against the Five Bells implementation *Note: current not working from the initial code migrated from L1P to Mojaloop Github org*
-    - build-snapshot - builds and publishes Snapshot (dev release candidate) packages when a tag (format `v{major}.{minor}-snapshot`) is pushed with the following regex: 
+    - build-snapshot - builds and publishes Snapshot (dev release candidate) packages when a tag (format `v{major}.{minor}.{patch}-snapshot`) is pushed with the following regex: 
         
 ``` REGEX
 /v[0-9]+(\.[0-9]+)*\-snapshot/
 ```
 
-- build- builds and publishes Release (prod) packages when a tag (format `v{major}.{minor}`) is pushed with the following regex: 
+- build- builds and publishes Release (prod) packages when a tag (format `v{major}.{minor}.{patch}`) is pushed with the following regex: 
 
 
 ``` REGEX
@@ -53,13 +53,13 @@
     - build-snapshot
 
 - Pending issues:
-    - Bill raised a concern that hub.docker.com and npmjs.com repositories are being used, and wants to validate with Millar if we should continue with this approach or if a switch to JFrog is necessary. <-- There has been some confusion as to what the "status quo" means from the London meeting, but my understanding is that it means using hub.docker.com and npmjs.com as that has already been implemented (prior to the London meeting - by manual deployments).
+    - Bill raised a concern that hub.docker.com and npmjs.com repositories are being used, and wants to validate with Miller if we should continue with this approach or if a switch to JFrog is necessary. <-- There has been some confusion as to what the "status quo" means from the London meeting, but my understanding is that it means using hub.docker.com and npmjs.com as that has already been implemented (prior to the London meeting - by manual deployments).
 
 ### 2. Continuous Deployment Pipeline
 
-- Publishing a Snapshot via a Tag Push with the following format `v{major}.{minor}-snapshot` will deploy into the following namespace "mojaloop-snapshot" 
+- Publishing a Snapshot via a Tag Push with the following format `v{major}.{minor}.{patch}-snapshot` will deploy into the following namespace "mojaloop-snapshot" 
 - If there is no "dev" release within that namespace a new deployment will occur
 - If there is an existing "dev" release within that namespace the existing "dev" release will be upgraded
-- Publishing a Release via a Tag Push with the following format `v{major}.{minor}` will deploy into the following namespace "mojaloop-release" 
+- Publishing a Release via a Tag Push with the following format `v{major}.{minor}.{patch}` will deploy into the following namespace "mojaloop-release" 
 -   If there is no "prod" release within that namespace a new deployment will occur
 - If there is an existing  "prod" release within that namespace the existing  "prod" release will be upgraded
