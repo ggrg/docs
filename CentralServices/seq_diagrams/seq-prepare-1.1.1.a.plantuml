@@ -136,18 +136,6 @@ group Prepare Handler Consume
         activate TOPIC_POSITION_DFSP1
         deactivate TOPIC_POSITION_DFSP1
     else Validate Prepare Transfer (failure)
-        ' group Persist Transfer State (with transferState='ABORTED' on validation fail)
-        '     PREP_HANDLER -> TRANS_DAO: Request to persist transfer
-        '     activate TRANS_DAO
-        '     TRANS_DAO -> DB: Persist transfer
-        '     hnote over DB #lightyellow
-        '         transferStateChange
-        '     end note
-        '     activate DB
-        '     deactivate DB
-        '     TRANS_DAO --> PREP_HANDLER: Return success
-        '     deactivate TRANS_DAO
-        ' end
         note right of PREP_HANDLER #yellow
             Message:
             {
