@@ -18,6 +18,7 @@ collections "Transfer-Topic" as TOPIC_TRANSFERS
 entity "Position DAO" as POS_DAO
 collections "Event-Topic" as TOPIC_EVENTS
 collections "Notification-Topic" as TOPIC_NOTIFICATIONS
+entity "Participant DAO" as PARTICIPANT_DAO
 entity "Transfer DAO" as TRANS_DAO
 database "Central Store" as DB
 
@@ -28,6 +29,7 @@ box "Central Service" #LightYellow
     participant TOPIC_EVENTS
     participant TOPIC_NOTIFICATIONS
     participant POS_DAO
+    participant PARTICIPANT_DAO
     participant TRANS_DAO
     participant DB
 end box
@@ -54,10 +56,24 @@ group Position Handler Consume
             hnote over DB #lightyellow
                 transferPosition
             end note
-            DB -> POS_DAO: Retrieve latest position from DB for Payer
+            DB --> POS_DAO: Retrieve latest position from DB for Payer
             deactivate DB
             POS_DAO --> POS_HANDLER: Return latest position
             deactivate POS_DAO
+
+            POS_HANDLER -> PARTICIPANT_DAO: Request position limits for Payer Participant
+            activate PARTICIPANT_DAO
+            PARTICIPANT_DAO -> DB: Request position limits for Payer Participant
+            activate DB
+            hnote over DB #lightyellow
+                participant
+                participantLimit
+            end note
+            DB --> PARTICIPANT_DAO: Return position limits
+            deactivate DB
+            deactivate DB
+            PARTICIPANT_DAO --> POS_HANDLER: Return position limits
+            deactivate PARTICIPANT_DAO
 
             POS_HANDLER <-> POS_HANDLER: Calculate latest position (lpos) for prepare
             POS_HANDLER <-> POS_HANDLER: Validate Calculated latest position against the net-debit cap (netcap) - Rule: lpos < netcap
@@ -130,6 +146,20 @@ group Position Handler Consume
             deactivate DB
             POS_DAO --> POS_HANDLER: Return latest position
             deactivate POS_DAO
+
+            POS_HANDLER -> PARTICIPANT_DAO: Request position limits for Payer Participant
+            activate PARTICIPANT_DAO
+            PARTICIPANT_DAO -> DB: Request position limits for Payer Participant
+            activate DB
+            hnote over DB #lightyellow
+                participant
+                participantLimit
+            end note
+            DB --> PARTICIPANT_DAO: Return position limits
+            deactivate DB
+            deactivate DB
+            PARTICIPANT_DAO --> POS_HANDLER: Return position limits
+            deactivate PARTICIPANT_DAO
 
             POS_HANDLER <-> POS_HANDLER: Calculate latest position (lpos) for prepare
             POS_HANDLER <-> POS_HANDLER: Validate Calculated latest position against the net-debit cap (netcap) - Rule: lpos < netcap
