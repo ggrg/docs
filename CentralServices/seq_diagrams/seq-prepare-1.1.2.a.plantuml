@@ -50,10 +50,11 @@ group Position Handler Consume
             POS_HANDLER -> POS_DAO: Request latest position from DB for Payer
             activate POS_DAO
             POS_DAO -> DB: Retrieve latest position from DB for Payer
+            activate DB
             hnote over DB #lightyellow
                 transferPosition
             end note
-            activate DB
+            DB -> POS_DAO: Retrieve latest position from DB for Payer
             deactivate DB
             POS_DAO --> POS_HANDLER: Return latest position
             deactivate POS_DAO
@@ -120,10 +121,12 @@ group Position Handler Consume
             POS_HANDLER -> POS_DAO: Request latest position from DB for Payer
             activate POS_DAO
             POS_DAO -> DB: Retrieve latest position from DB for Payer
+            activate DB
             hnote over DB #lightyellow
                 transferPosition
             end note
-            activate DB
+            DB -> POS_DAO: Retrieve latest position from DB for Payer
+            deactivate DB
             deactivate DB
             POS_DAO --> POS_HANDLER: Return latest position
             deactivate POS_DAO
