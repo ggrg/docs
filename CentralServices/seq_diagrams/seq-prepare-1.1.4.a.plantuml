@@ -32,7 +32,6 @@ box "Central Service" #LightYellow
 participant TOPIC_NOTIFICATIONS
     participant CSAPI
     participant TOPIC_EVENTS
-    participant EVENT_DAO
     participant NOTIFY_DAO
     participant DB
 end box

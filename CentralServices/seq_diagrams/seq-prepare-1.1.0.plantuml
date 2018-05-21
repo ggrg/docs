@@ -24,13 +24,6 @@ control "Position Event Handler" as POS_HANDLER
 collections "Transfer-Topic" as TOPIC_TRANSFERS
 control "Transfer Event Handler" as TRANS_HANDLER
 collections "Notification-Topic" as TOPIC_NOTIFICATIONS
-' collections "Errors-Topic" as ERRORS_NOTIFICATIONS
-' entity "Position DAO" as POS_DAO
-' entity "Event DAO" as EVENT_DAO
-' entity "Transfer DAO" as TRANS_DAO
-' entity "Notification DAO" as NOTIFY_DAO
-' entity "Participant DAO" as PARTICIPANT_DAO
-' database "Central Store" as DB
 
 box "Financial Service Providers" #lightGray
 	participant DFSP1
@@ -51,13 +44,6 @@ box "Central Service" #LightYellow
     participant TOPIC_TRANSFERS
     participant TRANS_HANDLER
     participant TOPIC_NOTIFICATIONS
-    ' participant ERRORS_NOTIFICATIONS
-    ' participant POS_DAO
-    ' participant EVENT_DAO
-    ' participant TRANS_DAO
-    ' participant NOTIFY_DAO
-    ' participant PARTICIPANT_DAO
-    ' participant DB
 end box
 
 ' start flow
