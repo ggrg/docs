@@ -141,7 +141,7 @@ group Position Handler Consume
             hnote over DB #lightyellow
                 transferPosition
             end note
-            DB -> POS_DAO: Retrieve latest position from DB for Payer
+            DB --> POS_DAO: Retrieve latest position from DB for Payer
             deactivate DB
             deactivate DB
             POS_DAO --> POS_HANDLER: Return latest position
