@@ -1,0 +1,25 @@
+@startuml
+' declate title
+title 9.1.0. Event Handler (TODO)
+
+autonumber
+
+' Actor Keys:
+'   boundary - APIs/Interfaces, etc
+'   collections - Kafka Topics
+'   control - Kafka Consumers
+'   entity - Database Access Objects
+'   database - Database Persistance Store
+
+' declare actors
+boundary "Central Service API" as CSAPI
+database "Central Store" as DB
+
+box "Central Service" #LightYellow
+    participant CSAPI
+    participant DB
+end box
+
+CSAPI -> CSAPI: TODO
+
+@enduml

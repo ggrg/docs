@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="925px" preserveAspectRatio="none" style="width:815px;height:925px;" version="1.1" viewBox="0 0 815 925" width="815px" zoomAndPan="magnify"><defs><filter height="300%" id="fm7a4cd2v4wvk" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="373" x="217.75" y="23.5352">1.1.3.a. Transfer Handler Consume (single message)</text><rect fill="#FFFFE0" height="880.2246" style="stroke: #A80036; stroke-width: 1.0;" width="785.5" x="19" y="34.4883"/><text fill="#000000" font-family="sans-serif" font-size="13" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="101" x="361.25" y="47.0566">Central Service</text><rect fill="#FFFFFF" filter="url(#fm7a4cd2v4wvk)" height="30" style="stroke: #A80036; stroke-width: 1.0;" width="10" x="81" y="171.5977"/><rect fill="#FFFFFF" filter="url(#fm7a4cd2v4wvk)" height="712.9375" style="stroke: #A80036; stroke-width: 1.0;" width="10" x="276" y="126.2871"/><rect fill="#FFFFFF" filter="url(#fm7a4cd2v4wvk)" height="30" style="stroke: #A80036; stroke-width: 1.0;" width="10" x="616" y="793.9141"/><rect fill="#FFFFFF" filter="url(#fm7a4cd2v4wvk)" height="698.9375" style="stroke: #000000; stroke-width: 2.0;" width="691.5" x="13" y="133.2871"/><rect fill="#FFFFFF" filter="url(#fm7a4cd2v4wvk)" height="157.5527" style="stroke: #000000; stroke-width: 2.0;" width="358" x="189.5" y="216.9082"/><line style="stroke: #A80036; stroke-width: 1.0; stroke-dasharray: 5.0,5.0;" x1="86" x2="86" y1="116.2871" y2="849.2246"/><line style="stroke: #A80036; stroke-width: 1.0; stroke-dasharray: 5.0,5.0;" x1="280.5" x2="280.5" y1="116.2871" y2="849.2246"/><line style="stroke: #A80036; stroke-width: 1.0; stroke-dasharray: 5.0,5.0;" x1="484.5" x2="484.5" y1="116.2871" y2="849.2246"/><line style="stroke: #A80036; stroke-width: 1.0; stroke-dasharray: 5.0,5.0;" x1="620.5" x2="620.5" y1="116.2871" y2="849.2246"/><line style="stroke: #A80036; stroke-width: 1.0; stroke-dasharray: 5.0,5.0;" x1="752.5" x2="752.5" y1="116.2871" y2="849.2246"/><rect fill="#FEFECE" filter="url(#fm7a4cd2v4wvk)" height="30.4883" style="stroke: #A80036; stroke-width: 1.5;" width="118" x="27" y="76.7988"/><rect fill="#FEFECE" filter="url(#fm7a4cd2v4wvk)" height="30.4883" style="stroke: #A80036; stroke-width: 1.5;" width="118" x="23" y="80.7988"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="104" x="30" y="101.334">Transfer-Topic</text><rect fill="#FEFECE" filter="url(#fm7a4cd2v4wvk)" height="30.4883" style="stroke: #A80036; stroke-width: 1.5;" width="118" x="27" y="848.2246"/><rect fill="#FEFECE" filter="url(#fm7a4cd2v4wvk)" height="30.4883" style="stroke: #A80036; stroke-width: 1.5;" width="118" x="23" y="852.2246"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="104" x="30" y="872.7598">Transfer-Topic</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="157" x="199.5" y="113.334">Transfer Event Handler</text><ellipse cx="281" cy="83.7988" fill="#FEFECE" filter="url(#fm7a4cd2v4wvk)" rx="12" ry="12" style="stroke: #A80036; stroke-width: 2.0;"/><polygon fill="#A80036" points="277,71.7988,283,66.7988,281,71.7988,283,76.7988,277,71.7988" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="157" x="199.5" y="861.7598">Transfer Event Handler</text><ellipse cx="281" cy="880.7129" fill="#FEFECE" filter="url(#fm7a4cd2v4wvk)" rx="12" ry="12" style="stroke: #A80036; stroke-width: 2.0;"/><polygon fill="#A80036" points="277,868.7129,283,863.7129,281,868.7129,283,873.7129,277,868.7129" style="stroke: #A80036; stroke-width: 1.0;"/><rect fill="#FEFECE" filter="url(#fm7a4cd2v4wvk)" height="30.4883" style="stroke: #A80036; stroke-width: 1.5;" width="97" x="436.5" y="76.7988"/><rect fill="#FEFECE" filter="url(#fm7a4cd2v4wvk)" height="30.4883" style="stroke: #A80036; stroke-width: 1.5;" width="97" x="432.5" y="80.7988"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="83" x="439.5" y="101.334">Event-Topic</text><rect fill="#FEFECE" filter="url(#fm7a4cd2v4wvk)" height="30.4883" style="stroke: #A80036; stroke-width: 1.5;" width="97" x="436.5" y="848.2246"/><rect fill="#FEFECE" filter="url(#fm7a4cd2v4wvk)" height="30.4883" style="stroke: #A80036; stroke-width: 1.5;" width="97" x="432.5" y="852.2246"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="83" x="439.5" y="872.7598">Event-Topic</text><rect fill="#FEFECE" filter="url(#fm7a4cd2v4wvk)" height="30.4883" style="stroke: #A80036; stroke-width: 1.5;" width="139" x="551.5" y="76.7988"/><rect fill="#FEFECE" filter="url(#fm7a4cd2v4wvk)" height="30.4883" style="stroke: #A80036; stroke-width: 1.5;" width="139" x="547.5" y="80.7988"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="125" x="554.5" y="101.334">Notification-Topic</text><rect fill="#FEFECE" filter="url(#fm7a4cd2v4wvk)" height="30.4883" style="stroke: #A80036; stroke-width: 1.5;" width="139" x="551.5" y="848.2246"/><rect fill="#FEFECE" filter="url(#fm7a4cd2v4wvk)" height="30.4883" style="stroke: #A80036; stroke-width: 1.5;" width="139" x="547.5" y="852.2246"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="125" x="554.5" y="872.7598">Notification-Topic</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="90" x="704.5" y="113.334">Central Store</text><path d="M734.5,63.7988 C734.5,53.7988 752.5,53.7988 752.5,53.7988 C752.5,53.7988 770.5,53.7988 770.5,63.7988 L770.5,89.7988 C770.5,99.7988 752.5,99.7988 752.5,99.7988 C752.5,99.7988 734.5,99.7988 734.5,89.7988 L734.5,63.7988 " fill="#FEFECE" filter="url(#fm7a4cd2v4wvk)" style="stroke: #000000; stroke-width: 1.5;"/><path d="M734.5,63.7988 C734.5,73.7988 752.5,73.7988 752.5,73.7988 C752.5,73.7988 770.5,73.7988 770.5,63.7988 " fill="none" style="stroke: #000000; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="90" x="704.5" y="861.7598">Central Store</text><path d="M734.5,874.7129 C734.5,864.7129 752.5,864.7129 752.5,864.7129 C752.5,864.7129 770.5,864.7129 770.5,874.7129 L770.5,900.7129 C770.5,910.7129 752.5,910.7129 752.5,910.7129 C752.5,910.7129 734.5,910.7129 734.5,900.7129 L734.5,874.7129 " fill="#FEFECE" filter="url(#fm7a4cd2v4wvk)" style="stroke: #000000; stroke-width: 1.5;"/><path d="M734.5,874.7129 C734.5,884.7129 752.5,884.7129 752.5,884.7129 C752.5,884.7129 770.5,884.7129 770.5,874.7129 " fill="none" style="stroke: #000000; stroke-width: 1.5;"/><rect fill="#FFFFFF" filter="url(#fm7a4cd2v4wvk)" height="30" style="stroke: #A80036; stroke-width: 1.0;" width="10" x="81" y="171.5977"/><rect fill="#FFFFFF" filter="url(#fm7a4cd2v4wvk)" height="712.9375" style="stroke: #A80036; stroke-width: 1.0;" width="10" x="276" y="126.2871"/><rect fill="#FFFFFF" filter="url(#fm7a4cd2v4wvk)" height="30" style="stroke: #A80036; stroke-width: 1.0;" width="10" x="616" y="793.9141"/><rect fill="none" height="698.9375" style="stroke: #000000; stroke-width: 2.0;" width="691.5" x="13" y="133.2871"/><polygon fill="#EEEEEE" points="13,133.2871,241,133.2871,241,140.2871,231,150.2871,13,150.2871,13,133.2871" style="stroke: #000000; stroke-width: 2.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="183" x="28" y="146.8555">Transfer Handler Consume</text><polygon fill="#A80036" points="102,167.5977,92,171.5977,102,175.5977,98,171.5977" style="stroke: #A80036; stroke-width: 1.0;"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="96" x2="275" y1="171.5977" y2="171.5977"/><text fill="#000000" font-family="sans-serif" font-size="13" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="9" x="108" y="167.166">1</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="153" x="121" y="167.166">Consume Transfer event</text><rect fill="none" height="157.5527" style="stroke: #000000; stroke-width: 2.0;" width="358" x="189.5" y="216.9082"/><polygon fill="#EEEEEE" points="189.5,216.9082,404.5,216.9082,404.5,223.9082,394.5,233.9082,189.5,233.9082,189.5,216.9082" style="stroke: #000000; stroke-width: 2.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="170" x="204.5" y="230.4766">Persist Event Information</text><polygon fill="#A80036" points="473,276.2188,483,280.2188,473,284.2188,477,280.2188" style="stroke: #A80036; stroke-width: 1.0;"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="286" x2="479" y1="280.2188" y2="280.2188"/><text fill="#000000" font-family="sans-serif" font-size="13" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="9" x="293" y="275.7871">2</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="162" x="306" y="275.7871">Publish event information</text><rect fill="#FFFFFF" filter="url(#fm7a4cd2v4wvk)" height="55.9316" style="stroke: #000000; stroke-width: 2.0;" width="340" x="196.5" y="288.5293"/><polygon fill="#EEEEEE" points="196.5,288.5293,260.5,288.5293,260.5,295.5293,250.5,305.5293,196.5,305.5293,196.5,288.5293" style="stroke: #000000; stroke-width: 2.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="19" x="209.5" y="303.0977">ref</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="198" x="267.5" y="322.0977">Event Handler Consume {9.1.0.}</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="0" x="271.5" y="337.4082"/><polygon fill="#FFFF00" filter="url(#fm7a4cd2v4wvk)" points="291,386.4609,291,763.4609,553,763.4609,553,396.4609,543,386.4609,291,386.4609" style="stroke: #A80036; stroke-width: 1.0;"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="543" x2="543" y1="386.4609" y2="396.4609"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="553" x2="543" y1="396.4609" y2="396.4609"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="58" x="297" y="404.0293">Message:</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="4" x="297" y="419.3398">{</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="208" x="313" y="434.6504">id: &lt;transferMessage.transferId&gt;</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="225" x="313" y="449.9609">from: &lt;transferMessage.payerFsp&gt;,</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="210" x="313" y="465.2715">to: &lt;transferMessage.payeeFsp&gt;,</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="139" x="313" y="480.582">type: application/json</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="60" x="313" y="495.8926">content: {</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="181" x="329" y="511.2031">headers: &lt;transferHeaders&gt;,</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="180" x="329" y="526.5137">payload: &lt;transferMessage&gt;</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="8" x="313" y="541.8242">},</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="70" x="313" y="557.1348">metadata: {</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="46" x="329" y="572.4453">event: {</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="72" x="345" y="587.7559">id: &lt;uuid&gt;,</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="191" x="345" y="603.0664">responseTo: &lt;previous.uuid&gt;,</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="112" x="345" y="618.377">type: notification,</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="98" x="345" y="633.6875">action: prepare,</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="159" x="345" y="648.998">createdAt: &lt;timestamp&gt;,</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="43" x="345" y="664.3086">state: {</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="111" x="361" y="679.6191">status: "success",</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="46" x="361" y="694.9297">code: 0</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="4" x="345" y="710.2402">}</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="4" x="329" y="725.5508">}</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="4" x="313" y="740.8613">}</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="4" x="297" y="756.1719">}</text><polygon fill="#A80036" points="604,789.9141,614,793.9141,604,797.9141,608,793.9141" style="stroke: #A80036; stroke-width: 1.0;"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="286" x2="610" y1="793.9141" y2="793.9141"/><text fill="#000000" font-family="sans-serif" font-size="13" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="9" x="293" y="789.4824">3</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="224" x="306" y="789.4824">Publish Notification event for Payee</text><!--
+@startuml
+' declate title
+title 1.1.3.a. Transfer Handler Consume (single message)
+
+autonumber
+
+' Actor Keys:
+'   boundary - APIs/Interfaces, etc
+'   collections - Kafka Topics
+'   control - Kafka Consumers
+'   entity - Database Access Objects
+'   database - Database Persistance Store
+
+' declare actors
+collections "Transfer-Topic" as TOPIC_TRANSFERS
+control "Transfer Event Handler" as TRANS_HANDLER
+collections "Event-Topic" as TOPIC_EVENTS
+collections "Notification-Topic" as TOPIC_NOTIFICATIONS
+database "Central Store" as DB
+
+box "Central Service" #LightYellow
+    participant TOPIC_TRANSFERS
+    participant TRANS_HANDLER
+    participant TOPIC_EVENTS
+    participant TOPIC_NOTIFICATIONS
+    participant DB
+end box
+
+' start flow
+activate TRANS_HANDLER
+group Transfer Handler Consume
+    TOPIC_TRANSFERS <- TRANS_HANDLER: Consume Transfer event
+
+    activate TOPIC_TRANSFERS
+    deactivate TOPIC_TRANSFERS
+
+    group Persist Event Information
+        |||
+        TRANS_HANDLER -> TOPIC_EVENTS: Publish event information
+        ref over TRANS_HANDLER, TOPIC_EVENTS :  Event Handler Consume {9.1.0.} \n
+        |||
+    end
+
+    note right of TRANS_HANDLER #yellow
+        Message:
+        {
+            id: <transferMessage.transferId>
+            from: <transferMessage.payerFsp>,
+            to: <transferMessage.payeeFsp>,
+            type: application/json
+            content: {
+                headers: <transferHeaders>,
+                payload: <transferMessage>
+            },
+            metadata: {
+                event: {
+                    id: <uuid>,
+                    responseTo: <previous.uuid>,
+                    type: notification,
+                    action: prepare,
+                    createdAt: <timestamp>,
+                    state: {
+                        status: "success",
+                        code: 0
+                    }
+                }
+            }
+        }
+    end note
+    TRANS_HANDLER -> TOPIC_NOTIFICATIONS: Publish Notification event for Payee
+    activate TOPIC_NOTIFICATIONS
+    deactivate TOPIC_NOTIFICATIONS
+end
+deactivate TRANS_HANDLER
+@enduml
+
+PlantUML version 1.2017.18(Fri Oct 06 17:56:32 BST 2017)
+(GPL source distribution)
+Java Runtime: Java(TM) SE Runtime Environment
+JVM: Java HotSpot(TM) 64-Bit Server VM
+Java Version: 1.8.0_152-b16
+Operating System: Mac OS X
+OS Version: 10.13.4
+Default Encoding: UTF-8
+Language: en
+Country: ZA
+--></g></svg>
