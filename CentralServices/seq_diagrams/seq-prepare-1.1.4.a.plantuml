@@ -71,7 +71,7 @@ group Send notification to Participant
     deactivate NOTIFY_DAO
     CSAPI --> NOTIFY_HANDLER: Return Notification details for Participant
     deactivate CSAPI
-    NOTIFY_HANDLER -> DFSP: HTTP Callback with Prepare result to Participant
+    NOTIFY_HANDLER --> DFSP: Callback with Prepare result to Participant to specified URL - PUT - HTTP://<dfsp-host>>/transfers
 end
 deactivate NOTIFY_HANDLER
 @enduml
