@@ -1,6 +1,6 @@
 @startuml
 ' declate title
-title 1.1.2. Position Handler Consume (batch messages)
+title 1.1.2.b. Position Handler Consume (batch messages)
 
 autonumber
 
@@ -40,7 +40,10 @@ group Position Handler Consume
     deactivate TOPIC_POSITION_DFSP1
 
     group Persist Event Information
-        POS_HANDLER -> TOPIC_EVENTS: Request to persist event information
+        |||
+        POS_HANDLER -> TOPIC_EVENTS: Publish event information
+        ref over POS_HANDLER, TOPIC_EVENTS : Event Handler Consume {9.1.0.} \n
+        |||
     end
 
     loop for each message in batch

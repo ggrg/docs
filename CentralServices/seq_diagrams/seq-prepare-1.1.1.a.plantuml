@@ -1,6 +1,6 @@
 @startuml
 ' declate title
-title 1.1.1. Prepare Handler Consume (single message)
+title 1.1.1.a. Prepare Handler Consume (single message)
 
 autonumber
 
@@ -169,6 +169,8 @@ group Prepare Handler Consume
             }
         end note
         PREP_HANDLER -> TOPIC_NOTIFICATIONS: Publish Notification (failure) event for Payer
+        activate TOPIC_NOTIFICATIONS
+        deactivate TOPIC_NOTIFICATIONS
     end
 end
 deactivate PREP_HANDLER

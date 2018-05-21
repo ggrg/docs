@@ -1,6 +1,6 @@
 @startuml
 ' declate title
-title 1.1.3. Transfer Handler Consume (single message)
+title 1.1.3.a. Transfer Handler Consume (single message)
 
 autonumber
 
@@ -41,12 +41,6 @@ group Transfer Handler Consume
         |||
     end
 
-    ' group Update Prepare Transfer State with transferState='RESERVED'
-    '     TRANS_HANDLER -> TRANS_DAO: Request to update transfer
-    '     TRANS_DAO <-> DB: Update transfer
-    '     TRANS_DAO -> TRANS_HANDLER: Return success
-    ' end
-
     note right of TRANS_HANDLER #yellow
         Message:
         {
@@ -73,9 +67,9 @@ group Transfer Handler Consume
             }
         }
     end note
-    TRANS_HANDLER -> TOPIC_NOTIFICATIONS: Publish Notifications event for Payee
+    TRANS_HANDLER -> TOPIC_NOTIFICATIONS: Publish Notification event for Payee
     activate TOPIC_NOTIFICATIONS
-    deactivate TOPIC_NOTIFICATIONSs
+    deactivate TOPIC_NOTIFICATIONS
 end
 deactivate TRANS_HANDLER
 @enduml

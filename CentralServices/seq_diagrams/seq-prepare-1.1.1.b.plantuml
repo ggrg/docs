@@ -1,6 +1,6 @@
 @startuml
 ' declate title
-title 1.1.1. Prepare Handler Consume (batch messages)
+title 1.1.1.b. Prepare Handler Consume (batch messages)
 
 autonumber
 
@@ -50,7 +50,7 @@ group Prepare Handler Consume
         activate PARTICIPANT_DAO
         PARTICIPANT_DAO -> DB: Request Participant details
         hnote over DB #lightyellow
-            participants
+            participant
         end note
         activate DB
         PARTICIPANT_DAO <-- DB: Return Participant details if it exists
@@ -66,7 +66,7 @@ group Prepare Handler Consume
         activate PARTICIPANT_DAO
         PARTICIPANT_DAO -> DB: Request Participant details
         hnote over DB #lightyellow
-            participants
+            participant
         end note
         activate DB
         PARTICIPANT_DAO <-- DB: Return Participant details if it exists
@@ -82,7 +82,7 @@ group Prepare Handler Consume
         activate TRANS_DAO
         TRANS_DAO -> DB: Request batch of Transfers
         hnote over DB #lightyellow
-            transfers
+            transfer
         end note
         activate DB
         TRANS_DAO <-- DB: Return batch of Transfers (if it exists)

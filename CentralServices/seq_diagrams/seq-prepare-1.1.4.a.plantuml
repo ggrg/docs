@@ -1,6 +1,6 @@
 @startuml
 ' declate title
-title 1.1.4. Send notification to Participant (Payer/Payee) (single message)
+title 1.1.4.a. Send notification to Participant (Payer/Payee) (single message)
 
 autonumber
 

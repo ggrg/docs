@@ -1,6 +1,6 @@
 @startuml
 ' declate title
-title 1.1.3. Transfer Handler Consume (batch messages)
+title 1.1.3.b. Transfer Handler Consume (batch messages)
 
 autonumber
 
@@ -71,7 +71,7 @@ group Transfer Handler Consume
                 }
             }
         end note
-        TRANS_HANDLER -> TOPIC_NOTIFICATIONS: Publish Notifications event for Payee
+        TRANS_HANDLER -> TOPIC_NOTIFICATIONS: Publish Notification event for Payee
         activate TOPIC_NOTIFICATIONS
         deactivate TOPIC_NOTIFICATIONS
     end

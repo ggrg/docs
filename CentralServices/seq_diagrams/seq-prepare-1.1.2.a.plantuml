@@ -1,6 +1,6 @@
 @startuml
 ' declate title
-title 1.1.2. Position Handler Consume (single message)
+title 1.1.2.a. Position Handler Consume (single message)
 
 autonumber
 
@@ -16,7 +16,7 @@ collections "Position-Topic-dfsp1" as TOPIC_POSITION_DFSP1
 control "Position Event Handler" as POS_HANDLER
 collections "Transfer-Topic" as TOPIC_TRANSFERS
 entity "Position DAO" as POS_DAO
-entity "Event-Topic" as TOPIC_EVENTS
+collections "Event-Topic" as TOPIC_EVENTS
 collections "Notification-Topic" as TOPIC_NOTIFICATIONS
 entity "Transfer DAO" as TRANS_DAO
 database "Central Store" as DB
@@ -115,7 +115,7 @@ group Position Handler Consume
         POS_HANDLER -> TOPIC_TRANSFERS: Publish Transfer event
         activate TOPIC_TRANSFERS
         deactivate TOPIC_TRANSFERS
-    else alt Calulate & Validate Latest Position (failure)
+    else Calculate & Validate Latest Position (failure)
         group Calculate position and persist change
             POS_HANDLER -> POS_DAO: Request latest position from DB for Payer
             activate POS_DAO
@@ -178,7 +178,9 @@ group Position Handler Consume
                 }
             }
         end note
-        POS_HANDLER -> TOPIC_NOTIFICATIONS: Publishes Notifications (failure) event for Payer
+        POS_HANDLER -> TOPIC_NOTIFICATIONS: Publish Notification (failure) event for Payer
+        activate TOPIC_NOTIFICATIONS
+        deactivate TOPIC_NOTIFICATIONS
         deactivate POS_HANDLER
     end
 end
