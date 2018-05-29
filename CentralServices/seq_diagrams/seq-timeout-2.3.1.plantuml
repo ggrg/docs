@@ -1,0 +1,112 @@
+@startuml
+' declate title
+title 2.3.1. Timeout Handler Consume
+
+autonumber
+
+' Actor Keys:
+'   boundary - APIs/Interfaces, etc
+'   collections - Kafka Topics
+'   control - Kafka Consumers
+'   entity - Database Access Objects
+'   database - Database Persistance Store
+
+' declare actors
+control "Transfer Timeout Handler" as EXP_HANDLER
+collections "Position-Topic-dfsp1" as TOPIC_POSITION_DFSP1
+collections "Event-Topic" as TOPIC_EVENT
+entity "Transfer DAO" as TRANS_DAO
+database "Central Store" as DB
+
+box "Central Service" #LightYellow
+    participant EXP_HANDLER
+    participant TOPIC_POSITION_DFSP1
+    participant TOPIC_EVENT
+    participant TRANS_DAO
+    participant DB
+end box
+
+' start flow
+activate EXP_HANDLER
+group Timeout Handler Consume
+    group Persist Event Information
+        EXP_HANDLER -> TOPIC_EVENT: Publish event information
+        ref over EXP_HANDLER, TOPIC_EVENT :  Event Handler Consume {9.1.0.} 
+    end
+
+    group Request expired transfers
+        EXP_HANDLER -> TRANS_DAO: Request all expired transfers (Date.now() > expirationDate) \nwith transferState IN ['RECEIVED', 'RESERVED']
+        activate TRANS_DAO
+        TRANS_DAO -> DB: Fetch from database
+        activate DB
+        DB --> TRANS_DAO
+        deactivate DB
+        hnote over DB #lightyellow
+            transfer
+            transferStateChange
+        end note
+        EXP_HANDLER <-- TRANS_DAO: Return list of all transfers to be aborted
+        deactivate TRANS_DAO
+    end
+
+    loop for each transfer in the list
+        |||
+        alt transferState == 'RECEIVED'
+            note right of EXP_HANDLER #yellow
+                Message:
+                {
+                    id: <transferId>,
+                    from: <payerParticipantId>,
+                    to: <payeeParticipantId>,
+                    type: application/json,
+                    <color #FF0000>content: {</color>
+                        <color #FF0000>headers: <transferHeaders>,</color>
+                        <color #FF0000>payload: <transferMessage></color>
+                    <color #FF0000>},</color>
+                    metadata: {
+                        event: {
+                            id: <uuid>,
+                            type: position,
+                            action: timeout-received,
+                            createdAt: <timestamp>,
+                            state: {
+                                status: "success",
+                                code: 0
+                            }
+                        }
+                    }
+                }
+            end note
+        else transferState == 'RESERVED'
+            note right of EXP_HANDLER #yellow
+                Message:
+                {
+                    id: <transferId>,
+                    from: <payerParticipantId>,
+                    to: <payeeParticipantId>,
+                    type: application/json,
+                    <color #FF0000>content: {</color>
+                        <color #FF0000>headers: <transferHeaders>,</color>
+                        <color #FF0000>payload: <transferMessage></color>
+                    <color #FF0000>},</color>
+                    metadata: {
+                        event: {
+                            id: <uuid>,
+                            type: position,
+                            action: timeout-reserved,
+                            createdAt: <timestamp>,
+                            state: {
+                                status: "success",
+                                code: 0
+                            }
+                        }
+                    }
+                }
+            end note
+        end
+        EXP_HANDLER -> TOPIC_POSITION_DFSP1: Route & Publish Position event
+        activate TOPIC_POSITION_DFSP1
+        deactivate TOPIC_POSITION_DFSP1
+    end
+end
+@enduml
