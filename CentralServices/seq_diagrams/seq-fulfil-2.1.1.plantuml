@@ -65,13 +65,26 @@ group Fulfil Handler Consume (Success)
         end
 
         group Validate Fulfil Transfer
-            FULF_HANDLER <-> FULF_HANDLER: Validate duplicate check (see Retrieve Transfer Details)
-            FULF_HANDLER <-> FULF_HANDLER: Validate fulfilment (see Retrieve Transfer Details)
-            FULF_HANDLER <-> FULF_HANDLER: Validate transfer state - Rule: transferState = 'COMMITTED'
+            FULF_HANDLER <-> FULF_HANDLER: Check existing transfer
+            FULF_HANDLER <-> FULF_HANDLER: Validate fulfilment against condition
+            FULF_HANDLER <-> FULF_HANDLER: Validate duplicate check
             FULF_HANDLER <-> FULF_HANDLER: Validate message signature (to be confirmed in future requirement)
         end
 
         alt Validate successful
+            group Persist fulfilment
+                FULF_HANDLER -> TRANS_DAO: Persist fulfilment
+                activate TRANS_DAO
+                TRANS_DAO -> DB: Persist to database
+                activate DB
+                deactivate DB
+                hnote over DB #lightyellow
+                    ilp
+                end note
+                FULF_HANDLER <-- TRANS_DAO: Return success
+                deactivate TRANS_DAO
+            end
+
             note right of FULF_HANDLER #yellow
                 Message:
                 {
