@@ -61,7 +61,7 @@ group DFSP2 sends a Fulfil Success Transfer request
     MLAPI -> TOPIC_FULFIL: Produce fulfil event for Payee\n(type: 'fulfil', action: 'commit')
     activate TOPIC_FULFIL
     TOPIC_FULFIL <-> TOPIC_FULFIL: Event is\nreplicated as\nconfigured\n(ACKS=all)
-    TOPIC_FULFIL --> MLAPI: Replication acknoledgements
+    TOPIC_FULFIL --> MLAPI: Replication acknowledgements
     deactivate TOPIC_FULFIL
     MLAPI --> DFSP2: Respond HTTP - 200 (OK)
     deactivate MLAPI

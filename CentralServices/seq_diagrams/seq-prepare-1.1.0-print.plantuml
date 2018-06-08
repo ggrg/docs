@@ -58,7 +58,7 @@ group DFSP1 sends a Prepare Transfer request to DFSP2
     MLAPI -> TOPIC_PREPARE_DFSP1: Produce prepare event for Payer\n(type: 'prepare', action: 'prepare')
     activate TOPIC_PREPARE_DFSP1
     TOPIC_PREPARE_DFSP1 <-> TOPIC_PREPARE_DFSP1: Event is\nreplicated as\nconfigured\n(ACKS=all)
-    TOPIC_PREPARE_DFSP1 --> MLAPI: Replication acknoledgements
+    TOPIC_PREPARE_DFSP1 --> MLAPI: Replication acknowledgements
     deactivate TOPIC_PREPARE_DFSP1
     MLAPI ---> DFSP1: Respond HTTP -\n202 (Accepted)
     deactivate MLAPI

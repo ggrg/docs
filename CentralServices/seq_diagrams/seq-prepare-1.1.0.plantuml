@@ -119,7 +119,7 @@ group DFSP1 sends a Prepare Transfer request to DFSP2
     MLAPI -> TOPIC_PREPARE_DFSP1: <color #FF0000>**Route & Publish Prepare event for Payer**</color>
     activate TOPIC_PREPARE_DFSP1
     TOPIC_PREPARE_DFSP1 <-> TOPIC_PREPARE_DFSP1: Ensure event is replicated as configured (ACKS=all)
-    TOPIC_PREPARE_DFSP1 --> MLAPI: Respond replication acknoledgements have been received
+    TOPIC_PREPARE_DFSP1 --> MLAPI: Respond replication acknowledgements have been received
     deactivate TOPIC_PREPARE_DFSP1
     MLAPI ---> DFSP1: Respond HTTP - 202 (Accepted)
     deactivate MLAPI

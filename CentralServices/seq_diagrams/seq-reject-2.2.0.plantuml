@@ -120,7 +120,7 @@ group DFSP2 sends a Fulfil Reject Transfer request
     MLAPI -> TOPIC_FULFIL: <color #FF0000>**Route & Publish Fulfil event for Payee**</color>
     activate TOPIC_FULFIL
     TOPIC_FULFIL <-> TOPIC_FULFIL: Ensure event is replicated as configured (ACKS=all)
-    TOPIC_FULFIL --> MLAPI: Respond replication acknoledgements have been received
+    TOPIC_FULFIL --> MLAPI: Respond replication acknowledgements have been received
     deactivate TOPIC_FULFIL
     MLAPI --> DFSP2: Respond HTTP - 200 (OK)
     deactivate MLAPI
