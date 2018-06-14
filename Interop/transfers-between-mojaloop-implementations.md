@@ -7,12 +7,14 @@
 
 ## References
 The following references are used in this document
+
 | Document | Version | Date |
 |------|--------|--------|
 | Open API for FSP Interoperability Specification | 0.95 | 8 January 2018 |
 
 ## Glossary 
 The following abbreviations are used in this document.
+
 | Abbreviation | Text | Reference |
 |------|--------|--------|
 | ALS | Account Lookup System | |
