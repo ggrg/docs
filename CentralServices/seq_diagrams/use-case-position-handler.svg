@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="936px" preserveAspectRatio="none" style="width:567px;height:936px;" version="1.1" viewBox="0 0 567 936" width="567px" zoomAndPan="magnify"><defs><filter height="300%" id="f1444pmen2ce5b" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><text fill="#000000" font-family="sans-serif" font-size="18" lengthAdjust="spacingAndGlyphs" textLength="168" x="203.5" y="17.4023">uc Position Handler</text><!--entity POS_HANDLER--><ellipse cx="280" cy="611.6875" fill="#FEFECE" filter="url(#f1444pmen2ce5b)" rx="8" ry="8" style="stroke: #A80036; stroke-width: 2.0;"/><path d="M280,619.6875 L280,646.6875 M267,627.6875 L293,627.6875 M280,646.6875 L267,661.6875 M280,646.6875 L293,661.6875 " fill="none" filter="url(#f1444pmen2ce5b)" style="stroke: #A80036; stroke-width: 2.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="113" x="223.5" y="682.2227">Position Handler</text><text fill="#000000" font-family="sans-serif" font-size="14" font-style="italic" lengthAdjust="spacingAndGlyphs" textLength="68" x="246" y="598.7344">«Handler»</text><ellipse cx="123.0321" cy="89.7311" fill="#FEFECE" filter="url(#f1444pmen2ce5b)" rx="98.0321" ry="60.5319" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="115" x="66.7821" y="57.4987">Transfer Prepare</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="0" x="126.2821" y="73.9869"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="28.2137" x2="217.8506" y1="76.9401" y2="76.9401"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="132" x="52.2821" y="114.9635">action == 'prepare'</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="108" x="64.2821" y="131.4518">see sd {1.1.2.a.}</text><line style="stroke: #A80036; stroke-width: 1.0; stroke-dasharray: 1.0,2.0;" x1="26.1596" x2="49.0321" y1="93.1842" y2="93.1842"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="148" x="49.0321" y="97.9752">Position-Topic-dfsp1</text><line style="stroke: #A80036; stroke-width: 1.0; stroke-dasharray: 1.0,2.0;" x1="197.0321" x2="219.9047" y1="93.1842" y2="93.1842"/><ellipse cx="280.1572" cy="274.1364" fill="#FEFECE" filter="url(#f1444pmen2ce5b)" rx="103.6572" ry="63.9372" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="153" x="203.6572" y="247.5206">Transfer Fulfil Success</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="0" x="282.1572" y="264.0089"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="178.1547" x2="382.1597" y1="266.962" y2="266.962"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="129" x="208.1572" y="304.9854">action == 'commit'</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="96" x="224.6572" y="321.4737">see sd {2.1.2.}</text><line style="stroke: #A80036; stroke-width: 1.0; stroke-dasharray: 1.0,2.0;" x1="178.5482" x2="206.1572" y1="283.2061" y2="283.2061"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="148" x="206.1572" y="287.9972">Position-Topic-dfsp2</text><line style="stroke: #A80036; stroke-width: 1.0; stroke-dasharray: 1.0,2.0;" x1="354.1572" x2="381.7662" y1="283.2061" y2="283.2061"/><ellipse cx="436.0044" cy="461.7412" fill="#FEFECE" filter="url(#f1444pmen2ce5b)" rx="103.0044" ry="63.542" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="141" x="365.5044" y="431.7908">Transfer Fulfil Reject</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="0" x="438.0044" y="448.2791"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="335.4185" x2="536.5903" y1="451.2322" y2="451.2322"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="116" x="364.0044" y="489.2557">action == 'reject'</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="96" x="374.0044" y="505.7439">see sd {2.2.2.}</text><line style="stroke: #A80036; stroke-width: 1.0; stroke-dasharray: 1.0,2.0;" x1="334.4204" x2="362.0044" y1="467.4764" y2="467.4764"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="148" x="362.0044" y="472.2674">Position-Topic-dfsp1</text><line style="stroke: #A80036; stroke-width: 1.0; stroke-dasharray: 1.0,2.0;" x1="510.0044" x2="537.5884" y1="467.4764" y2="467.4764"/><ellipse cx="134.0383" cy="865.9723" fill="#FEFECE" filter="url(#f1444pmen2ce5b)" rx="128.0383" ry="59.7731" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="183" x="42.5383" y="840.2671">Received Transfer Timeout</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="0" x="136.0383" y="856.7554"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="7.705" x2="260.3717" y1="859.7085" y2="859.7085"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="196" x="36.0383" y="897.732">action == 'timeout-received'</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="96" x="86.0383" y="914.2203">see sd {2.3.2.}</text><line style="stroke: #A80036; stroke-width: 1.0; stroke-dasharray: 1.0,2.0;" x1="8.7974" x2="60.0383" y1="875.9527" y2="875.9527"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="148" x="60.0383" y="880.7437">Position-Topic-dfsp1</text><line style="stroke: #A80036; stroke-width: 1.0; stroke-dasharray: 1.0,2.0;" x1="208.0383" x2="259.2792" y1="875.9527" y2="875.9527"/><ellipse cx="426.8062" cy="866.0018" fill="#FEFECE" filter="url(#f1444pmen2ce5b)" rx="129.3062" ry="59.8026" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="185" x="334.3062" y="840.3114">Reserved Transfer Timeout</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="0" x="428.8062" y="856.7997"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="299.2079" x2="554.4046" y1="859.7528" y2="859.7528"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="198" x="327.8062" y="897.7763">action == 'timeout-reserved'</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="96" x="378.8062" y="914.2645">see sd {2.3.2.}</text><line style="stroke: #A80036; stroke-width: 1.0; stroke-dasharray: 1.0,2.0;" x1="300.3188" x2="352.8062" y1="875.997" y2="875.997"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="148" x="352.8062" y="880.788">Position-Topic-dfsp1</text><line style="stroke: #A80036; stroke-width: 1.0; stroke-dasharray: 1.0,2.0;" x1="500.8062" x2="553.2936" y1="875.997" y2="875.997"/><!--link PREPARE to POS_HANDLER--><path d="M128.1331,155.4256 C133.1344,206.0389 142.4752,277.3975 159,338.1992 C183.3861,427.9258 227.4478,526.9763 255.137,585.0025 " fill="none" id="PREPARE-POS_HANDLER" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="127.633,150.2856,124.5235,159.6307,128.1173,155.2621,132.4859,158.8559,127.633,150.2856" style="stroke: #A80036; stroke-width: 1.0;"/><!--link FULFIL to POS_HANDLER--><path d="M280,343.3474 C280,414.0466 280,522.1512 280,585.0363 " fill="none" id="FULFIL-POS_HANDLER" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="280,338.3228,276,347.3228,280,343.3228,284,347.3228,280,338.3228" style="stroke: #A80036; stroke-width: 1.0;"/><!--link REJECT to POS_HANDLER--><path d="M382.3268,521.3934 C363.6882,542.1229 342.9902,565.1428 325.1135,585.0249 " fill="none" id="REJECT-POS_HANDLER" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="385.7819,517.5507,376.7899,521.5688,382.4388,521.2688,382.7388,526.9177,385.7819,517.5507" style="stroke: #A80036; stroke-width: 1.0;"/><!--link POS_HANDLER to TIMEOUT_RECEIVED--><path d="M248.3202,685.3228 C226.3189,720.133 196.8512,766.7566 173.3442,803.9491 " fill="none" id="POS_HANDLER-TIMEOUT_RECEIVED" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="170.508,808.4366,178.6978,802.966,173.1794,804.2101,171.9353,798.6917,170.508,808.4366" style="stroke: #A80036; stroke-width: 1.0;"/><!--link POS_HANDLER to TIMEOUT_RESERVED--><path d="M311.8968,685.3228 C334.0488,720.133 363.7183,766.7566 387.3863,803.9491 " fill="none" id="POS_HANDLER-TIMEOUT_RESERVED" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="390.242,808.4366,388.7847,798.6962,387.5576,804.2183,382.0354,802.9913,390.242,808.4366" style="stroke: #A80036; stroke-width: 1.0;"/><!--
+@startuml
+title uc Position Handler
+
+actor :Position Handler: as POS_HANDLER << Handler >>
+
+usecase PREPARE as "Transfer Prepare
+
+- -
+..Position-Topic-dfsp1..
+action == 'prepare'
+see sd {1.1.2.a.}"
+usecase FULFIL as "Transfer Fulfil Success
+
+- -
+..Position-Topic-dfsp2..
+action == 'commit'
+see sd {2.1.2.}"
+usecase REJECT as "Transfer Fulfil Reject
+
+- -
+..Position-Topic-dfsp1..
+action == 'reject'
+see sd {2.2.2.}"
+usecase TIMEOUT_RECEIVED as "Received Transfer Timeout
+
+- -
+..Position-Topic-dfsp1..
+action == 'timeout-received'
+see sd {2.3.2.}"
+usecase TIMEOUT_RESERVED as "Reserved Transfer Timeout
+
+- -
+..Position-Topic-dfsp1..
+action == 'timeout-reserved'
+see sd {2.3.2.}"
+
+(PREPARE) <- - - - :POS_HANDLER:
+(FULFIL) <- - - :POS_HANDLER:
+(REJECT) <- - :POS_HANDLER:
+:POS_HANDLER: - - -> (TIMEOUT_RECEIVED)
+:POS_HANDLER: - - -> (TIMEOUT_RESERVED)
+
+@enduml
+
+PlantUML version 1.2018.05(Sat May 05 23:00:17 EEST 2018)
+(GPL source distribution)
+Java Runtime: Java(TM) SE Runtime Environment
+JVM: Java HotSpot(TM) 64-Bit Server VM
+Java Version: 1.8.0_131-b11
+Operating System: Mac OS X
+OS Version: 10.13.4
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>

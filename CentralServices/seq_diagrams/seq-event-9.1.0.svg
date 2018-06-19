@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="255px" preserveAspectRatio="none" style="width:263px;height:255px;" version="1.1" viewBox="0 0 263 255" width="263px" zoomAndPan="magnify"><defs><filter height="300%" id="f7qz6h7u0go7y" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="201" x="27.5" y="23.5352">9.1.0. Event Handler (TODO)</text><rect fill="#FFFFE0" height="209.5977" style="stroke: #A80036; stroke-width: 1.0;" width="248" x="4" y="34.4883"/><text fill="#000000" font-family="sans-serif" font-size="13" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="101" x="77.5" y="47.0566">Central Service</text><line style="stroke: #A80036; stroke-width: 1.0; stroke-dasharray: 5.0,5.0;" x1="75" x2="75" y1="116.2871" y2="178.5977"/><line style="stroke: #A80036; stroke-width: 1.0; stroke-dasharray: 5.0,5.0;" x1="200" x2="200" y1="116.2871" y2="178.5977"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="128" x="8" y="113.334">Central Service API</text><path d="M54.5,71.7988 L54.5,95.7988 M54.5,83.7988 L71.5,83.7988 " fill="none" filter="url(#f7qz6h7u0go7y)" style="stroke: #A80036; stroke-width: 2.0;"/><ellipse cx="83.5" cy="83.7988" fill="#FEFECE" filter="url(#f7qz6h7u0go7y)" rx="12" ry="12" style="stroke: #A80036; stroke-width: 2.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="128" x="8" y="191.1328">Central Service API</text><path d="M54.5,198.0859 L54.5,222.0859 M54.5,210.0859 L71.5,210.0859 " fill="none" filter="url(#f7qz6h7u0go7y)" style="stroke: #A80036; stroke-width: 2.0;"/><ellipse cx="83.5" cy="210.0859" fill="#FEFECE" filter="url(#f7qz6h7u0go7y)" rx="12" ry="12" style="stroke: #A80036; stroke-width: 2.0;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="90" x="152" y="113.334">Central Store</text><path d="M182,63.7988 C182,53.7988 200,53.7988 200,53.7988 C200,53.7988 218,53.7988 218,63.7988 L218,89.7988 C218,99.7988 200,99.7988 200,99.7988 C200,99.7988 182,99.7988 182,89.7988 L182,63.7988 " fill="#FEFECE" filter="url(#f7qz6h7u0go7y)" style="stroke: #000000; stroke-width: 1.5;"/><path d="M182,63.7988 C182,73.7988 200,73.7988 200,73.7988 C200,73.7988 218,73.7988 218,63.7988 " fill="none" style="stroke: #000000; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="90" x="152" y="191.1328">Central Store</text><path d="M182,204.0859 C182,194.0859 200,194.0859 200,194.0859 C200,194.0859 218,194.0859 218,204.0859 L218,230.0859 C218,240.0859 200,240.0859 200,240.0859 C200,240.0859 182,240.0859 182,230.0859 L182,204.0859 " fill="#FEFECE" filter="url(#f7qz6h7u0go7y)" style="stroke: #000000; stroke-width: 1.5;"/><path d="M182,204.0859 C182,214.0859 200,214.0859 200,214.0859 C200,214.0859 218,214.0859 218,204.0859 " fill="none" style="stroke: #000000; stroke-width: 1.5;"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="75" x2="117" y1="147.5977" y2="147.5977"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="117" x2="117" y1="147.5977" y2="160.5977"/><line style="stroke: #A80036; stroke-width: 1.0;" x1="76" x2="117" y1="160.5977" y2="160.5977"/><polygon fill="#A80036" points="86,156.5977,76,160.5977,86,164.5977,82,160.5977" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="9" x="82" y="142.8555">1</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="38" x="95" y="142.8555">TODO</text><!--
+@startuml
+title 9.1.0. Event Handler (TODO)
+
+autonumber
+
+
+boundary "Central Service API" as CSAPI
+database "Central Store" as DB
+
+box "Central Service" #LightYellow
+    participant CSAPI
+    participant DB
+end box
+
+CSAPI -> CSAPI: TODO
+
+@enduml
+
+PlantUML version 1.2018.05(Sat May 05 23:00:17 EEST 2018)
+(GPL source distribution)
+Java Runtime: Java(TM) SE Runtime Environment
+JVM: Java HotSpot(TM) 64-Bit Server VM
+Java Version: 1.8.0_131-b11
+Operating System: Mac OS X
+OS Version: 10.13.4
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>

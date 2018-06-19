@@ -1,0 +1,95 @@
+@startuml
+' declate title
+title 2.1.0. DFSP2 sends a Fulfil Success Transfer request
+
+autonumber
+
+' Actor Keys:
+'   boundary - APIs/Interfaces, etc
+'   collections - Kafka Topics
+'   control - Kafka Consumers
+'   entity - Database Access Objects
+'   database - Database Persistance Store
+
+' declare actors
+actor "DFSP1\nPayer" as DFSP1
+actor "DFSP2\nPayee" as DFSP2
+boundary "ML API Adapter" as MLAPI
+control "ML API Notification\nEvent Handler" as NOTIFY_HANDLER
+boundary "Central\nService API" as CSAPI
+collections "Fulfil\nTopic" as TOPIC_FULFIL
+control "Fulfil\nEvent\nHandler" as FULF_HANDLER
+collections "Position\nTopic\ndfsp2" as TOPIC_POSITION_DFSP2
+control "Position\nEvent\nHandler" as POS_HANDLER
+collections "Transfer\nTopic" as TOPIC_TRANSFERS
+collections "Event\nTopic" as TOPIC_EVENTS
+control "Transfer\nEvent\nHandler" as TRANS_HANDLER
+collections "Notification\nTopic" as TOPIC_NOTIFICATIONS
+
+box "Financial\nService Providers" #lightGray
+	participant DFSP1
+	participant DFSP2
+end box
+
+box "ML API Adapter Service" #LightBlue
+	participant MLAPI
+	participant NOTIFY_HANDLER
+end box
+
+box "Central Service" #LightYellow
+    participant CSAPI
+	participant TOPIC_FULFIL
+    participant FULF_HANDLER
+    participant TOPIC_POSITION_DFSP2
+    participant TOPIC_EVENTS
+    participant POS_HANDLER
+    participant TOPIC_TRANSFERS
+    participant TRANS_HANDLER
+    participant TOPIC_NOTIFICATIONS
+end box
+
+' start flow
+activate NOTIFY_HANDLER
+activate FULF_HANDLER
+activate POS_HANDLER
+activate TRANS_HANDLER
+group DFSP2 sends a Fulfil Success Transfer request
+    DFSP2 <-> DFSP2: Retrieve fulfilment string\ngenerated during the quoting\nprocess or regenerate it using\n**Local secret** and **ILP Packet**
+    DFSP2 -> MLAPI: PUT - /transfers/<ID>\n(<IlpFulfilment>   payload)
+    activate MLAPI
+    MLAPI -> MLAPI: Validate incoming\ntoken and originator\nmatching Payee
+    MLAPI -> TOPIC_FULFIL: Produce fulfil event for Payee\n(type: 'fulfil', action: 'commit')
+    activate TOPIC_FULFIL
+    TOPIC_FULFIL <-> TOPIC_FULFIL: Event is\nreplicated as\nconfigured\n(ACKS=all)
+    TOPIC_FULFIL --> MLAPI: Replication acknowledgements
+    deactivate TOPIC_FULFIL
+    MLAPI --> DFSP2: Respond HTTP - 200 (OK)
+    deactivate MLAPI
+    TOPIC_FULFIL <- FULF_HANDLER: Consume
+    ref over TOPIC_FULFIL, TOPIC_EVENTS:  Fulfil Handler Consume (Success) {2.1.1.} \n
+    FULF_HANDLER -> TOPIC_POSITION_DFSP2: Produce
+    TOPIC_POSITION_DFSP2 <- POS_HANDLER: Consume
+    ref over TOPIC_POSITION_DFSP2, TOPIC_TRANSFERS:  Position Handler Consume (Success) {2.1.2.} \n
+    POS_HANDLER -> TOPIC_TRANSFERS: Produce
+    TOPIC_TRANSFERS <- TRANS_HANDLER: Consume
+    ref over TOPIC_EVENTS, TOPIC_NOTIFICATIONS: Transfer Handler Consume (Success) {2.1.3.} \n
+    TRANS_HANDLER -> TOPIC_NOTIFICATIONS: Produce
+    TOPIC_NOTIFICATIONS <- NOTIFY_HANDLER: Consume
+    opt action == 'commit'
+        |||
+        ref over DFSP1, TOPIC_NOTIFICATIONS: Send notification to Participant (Payer) {1.1.4.} \n
+        NOTIFY_HANDLER -> DFSP1: Send callback notification
+    end
+    TOPIC_NOTIFICATIONS <- NOTIFY_HANDLER: Consume
+    opt action == 'commit'
+        |||
+        ref over DFSP2, TOPIC_NOTIFICATIONS: Send notification to Participant (Payee) {1.1.4.} \n
+        NOTIFY_HANDLER -> DFSP2: Send callback notification
+    end
+    |||
+end
+deactivate TRANS_HANDLER
+deactivate POS_HANDLER
+deactivate FULF_HANDLER
+deactivate NOTIFY_HANDLER
+@enduml

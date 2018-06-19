@@ -1,0 +1,91 @@
+@startuml
+' declate title
+title 2.3.0. Transfer Timeout
+
+autonumber
+
+' Actor Keys:
+'   boundary - APIs/Interfaces, etc
+'   collections - Kafka Topics
+'   control - Kafka Consumers
+'   entity - Database Access Objects
+'   database - Database Persistance Store
+
+' declare actors
+actor "DFSP1\nPayer" as DFSP1
+actor "DFSP2\nPayee" as DFSP2
+boundary "ML API Adapter" as MLAPI
+control "ML API Notification Event Handler" as NOTIFY_HANDLER
+control "Transfer Timeout Handler" as EXP_HANDLER
+collections "Position-Topic-dfsp1" as TOPIC_POSITION_DFSP1
+control "Position Event Handler" as POS_HANDLER
+collections "Transfer-Topic" as TOPIC_TRANSFERS
+control "Transfer Event Handler" as TRANS_HANDLER
+collections "Notification-Topic" as TOPIC_NOTIFICATIONS
+collections "Event-Topic" as TOPIC_EVENT
+
+box "Financial Service Providers" #lightGray
+	participant DFSP1
+	participant DFSP2
+end box
+
+box "ML API Adapter Service" #LightBlue
+	participant MLAPI
+	participant NOTIFY_HANDLER
+end box
+
+box "Central Service" #LightYellow
+    participant EXP_HANDLER
+    participant TOPIC_POSITION_DFSP1
+    participant TOPIC_EVENT
+    participant POS_HANDLER
+    participant TOPIC_TRANSFERS
+    participant TRANS_HANDLER
+    participant TOPIC_NOTIFICATIONS
+end box
+
+' start flow
+activate NOTIFY_HANDLER
+activate EXP_HANDLER
+activate POS_HANDLER
+activate TRANS_HANDLER
+group Transfer Expiry
+    |||
+    ref over EXP_HANDLER, TOPIC_EVENT :  Timeout Handler Consume {2.3.1.} \n
+    EXP_HANDLER -> TOPIC_POSITION_DFSP1: Produce message
+    
+    alt Consume Single Message
+        |||
+        TOPIC_POSITION_DFSP1 <- POS_HANDLER: Consume message
+        ref over TOPIC_POSITION_DFSP1, TOPIC_TRANSFERS :  Position Hander Consume (Timeout) {2.3.2.} \n
+        POS_HANDLER -> TOPIC_TRANSFERS: Produce message
+        |||
+        TOPIC_TRANSFERS <- TRANS_HANDLER: Consume message
+        ref over TOPIC_EVENT, TOPIC_NOTIFICATIONS : Transfer Handler Consume (Timeout) {2.3.3.} \n
+        TRANS_HANDLER -> TOPIC_NOTIFICATIONS: Produce message
+        |||
+        TOPIC_NOTIFICATIONS <- NOTIFY_HANDLER: <color #FF0000>**Consume message**</color>
+        opt action IN ['timeout-received', 'timeout-reserved']
+            |||
+            ref over DFSP1, TOPIC_NOTIFICATIONS : Send notification to Participant (Payer) {1.1.4.} \n
+            NOTIFY_HANDLER -> DFSP1: Send callback notification
+        end
+        |||
+        TOPIC_NOTIFICATIONS <- NOTIFY_HANDLER: <color #FF0000>**Consume message**</color>
+        opt action == 'timeout-reserved'
+            |||
+            ref over DFSP2, TOPIC_NOTIFICATIONS : Send notification to Participant (Payee) {1.1.4.} \n
+            NOTIFY_HANDLER -> DFSP2: Send callback notification
+        end
+        |||
+    else Consume Batch Messages
+        note left of POS_HANDLER #lightblue
+            To be delivered by future story
+        end note
+    end
+end
+deactivate TRANS_HANDLER
+deactivate POS_HANDLER
+deactivate EXP_HANDLER
+deactivate NOTIFY_HANDLER
+@enduml

@@ -1,0 +1,114 @@
+@startuml
+' declate title
+title 2.3.1. Transfer Handler Consume (Timeout)
+
+autonumber
+
+' Actor Keys:
+'   boundary - APIs/Interfaces, etc
+'   collections - Kafka Topics
+'   control - Kafka Consumers
+'   entity - Database Access Objects
+'   database - Database Persistance Store
+
+' declare actors
+collections "Transfer-Topic" as TOPIC_TRANSFERS
+control "Transfer Event Handler" as TRANS_HANDLER
+collections "Notification-Topic" as TOPIC_NOTIFICATIONS
+collections "Event-Topic" as TOPIC_EVENT
+
+box "Central Service" #LightYellow
+    participant TOPIC_EVENT
+    participant TOPIC_TRANSFERS
+    participant TRANS_HANDLER
+    participant TOPIC_NOTIFICATIONS
+end box
+
+' start flow
+activate TRANS_HANDLER
+group Transfer Handler Consume (Timeout)
+    alt Consume Single Message
+        TOPIC_TRANSFERS <- TRANS_HANDLER: Consume Transfer event
+        activate TOPIC_TRANSFERS
+        deactivate TOPIC_TRANSFERS
+
+        break
+            group Validate Event
+                TRANS_HANDLER <-> TRANS_HANDLER: Validate event - Rule: type == 'transfer' && action IN ['timeout-received', 'timeout-reserved']
+            end
+        end
+
+        group Persist Event Information
+            TRANS_HANDLER -> TOPIC_EVENT: Publish event information
+	        ref over TRANS_HANDLER, TOPIC_EVENT :  Event Handler Consume {9.1.0.}
+        end
+
+        alt action == 'timeout-received'
+            note right of TRANS_HANDLER #yellow
+                Message:
+                {
+                    id: <transferId>,
+                    from: <payerParticipantId>,
+                    to: <payeeParticipantId>,
+                    type: application/json,
+                    <color #FF0000>content: {</color>
+                        <color #FF0000>headers: <transferHeaders>,</color>
+                        <color #FF0000>payload: <transferMessage></color>
+                    <color #FF0000>},</color>
+                    metadata: {
+                        event: {
+                            id: <uuid>,
+                            responseTo: <previous.uuid>,
+                            type: notification,
+                            action: timeout-received,
+                            createdAt: <timestamp>,
+                            state: {
+                                status: "success",
+                                code: 0
+                            }
+                        }
+                    }
+                }
+            end note
+        else action == 'timeout-reserved'
+            note right of TRANS_HANDLER #yellow
+                Message:
+                {
+                    id: <transferId>,
+                    from: <payerParticipantId>,
+                    to: <payeeParticipantId>,
+                    type: application/json,
+                    <color #FF0000>content: {</color>
+                        <color #FF0000>headers: <transferHeaders>,</color>
+                        <color #FF0000>payload: <transferMessage></color>
+                    <color #FF0000>},</color>
+                    metadata: {
+                        event: {
+                            id: <uuid>,
+                            responseTo: <previous.uuid>,
+                            type: notification,
+                            action: timeout-reserved,
+                            createdAt: <timestamp>,
+                            state: {
+                                status: "success",
+                                code: 0
+                            }
+                        }
+                    }
+                }
+            end note
+        end
+
+        TRANS_HANDLER -> TOPIC_NOTIFICATIONS: Publish Notification event for successful timeout
+        activate TOPIC_NOTIFICATIONS
+        deactivate TOPIC_NOTIFICATIONS
+
+
+    else Consume Batch Messages
+        note left of TRANS_HANDLER #lightblue
+            To be delivered by future story
+        end note
+    end
+end
+deactivate TRANS_HANDLER
+@enduml
