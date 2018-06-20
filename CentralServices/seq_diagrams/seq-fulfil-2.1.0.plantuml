@@ -84,7 +84,7 @@ group DFSP2 sends a Fulfil Success Transfer request
             }
         }
     end note
-    DFSP2 -> MLAPI: PUT - http://transfers/<ID>
+    DFSP2 -> MLAPI: PUT - /transfers/<ID>
     activate MLAPI
     MLAPI -> MLAPI: Validate incoming token and originator matching Payee
     note right of MLAPI #yellow

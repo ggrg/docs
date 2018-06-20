@@ -88,7 +88,7 @@ group DFSP2 sends a Fulfil Reject Transfer request
         **Note**: Payee rejection reason should be captured
         in the extensionList within the payload.
     end note
-    DFSP2 -> MLAPI: <color #FF0000>PUT - http://transfers/<ID></color>
+    DFSP2 -> MLAPI: <color #FF0000>PUT - /transfers/<ID></color>
     
     activate MLAPI
     MLAPI -> MLAPI: Validate incoming token and originator matching Payee

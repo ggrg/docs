@@ -45,7 +45,7 @@ group Send notification to Participant
     deactivate TOPIC_NOTIFICATIONS
     loop for each message in batch
         group Persist Event Information
-            NOTIFY_HANDLER -> CSAPI: Request to persist event information - POST - HTTP://events/
+            NOTIFY_HANDLER -> CSAPI: Request to persist event information - POST - /events
             activate CSAPI
             CSAPI -> TOPIC_EVENTS: Publish event information
             activate TOPIC_EVENTS
@@ -57,7 +57,7 @@ group Send notification to Participant
             CSAPI --> NOTIFY_HANDLER: Return success
             deactivate CSAPI
         end
-        NOTIFY_HANDLER -> CSAPI: Request Notifications details for Participant - GET - HTTP://notifications/DFPS(n)
+        NOTIFY_HANDLER -> CSAPI: Request Notifications details for Participant - GET - /notifications/DFPS(n)
         activate CSAPI
         CSAPI -> NOTIFY_DAO: Fetch Notifications details for Participant
         activate NOTIFY_DAO
@@ -72,7 +72,7 @@ group Send notification to Participant
         deactivate NOTIFY_DAO
         CSAPI --> NOTIFY_HANDLER: Return Notifications details for Participant
         deactivate CSAPI
-        NOTIFY_HANDLER --> DFSP: Callback with Prepare result to Participant to specified URL - PUT - HTTP://<dfsp-host>>/transfers
+        NOTIFY_HANDLER --> DFSP: Callback with Prepare result to Participant to specified URL - PUT - /<dfsp-host>>/transfers
     end
 end
 deactivate NOTIFY_HANDLER

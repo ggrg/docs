@@ -88,7 +88,7 @@ group DFSP1 sends a Prepare Transfer request to DFSP2
             }
         }
     end note
-    DFSP1 -> MLAPI: POST - http://transfers
+    DFSP1 -> MLAPI: POST - /transfers
     activate MLAPI
     MLAPI -> MLAPI: Validate incoming token and originator matching Payer
     note right of MLAPI #yellow
