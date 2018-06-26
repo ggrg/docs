@@ -12,13 +12,15 @@ New developers, see the [contributors guide](https://github.com/mojaloop/mojaloo
 The following architecture diagram shows the Mojaloop services:
 ![Mojaloop Services](https://github.com/mojaloop/docs/blob/master/Wiki/Mojaloop%20Services%20Overview.png)
 
-### Central Services
-The central services are a collection of separate services that help the DFSPs perform operations on the network.
+## ML-Adapter
+The Mojaloop Adapter is the translation layer to convert to/from Mojaloop API to an internal format that is used in Central Services Stack.
 
-- The [Central Directory Service](./CentralDirectory) determines which DFSP handles a user's accounts.
-- The [Central Ledger Service](./CentralLedger) handles clearing and settlement.
-- The [Central Rules Service](./CentralRules) sets policy across the system.
-- The [Fraud service](https://github.com/mojaloop/central-fraud-sharing) aids DFPS in identifying suspicious behavior.
+## Central Services
+The central ledger is a series of services that facilitate clearing and settlement of transfers between DFSPs, including the following functions:
+
+* Brokering real-time messaging for funds clearing
+* Maintaining net positions for a deferred net settlement
+* Propagating scheme-level and off-transfer fees
 
 ## End-to-End Scenarios
 The aforementioned individual services can't alone describe how key scenarios work across the system. Therefore, for each of the [Mojaloop Scenarios](https://github.com/mojaloop/docs/blob/master/scenarios.md), we provide a technical walk through.
@@ -51,6 +53,14 @@ Any text in this area is considered "out of date." It may reflect earlier versio
 The DFSP code is an example implementation of a mobile money provider. Customers connect to it from their mobile feature phones using Unstructured Supplementary Service Data (USSD). USSD is a Global System for Mobile (GSM) communication technology that is used to send text between a mobile phone and an application program in the network, allowing users to create accounts, send money, and receive money.
 
 [DFSP Documentation](./DFSP)
+
+### Central Services
+The central services are a collection of separate services that help the DFSPs perform operations on the network.
+
+- The [Central Directory Service](./CentralDirectory) determines which DFSP handles a user's accounts.
+- The [Central Ledger Service](./CentralLedger) handles clearing and settlement.
+- The [Central Rules Service](./CentralRules) sets policy across the system.
+- The [Fraud service](https://github.com/mojaloop/central-fraud-sharing) aids DFPS in identifying suspicious behavior.
 
 ### Level One Client Service
 The client service connects a DFSP to other other DFSPs and the central services. It has a few simple interfaces to connect to a DFSP for account holder lookup, payment setup, and ledger operations. The level one client can be hosted locally by the DFSP or in a remote data center such as Amazon.
