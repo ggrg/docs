@@ -1,5 +1,5 @@
 # Docs Overview
-The _Docs_ repository documents the overall architecture, component design, message flow, high level tests and an overview of the Mojaloop software. 
+The _docs_ repository documents the overall architecture, component design, message flow, high level tests and an overview of the Mojaloop software. 
 
 Individual repositories in the [mojaloop GitHub organization](https://github.com/mojaloop/) each describe component-specific details including source and APIs.
 
@@ -10,16 +10,7 @@ New developers, see the [contributors guide](https://github.com/mojaloop/mojaloo
 
 ## Mojaloop Services
 The following architecture diagram shows the Mojaloop services:
-
-![Mojaloop Services](./Wiki/Basic%20Overview.png)
-
-### DFSP Service
-The DFSP code is an example implementation of a mobile money provider. Customers connect to it from their mobile feature phones using Unstructured Supplementary Service Data (USSD). USSD is a Global System for Mobile (GSM) communication technology that is used to send text between a mobile phone and an application program in the network, allowing users to create accounts, send money, and receive money.
-
-[DFSP Documentation](./DFSP)
-
-### Level One Client Service
-The client service connects a DFSP to other other DFSPs and the central services. It has a few simple interfaces to connect to a DFSP for account holder lookup, payment setup, and ledger operations. The level one client can be hosted locally by the DFSP or in a remote data center such as Amazon.
+![Mojaloop Services](https://github.com/mojaloop/docs/blob/master/Wiki/Mojaloop%20Services%20Overview.png)
 
 ### Central Services
 The central services are a collection of separate services that help the DFSPs perform operations on the network.
@@ -55,5 +46,14 @@ This document is a work in progress; not all sections are updated to the latest 
 > ***OUT OF DATE STARTS HERE***
 
 Any text in this area is considered "out of date." It may reflect earlier versions of the technology, outdated terminology use, or sections that are poorly phrased and edited.
+
+### DFSP Service
+The DFSP code is an example implementation of a mobile money provider. Customers connect to it from their mobile feature phones using Unstructured Supplementary Service Data (USSD). USSD is a Global System for Mobile (GSM) communication technology that is used to send text between a mobile phone and an application program in the network, allowing users to create accounts, send money, and receive money.
+
+[DFSP Documentation](./DFSP)
+
+### Level One Client Service
+The client service connects a DFSP to other other DFSPs and the central services. It has a few simple interfaces to connect to a DFSP for account holder lookup, payment setup, and ledger operations. The level one client can be hosted locally by the DFSP or in a remote data center such as Amazon.
+
 
 > ***OUT OF DATE ENDS HERE***
