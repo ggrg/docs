@@ -1,0 +1,240 @@
+@startuml
+' declate title
+title 1.3.1 Prepare Position Handler Consume
+
+autonumber
+
+' Actor Keys:
+'   boundary - APIs/Interfaces, etc
+'   collections - Kafka Topics
+'   control - Kafka Consumers
+'   entity - Database Access Objects
+'   database - Database Persistence Store
+
+' declare actors
+control "Position Handler" as POS_HANDLER
+collections "Transfer-Topic" as TOPIC_TRANSFERS
+entity "Position\nManagement\nFacade" as POS_MGMT
+entity "Position DAO" as POS_DAO
+collections "Notification-Topic" as TOPIC_NOTIFICATIONS
+entity "Participant DAO" as PARTICIPANT_DAO
+entity "Transfer DAO" as TRANS_DAO
+database "Central Store" as DB
+
+box "Central Service" #LightYellow
+    participant POS_HANDLER
+    participant TOPIC_TRANSFERS
+    participant TOPIC_NOTIFICATIONS
+    participant POS_MGMT
+    participant POS_DAO
+    participant PARTICIPANT_DAO
+    participant TRANS_DAO
+    participant DB
+end box
+
+' start flow
+activate POS_HANDLER
+group Prepare Position Handler Consume
+    POS_HANDLER -> TRANS_DAO: Request current state of transfer from DB\n<color #FF0000><b>Error code:</b> 2003</color>
+    activate TRANS_DAO
+    TRANS_DAO -> DB: Retrieve current state of transfer from DB
+    activate DB
+    hnote over DB #lightyellow
+        transferStateChange
+    end note
+    DB --> TRANS_DAO: Return current state of transfer from DB
+    deactivate DB
+    TRANS_DAO --> POS_HANDLER: Return current state of transfer from DB
+    deactivate TRANS_DAO
+
+    POS_HANDLER <-> POS_HANDLER: Validate current state (transferStateChange.transferStateId == 'RECEIVED-PREPARE')\n<color #FF0000><b>Error code:</b> 2001</color>
+    POS_HANDLER -> POS_DAO: Select effectivePosition from DB for Payer for update (pass in payload.amount.amount)\n<color #FF0000><b>Error code:</b> 2003</color>
+    activate POS_DAO
+    note right of POS_HANDLER #lightgray
+        **transferAmount** = payload.amount.amount
+        **currentPosition** = participantPosition.value
+        **reservedPosition** = participantPosition.{original}reservedValue
+        **effectivePosition** = currentPosition + reservedPosition
+        **heldPosition** = effectivePosition + sumTransfersInBatch
+        **availablePosition** = NetDebitCap - effectivePosition
+        **sumTransfersInBatch** = SUM amount against each Transfer in batch
+        **sumRESERVED** = SUM of transfers that have met rule criteria and processed = 0
+    end note
+    group <color #blue>DB TRANSACTION</color>
+        POS_DAO -> DB: Select effectivePosition FOR UPDATE from DB for Payer
+        activate DB
+        hnote over DB #lightyellow
+            participantPosition
+        end note
+        DB --> POS_DAO: Return effectivePosition (currentPosition and reservedPosition) from DB for Payer
+        deactivate DB
+        POS_DAO -> POS_DAO: Increment reservedValue to heldPosition\n(reservedValue = reservedPosition + transferAmount)
+        POS_DAO -> DB: Persist reservedValue
+        activate DB
+        hnote over DB #lightyellow
+            UPDATE **participantPosition**
+            SET reservedValue += sumTransfersInBatch
+        end note
+        deactivate DB
+    end
+    POS_DAO --> POS_HANDLER: Return currentPosition and reservedPosition
+    deactivate POS_DAO
+
+    POS_HANDLER -> PARTICIPANT_DAO: Request position limits for Payer Participant\n<color #FF0000><b>Error code:</b> 2003</color>
+    activate PARTICIPANT_DAO
+    PARTICIPANT_DAO -> DB: Request position limits for Payer Participant
+    activate DB
+    hnote over DB #lightyellow
+        FROM **participantLimit**
+        WHERE participantLimit.limitTypeId = 'NET-DEBIT-CAP'
+        AND participantLimit.participantId = payload.payerFsp
+        AND participantLimit.currencyId = payload.amount.currency
+    end note
+    DB --> PARTICIPANT_DAO: Return position limits
+    deactivate DB
+    PARTICIPANT_DAO --> POS_HANDLER: Return position limits
+    deactivate PARTICIPANT_DAO
+
+    POS_HANDLER <-> POS_HANDLER: **latestPosition** = payload.amount.amount + currentPosition + reservedPosition
+    POS_HANDLER <-> POS_HANDLER: **availablePosition** = netDebitCap - effectivePosition =\n = netDebitCap - currentPosition - reservedPosition
+    POS_HANDLER <-> POS_HANDLER: Validate availablePosition >= transferAmount\n<color #FF0000><b>Error code:</b> 4001</color>
+    note right of POS_HANDLER #lightgray
+    01: sumRESERVED = 0
+    02: preparedTransfer.positionValue = currentPosition
+    02: foreach preparedTransfer in transferBatch
+        03: if availablePosition >= preparedTransfer.amount
+            04: preparedTransfer.state = "RESERVED"
+            05: availablePosition -= preparedTransfer.amount
+            06: sumRESERVED += preparedTransfer.amount
+            07: preparedTransfer.positionValue += preparedTransfer.amount
+            08: preparedTransfer.positionReservedValue = reservedPosition + sumTransfersInBatch - preparedTransfer.amount
+        09: else
+            10: preparedTransfer.state = "ABORTED"
+            11: preparedTransfer.reason = "Net Debit Cap exceeded by this request at this time, please try again later"
+            12: preparedTransfer.positionReservedValue = reservedPosition + sumTransfersInBatch - preparedTransfer.amount
+        13: end if
+    14: end foreach
+    end note
+
+    alt Calculate & Validate Latest Position Prepare (success)
+        group Persist Position change and Transfer State (with transferState='RESERVED' on position check pass)
+            POS_HANDLER -> POS_MGMT: Request to increment position **value** by **sumRESERVED**,\ndecrement **reservedValue** by **sumTransfersInBatch** for Payer\nand persist state change\n<color #FF0000><b>Error code:</b> 2003</color>
+            group <color #blue>DB TRANSACTION</color>
+                activate POS_MGMT
+                POS_MGMT->DB: Persist latest position **value** and **reservedValue** to DB for Payer
+                hnote over DB #lightyellow
+                    UPDATE **participantPosition**
+                    SET value += sumRESERVED,
+                    reservedValue -= sumTransfersInBatch
+                end note
+                activate DB
+                deactivate DB
+                deactivate POS_DAO
+                POS_MGMT -> DB: Persist transfer state and participant position change
+                hnote over DB #lightyellow
+                    **bulk insert for all processed transfers**:
+                        transferStateChange
+
+                        INSERT **participantPositionChange**
+                        SET transferStateChangeId = preparedTransfer.transferStateChangeId,
+                        particpantPositionId = preparedTransfer.participantPositionId,
+                        value = preparedTransfer.positionValue,
+                        reservedValue = preparedTransfer.positionReservedValue
+
+                end note
+                activate DB
+                deactivate DB
+                deactivate TRANS_DAO
+            end
+            POS_MGMT --> POS_HANDLER: Return success
+            deactivate POS_MGMT
+        end
+        note right of POS_HANDLER #yellow
+            Message:
+            {
+                id: <transferMessage.transferId>
+                from: <transferMessage.payerFsp>,
+                to: <transferMessage.payeeFsp>,
+                type: application/json
+                content: {
+                    headers: <transferHeaders>,
+                    payload: <transferMessage>
+                },
+                metadata: {
+                    event: {
+                        id: <uuid>,
+                        responseTo: <previous.uuid>,
+                        type: transfer,
+                        action: prepare,
+                        createdAt: <timestamp>,
+                        state: {
+                            status: "success",
+                            code: 0
+                        }
+                    }
+                }
+            }
+        end note
+        POS_HANDLER -> TOPIC_TRANSFERS: Publish Transfer event\n<color #FF0000><b>Error code:</b> 2003</color>
+        activate TOPIC_TRANSFERS
+        deactivate TOPIC_TRANSFERS
+   else Calculate & Validate Latest Position Prepare (failure)
+        note right of POS_HANDLER #red: Validation failure!
+
+        group Persist Transfer State (with transferState='ABORTED' on position check fail)
+            POS_HANDLER -> TRANS_DAO: Request to persist transfer\n<color #FF0000><b>Error code:</b> 2003</color>
+            activate TRANS_DAO
+            note right of POS_HANDLER #lightgray
+                transferStateChange.state = "ABORTED",
+                transferStateChange.reason = "Net Debit Cap exceeded by this request at this time, please try again later"
+            end note
+            TRANS_DAO -> DB: Persist transfer state
+            hnote over DB #lightyellow
+                transferStateChange
+            end note
+            activate DB
+            deactivate DB
+            TRANS_DAO --> POS_HANDLER: Return success
+            deactivate TRANS_DAO
+        end
+
+        note right of POS_HANDLER #yellow
+            Message:
+            {
+                id: <transferMessage.transferId>
+                from: <ledgerName>,
+                to: <transferMessage.payerFsp>,
+                type: application/json
+                content: {
+                    headers: <transferHeaders>,
+                    payload: {
+                        "errorInformation": {
+                            "errorCode": 4001,
+                            "errorDescription": "Payer FSP insufficient liquidity",
+                            "extensionList": <transferMessage.extensionList>
+                    }
+                },
+                metadata: {
+                    event: {
+                        id: <uuid>,
+                        responseTo: <previous.uuid>,
+                        type: notification,
+                        action: prepare,
+                        createdAt: <timestamp>,
+                        state: {
+                            status: 'error',
+                            code: <errorInformation.errorCode>
+                            description: <errorInformation.errorDescription>
+                        }
+                    }
+                }
+            }
+        end note
+        POS_HANDLER -> TOPIC_NOTIFICATIONS: Publish Notification (failure) event for Payer\n<color #FF0000><b>Error code:</b> 2003</color>
+        activate TOPIC_NOTIFICATIONS
+        deactivate TOPIC_NOTIFICATIONS
+        deactivate POS_HANDLER
+   end
+end
+deactivate POS_HANDLER
+@enduml

@@ -30,9 +30,14 @@ end box
 activate TRANS_HANDLER
 group Transfer Handler Consume
     TOPIC_TRANSFERS <- TRANS_HANDLER: Consume Transfer event
-
     activate TOPIC_TRANSFERS
     deactivate TOPIC_TRANSFERS
+
+    break
+        group Validate Event
+            TRANS_HANDLER <-> TRANS_HANDLER: Validate event - Rule: type == 'transfer' && action == 'prepare'\n<color #FF0000><b>Error codes:</b> 2001</color>
+        end
+    end
 
     group Persist Event Information
         |||
@@ -67,7 +72,7 @@ group Transfer Handler Consume
             }
         }
     end note
-    TRANS_HANDLER -> TOPIC_NOTIFICATIONS: Publish Notification event for Payee
+    TRANS_HANDLER -> TOPIC_NOTIFICATIONS: Publish Notification event for Payee\n<color #FF0000><b>Error codes:</b> 2003</color>
     activate TOPIC_NOTIFICATIONS
     deactivate TOPIC_NOTIFICATIONS
 end

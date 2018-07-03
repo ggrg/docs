@@ -1,0 +1,8 @@
+# VSCode directory
+.vscode
+
+# --------------- #
+# IntelliJ #
+# --------------- #
+.idea/
+**/*.iml

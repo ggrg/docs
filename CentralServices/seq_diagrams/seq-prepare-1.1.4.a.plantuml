@@ -39,7 +39,7 @@ end box
 ' start flow
 activate NOTIFY_HANDLER
 group Send notification to Participant
-    TOPIC_NOTIFICATIONS <- NOTIFY_HANDLER: <color #FF0000>**Consume Notification event**</color>
+    TOPIC_NOTIFICATIONS <- NOTIFY_HANDLER: Consume Notification event
     activate TOPIC_NOTIFICATIONS
     deactivate TOPIC_NOTIFICATIONS
 
@@ -56,9 +56,9 @@ group Send notification to Participant
         CSAPI --> NOTIFY_HANDLER: Return success
         deactivate CSAPI
     end
-    NOTIFY_HANDLER -> CSAPI: Request Notification details for Participant - GET - /notifications/DFSP(n)
+    NOTIFY_HANDLER -> CSAPI: Request Notification details for Participant - GET - /notifications/DFSP(n)\n<color #FF0000><b>Error code:</b> 2003</color>
     activate CSAPI
-    CSAPI -> NOTIFY_DAO: Fetch Notification details for Participant
+    CSAPI -> NOTIFY_DAO: Fetch Notification details for Participant\n<color #FF0000><b>Error code:</b> 2003</color>
     activate NOTIFY_DAO
     NOTIFY_DAO -> DB: Fetch Notification details for Participant
     activate DB
@@ -69,9 +69,10 @@ group Send notification to Participant
     deactivate DB
     NOTIFY_DAO --> CSAPI: Return Notification details for Participant
     deactivate NOTIFY_DAO
-    CSAPI --> NOTIFY_HANDLER: Return Notification details for Participant
+    CSAPI --> NOTIFY_HANDLER: Return Notification details for Participant\n<color #FF0000><b>Error codes:</b> 3202, 3203</color>
     deactivate CSAPI
-    NOTIFY_HANDLER --> DFSP: Callback with Prepare result to Participant to specified URL - PUT - /<dfsp-host>>/transfers
+    NOTIFY_HANDLER -> DFSP: Callback with Prepare result to Participant to specified URL - PUT - /<dfsp-host>>/transfers\n<color #FF0000><b>Error code:</b> 1001</color>
+    NOTIFY_HANDLER <-- DFSP: HTTP 200 OK 
 end
 deactivate NOTIFY_HANDLER
 @enduml

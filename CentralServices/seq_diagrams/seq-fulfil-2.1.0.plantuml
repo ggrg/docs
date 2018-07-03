@@ -86,7 +86,7 @@ group DFSP2 sends a Fulfil Success Transfer request
     end note
     DFSP2 -> MLAPI: PUT - /transfers/<ID>
     activate MLAPI
-    MLAPI -> MLAPI: Validate incoming token and originator matching Payee
+    MLAPI -> MLAPI: Validate incoming token and originator matching Payee\n<color #FF0000><b>Error codes:</b> 3000-3002, 3100-3107</color>
     note right of MLAPI #yellow
         Message:
         {
@@ -112,9 +112,9 @@ group DFSP2 sends a Fulfil Success Transfer request
             }
         }
     end note
-    MLAPI -> TOPIC_FULFIL: <color #FF0000>**Route & Publish Fulfil event for Payee**</color>
+    MLAPI -> TOPIC_FULFIL: Route & Publish Fulfil event for Payee\n<color #FF0000><b>Error code:</b> 2003</color>
     activate TOPIC_FULFIL
-    TOPIC_FULFIL <-> TOPIC_FULFIL: Ensure event is replicated as configured (ACKS=all)
+    TOPIC_FULFIL <-> TOPIC_FULFIL: Ensure event is replicated as configured (ACKS=all)\n<color #FF0000><b>Error code:</b> 2003</color>
     TOPIC_FULFIL --> MLAPI: Respond replication acknowledgements have been received
     deactivate TOPIC_FULFIL
     MLAPI --> DFSP2: Respond HTTP - 200 (OK)
@@ -131,14 +131,14 @@ group DFSP2 sends a Fulfil Success Transfer request
     ref over TOPIC_EVENTS, TOPIC_NOTIFICATIONS: Transfer Handler Consume (Success) {2.1.3.} \n
     TRANS_HANDLER -> TOPIC_NOTIFICATIONS: Produce message
     |||
-    TOPIC_NOTIFICATIONS <- NOTIFY_HANDLER: <color #FF0000>**Consume message**</color>
+    TOPIC_NOTIFICATIONS <- NOTIFY_HANDLER: Consume message
     opt action == 'commit'
         |||
         ref over DFSP1, TOPIC_NOTIFICATIONS: Send notification to Participant (Payer) {1.1.4.} \n
         NOTIFY_HANDLER -> DFSP1: Send callback notification
     end
     |||
-    TOPIC_NOTIFICATIONS <- NOTIFY_HANDLER: <color #FF0000>**Consume message**</color>
+    TOPIC_NOTIFICATIONS <- NOTIFY_HANDLER: Consume message
     opt action == 'commit'
         |||
         ref over DFSP2, TOPIC_NOTIFICATIONS: Send notification to Participant (Payee) {1.1.4.} \n

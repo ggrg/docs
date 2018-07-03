@@ -71,7 +71,7 @@ group Position Handler Consume (Reject)
         break
             group Validate Transfer
                 POS_HANDLER <-> POS_HANDLER: Validate transfer expiration - Rule: Date.now() < expirationDate
-                POS_HANDLER <-> POS_HANDLER: Validate transfer state - Rule: **transferState**Id corresponds to 'RESERVED'
+                POS_HANDLER <-> POS_HANDLER: Validate transfer state - Rule: **transferState**Id corresponds to 'RECEIVED-FULFIL'
                 note right of POS_HANDLER #lightgray
                     **Condition**: Continue only if both equal to true, break otherwise
                     **Note**: All timestamps should be transformed and stored as UTC (GMT 0)
@@ -107,36 +107,6 @@ group Position Handler Consume (Reject)
             end note
             TRANS_DAO --> POS_HANDLER: Return success
             deactivate TRANS_DAO
-        end
-
-        group Append Settlement Batch
-            note right of POS_HANDLER #lightgray
-                <color #FF0000>**To be considered**: Retrieve current settlement batch from</color>
-                <color #FF0000>Position-Topic (message 1) instead of querying the DB.</color>
-            end note
-            POS_HANDLER -> TRANS_DAO: Request to retrieve current/latest transfer settlement batch
-            activate TRANS_DAO
-            TRANS_DAO -> DB: Fetch transferSettlementBatchId
-            activate DB
-            DB --> TRANS_DAO
-            deactivate DB
-            hnote over DB #lightyellow
-                transferSettlementBatch
-            end note
-            POS_HANDLER <-- TRANS_DAO: Return transferSettlementBatchId to be appended
-            deactivate TRANS_DAO
-
-            POS_HANDLER -> TRANS_DAO: Request to append the transfer to current/latest transfer settlement batch
-            activate TRANS_DAO
-            TRANS_DAO -> DB: Append transfer
-            activate DB
-            deactivate DB
-            hnote over DB #lightyellow
-                transferSettlementBatchIndex
-            end note
-            POS_HANDLER <-- TRANS_DAO: Return success
-            deactivate TRANS_DAO
-            |||
         end
 
         note right of POS_HANDLER #yellow

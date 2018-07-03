@@ -40,6 +40,13 @@ group Position Handler Consume
     TOPIC_POSITION_DFSP1 <- POS_HANDLER: Consume Position event message for Payer
     activate TOPIC_POSITION_DFSP1
     deactivate TOPIC_POSITION_DFSP1
+
+    break
+        group Validate Event
+            POS_HANDLER <-> POS_HANDLER: Validate event - Rule: type == 'position' && action == 'prepare'
+        end
+    end
+
     group Persist Event Information
         |||
         POS_HANDLER -> TOPIC_EVENTS: Publish event information

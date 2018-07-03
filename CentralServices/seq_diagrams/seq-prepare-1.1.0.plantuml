@@ -90,7 +90,7 @@ group DFSP1 sends a Prepare Transfer request to DFSP2
     end note
     DFSP1 -> MLAPI: POST - /transfers
     activate MLAPI
-    MLAPI -> MLAPI: Validate incoming token and originator matching Payer
+    MLAPI -> MLAPI: Validate incoming token and originator matching Payer\n<color #FF0000><b>Error codes:</b> 3000-3002, 3100-3107</color>
     note right of MLAPI #yellow
         Message:
         {
@@ -116,9 +116,9 @@ group DFSP1 sends a Prepare Transfer request to DFSP2
             }
         }
     end note
-    MLAPI -> TOPIC_PREPARE_DFSP1: <color #FF0000>**Route & Publish Prepare event for Payer**</color>
+    MLAPI -> TOPIC_PREPARE_DFSP1: Route & Publish Prepare event for Payer\n<color #FF0000><b>Error code:</b> 2003</color>
     activate TOPIC_PREPARE_DFSP1
-    TOPIC_PREPARE_DFSP1 <-> TOPIC_PREPARE_DFSP1: Ensure event is replicated as configured (ACKS=all)
+    TOPIC_PREPARE_DFSP1 <-> TOPIC_PREPARE_DFSP1: Ensure event is replicated as configured (ACKS=all)\n<color #FF0000><b>Error code:</b> 2003</color>
     TOPIC_PREPARE_DFSP1 --> MLAPI: Respond replication acknowledgements have been received
     deactivate TOPIC_PREPARE_DFSP1
     MLAPI ---> DFSP1: Respond HTTP - 202 (Accepted)

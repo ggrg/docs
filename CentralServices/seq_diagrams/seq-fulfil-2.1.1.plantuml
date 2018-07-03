@@ -40,7 +40,7 @@ group Fulfil Handler Consume (Success)
 
         break
             group Validate Event
-                FULF_HANDLER <-> FULF_HANDLER: Validate event - Rule: type == 'fulfil' && action == 'commit'
+                FULF_HANDLER <-> FULF_HANDLER: Validate event - Rule: type == 'fulfil' && action == 'commit'\n<color #FF0000><b>Error codes:</b> 2001</color>
             end
         end
 
@@ -50,7 +50,7 @@ group Fulfil Handler Consume (Success)
         end
 
         group Retrieve Transfer Details
-            FULF_HANDLER -> TRANS_DAO: Request information for the validate checks
+            FULF_HANDLER -> TRANS_DAO: Request information for the validate checks\n<color #FF0000><b>Error code:</b> 2001</color>
             activate TRANS_DAO
             TRANS_DAO -> DB: Fetch from database
             activate DB
@@ -72,6 +72,19 @@ group Fulfil Handler Consume (Success)
         end
 
         alt Validate successful
+            group Persist Transfer State (with transferState='RECEIVED-FULFIL')
+                FULF_HANDLER -> TRANS_DAO: Request to persist transfer state
+                activate TRANS_DAO
+                TRANS_DAO -> DB: Persist transfer state
+                activate DB
+                deactivate DB
+                hnote over DB #lightyellow
+                    transferStateChange
+                end note
+                TRANS_DAO --> FULF_HANDLER: Return success
+                deactivate TRANS_DAO
+            end
+
             group Persist fulfilment
                 FULF_HANDLER -> TRANS_DAO: Persist fulfilment
                 activate TRANS_DAO
@@ -83,6 +96,36 @@ group Fulfil Handler Consume (Success)
                 end note
                 FULF_HANDLER <-- TRANS_DAO: Return success
                 deactivate TRANS_DAO
+            end
+
+            group Append to Settlement Window
+                note right of FULF_HANDLER #lightgray
+                    <color #FF0000>**To be considered**: Retrieve current settlement window from</color>
+                    <color #FF0000>Position-Topic (message 1) instead of querying the DB.</color>
+                end note
+                FULF_HANDLER -> TRANS_DAO: Request to retrieve current/latest transfer settlement window
+                activate TRANS_DAO
+                TRANS_DAO -> DB: Fetch settlementWindowId
+                activate DB
+                DB --> TRANS_DAO
+                deactivate DB
+                hnote over DB #lightyellow
+                    settlementWindow
+                end note
+                FULF_HANDLER <-- TRANS_DAO: Return settlementWindowId to be appended
+                deactivate TRANS_DAO
+
+                FULF_HANDLER -> TRANS_DAO: Request to append the transfer to current/latest transfer settlement window
+                activate TRANS_DAO
+                TRANS_DAO -> DB: Append transfer
+                activate DB
+                deactivate DB
+                hnote over DB #lightyellow
+                    settlementWindowIndex
+                end note
+                FULF_HANDLER <-- TRANS_DAO: Return success
+                deactivate TRANS_DAO
+                |||
             end
 
             note right of FULF_HANDLER #yellow
