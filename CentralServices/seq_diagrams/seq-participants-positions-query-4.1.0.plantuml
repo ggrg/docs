@@ -1,0 +1,117 @@
+@startuml
+' declate title
+title 4.1.0 Get Participant Position Details
+
+autonumber
+
+' Actor Keys:
+'   boundary - APIs/Interfaces, etc
+'   collections - Kafka Topics
+'   control - Kafka Consumers
+'   entity - Database Access Objects
+'   database - Database Persistance Store
+
+' declare actors
+entity "ML-API-ADAPTER" as MLAPI
+boundary "Central Service API" as CSAPI
+control "Participant Handler" as PARTICIPANT_HANDLER
+entity "Central Service API" as CSAPI
+entity "Participant DAO" as PARTICIPANT_DAO
+database "Central Store" as DB
+box "ML API Adapter Service" #LightBlue
+	participant MLAPI
+end box
+
+box "Central Service" #LightYellow
+    participant CSAPI
+    participant PARTICIPANT_HANDLER
+    participant PARTICIPANT_DAO
+    participant DB
+end box
+
+' start flow
+
+activate MLAPI
+group Get Position Details
+MLAPI -> CSAPI: Request to get positions - GET - /participants/{name}/positions
+    activate CSAPI
+    CSAPI -> PARTICIPANT_HANDLER: Fetch Positions for Participant
+    activate PARTICIPANT_HANDLER
+        PARTICIPANT_HANDLER ->PARTICIPANT_DAO: Fetch Participant \n<color #FF0000><b>Error code:</b> 2003,3201 </color>
+
+    activate PARTICIPANT_DAO
+    PARTICIPANT_DAO ->DB: Fetch Participant
+    activate DB
+    hnote over DB #lightyellow
+            participant
+    end note
+    DB --> PARTICIPANT_DAO: Retrieved Participant
+    deactivate DB
+    PARTICIPANT_DAO -->PARTICIPANT_HANDLER: Return Participant
+    deactivate PARTICIPANT_DAO
+    PARTICIPANT_HANDLER ->PARTICIPANT_HANDLER: Validate DFSP \n<color #FF0000><b>Error code:</b> 3201</color>
+    alt Validate participant (success)
+    PARTICIPANT_HANDLER ->PARTICIPANT_DAO: Fetch Positions for Participant \n<color #FF0000><b>Error code:</b> 2003 </color>
+    activate PARTICIPANT_DAO
+    PARTICIPANT_DAO ->DB: Fetch Positions for Participant \n For all active Currencies \n Use participant-<participantCurrency-<participantPosition lookup
+    activate DB
+    hnote over DB #lightyellow
+            participantCurrency
+            participantPosition
+    end note
+    DB --> PARTICIPANT_DAO: Retrieved Positions for Participant
+    deactivate DB
+    PARTICIPANT_DAO -->PARTICIPANT_HANDLER: Return Positions for Participant
+    deactivate PARTICIPANT_DAO
+    note right of PARTICIPANT_HANDLER #yellow
+            Message:
+            {
+                participantId: <participantId>,
+                respondedAt: <timeStamp0>
+                participantPositions:
+                    [
+                        {
+                            currentPosition: {
+                                currency: <currency1>,
+                                value: <amount1>,
+                                reservedValue: <amount2>,
+                                lastUpdated: <timeStamp1>
+                            }
+                        },
+                        {
+                            currentPosition: {
+                                currency: <currency2>,
+                                value: <amount3>,
+                                reservedValue: <amount4>,
+                                lastUpdated: <timeStamp2>
+                            }
+                        }
+                    ]
+            }
+        end note
+    PARTICIPANT_HANDLER -->CSAPI: Return Positions for Participant
+	deactivate PARTICIPANT_HANDLER
+CSAPI -->MLAPI: Return Positions for Participant
+else Validate participant (failure)
+note right of PARTICIPANT_HANDLER #red: Validation failure!
+    activate PARTICIPANT_HANDLER
+    note right of PARTICIPANT_HANDLER #yellow
+            Message:
+            {
+                "errorInformation": {
+                    "errorCode": 3201,
+                    "errorDescription": "FSP id does not exist or not found",
+                }
+            }
+        end note
+    PARTICIPANT_HANDLER -->CSAPI: Return <color #FF0000><b>Error code:</b> 3201</color>
+	deactivate PARTICIPANT_HANDLER
+CSAPI -->MLAPI: Return <color #FF0000><b>Error code:</b> 3201</color>
+end
+
+end
+
+    deactivate CSAPI
+deactivate MLAPI
+
+@enduml

@@ -1,0 +1,115 @@
+@startuml
+' declate title
+title 4.2.0 Get Positions of all Participants
+
+autonumber
+
+
+' Actor Keys:
+'   boundary - APIs/Interfaces, etc
+'   collections - Kafka Topics
+'   control - Kafka Consumers
+'   entity - Database Access Objects
+'   database - Database Persistance Store
+
+' declare actors
+entity "ML-API-ADAPTER" as MLAPI
+boundary "Central Service API" as CSAPI
+control "Participant Handler" as PARTICIPANT_HANDLER
+entity "Central Service API" as CSAPI
+entity "Participant DAO" as PARTICIPANT_DAO
+database "Central Store" as DB
+box "ML API Adapter Service" #LightBlue
+	participant MLAPI
+end box
+
+box "Central Service" #LightYellow
+    participant CSAPI
+    participant PARTICIPANT_HANDLER
+    participant PARTICIPANT_DAO
+    participant DB
+end box
+
+' start flow
+
+activate MLAPI
+group Get Position Details
+MLAPI -> CSAPI: Request to get positions - GET - /participants/positions
+    activate CSAPI
+    CSAPI -> PARTICIPANT_HANDLER: Fetch Positions for all Participants
+    activate PARTICIPANT_HANDLER
+    PARTICIPANT_HANDLER ->PARTICIPANT_DAO: Fetch Positions for all active Participants \n<color #FF0000><b>Error code:</b> 2003,3200 </color>
+    activate PARTICIPANT_DAO
+    PARTICIPANT_DAO ->DB: Fetch Positions for: \n all active Participants \n with all active Currencies for each Participant
+    activate DB
+    hnote over DB #lightyellow
+            participant
+            participantPosition
+            participantCurrency
+    end note
+    DB --> PARTICIPANT_DAO: Retrieved Positions for Participants
+    deactivate DB
+    PARTICIPANT_DAO -->PARTICIPANT_HANDLER: Return Positions for Participants
+    deactivate PARTICIPANT_DAO
+    note right of PARTICIPANT_HANDLER #yellow
+            Message:
+            {
+                snapshotAt: <timestamp0>,
+                positions:
+                [
+                    {
+                        participantId: <dfsp1>,
+                        participantPositions:
+                        [
+                            {
+                                currentPosition: {
+                                    currency: <currency1>,
+                                    value: <amount1>,
+                                    reservedValue: <amount2>,
+                                    lastUpdated: <timeStamp1>
+                                }
+                            },
+                            {
+                                currentPosition: {
+                                    currency: <currency2>,
+                                    value: <amount3>,
+                                    reservedValue: <amount4>,
+                                    lastUpdated: <timeStamp2>
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        participantId: <dfsp2>,
+                        participantPositions:
+                        [
+                            {
+                                currentPosition: {
+                                    currency: <currency1>,
+                                    value: <amount1>,
+                                    reservedValue: <amount2>,
+                                    lastUpdated: <timeStamp1>
+                                }
+                            },
+                            {
+                                currentPosition: {
+                                    currency: <currency2>,
+                                    value: <amount3>,
+                                    reservedValue: <amount4>,
+                                    lastUpdated: <timeStamp2>
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        end note
+    PARTICIPANT_HANDLER -->CSAPI: Return Positions for Participants
+	deactivate PARTICIPANT_HANDLER
+CSAPI -->MLAPI: Return Positions for Participants
+
+end
+    deactivate CSAPI
+deactivate MLAPI
+
+@enduml
