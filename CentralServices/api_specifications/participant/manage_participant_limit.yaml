@@ -1,7 +1,7 @@
 swagger: '2.0'
 info:
  version: 0.0.1
- title: MOJALOOP Participant Limit Adjustment.
+ title: Central services admin API for Participant Limit Adjustment
  description: Manage Participant Limit.
 host: '127.0.0.1:8080'
 basePath: /v1
@@ -19,7 +19,7 @@ paths:
      consumes:
        - application/json
      deprecated: false
-     summary: TBD
+     summary: Manage Participant Limits
      operationId: adjustParticipantLimit
      parameters:
        - in: path

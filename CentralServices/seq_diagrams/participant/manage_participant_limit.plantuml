@@ -27,7 +27,6 @@ group Manage Net Debit Cap
         {
             payload: {
                 LimitAdjustment: {
-                    type: <object>
                         currencyId: {
                             type: <string>,
                             value: <Id>
