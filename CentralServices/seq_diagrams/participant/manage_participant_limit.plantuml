@@ -1,0 +1,161 @@
+@startuml
+' declare title
+title 2.06 Design an API to manage NET DEBIT CAP #330
+
+autonumber
+
+' declare actors
+actor "HUB OPERATOR" as OPERATOR
+boundary "Participant Handler API" as PartHAPI
+control "Participant Facade" as PARTICIPANT_FACADE
+entity "Participant DAO" as PARTICIPANT_DAO
+database "Central Store" as DB
+
+box "Central Services" #LightYellow
+participant PARTICIPANT_FACADE
+participant PARTICIPANT_DAO
+participant DB
+end box
+
+' start flow
+
+activate OPERATOR
+group Manage Net Debit Cap
+    OPERATOR -> PartHAPI: Request to adjust ParticipantLimit for a certain Currency - POST - /participants/{name}/limits
+    note right of OPERATOR #yellow
+        Message:
+        {
+            payload: {
+                LimitAdjustment: {
+                        currencyId: {
+                            type: <string>,
+                            value: <Id>
+                        }
+                        adjustmentValue: {
+                            type: <number>,
+                            value: <0>
+                        }
+                }
+            }
+        }
+    end note
+
+    activate PartHAPI
+    PartHAPI -> PARTICIPANT_FACADE: Adjust Limit for Participant
+    activate PARTICIPANT_FACADE
+    PARTICIPANT_FACADE ->PARTICIPANT_DAO: Fetch Participant \n<color #FF0000><b>Error code:</b> 3200</color>
+    activate PARTICIPANT_DAO
+    PARTICIPANT_DAO -> DB: Fetch Participant
+    activate DB
+    hnote over DB #lightyellow
+        participant
+    end note
+    DB --> PARTICIPANT_DAO: Retrieved Participant
+    deactivate DB
+    PARTICIPANT_DAO --> PARTICIPANT_FACADE: Return Participant
+    deactivate PARTICIPANT_DAO
+    PARTICIPANT_FACADE -> PARTICIPANT_FACADE: Validate DFSP
+    alt Validate participant (success)
+        PARTICIPANT_FACADE ->PARTICIPANT_DAO:  (for Participant) Fetch ParticipantCurrency \n<color #FF0000><b>Error code:</b> 3200</color>
+        activate PARTICIPANT_DAO
+        PARTICIPANT_DAO -> DB: Fetch ParticipantCurrency
+        activate DB
+        hnote over DB #lightyellow
+            participantCurrency
+        end note
+        DB --> PARTICIPANT_DAO: Retrieved ParticipantCurrency
+        deactivate DB
+        PARTICIPANT_DAO --> PARTICIPANT_FACADE: Return ParticipantCurrency
+        deactivate PARTICIPANT_DAO
+        PARTICIPANT_FACADE->PARTICIPANT_FACADE: Validate ParticipantCurrency
+        Group DB TRANSACTION IMPLEMENTATION - Lock on ParticipantLimit table with UPDATE
+            alt Validate participantCurrency (success)
+                PARTICIPANT_FACADE ->PARTICIPANT_DAO:  (for ParticipantCurrency) Fetch ParticipantLimit \n<color #FF0000><b>Error code:</b> 3200</color>
+                activate PARTICIPANT_DAO
+                PARTICIPANT_DAO -> DB: Fetch ParticipantLimit
+                activate DB
+                hnote over DB #lightyellow
+                    participantLimit
+                end note
+                DB --> PARTICIPANT_DAO: Retrieved ParticipantLimit
+                deactivate DB
+                PARTICIPANT_DAO --> PARTICIPANT_FACADE: Return ParticipantLimit
+                deactivate PARTICIPANT_DAO
+                PARTICIPANT_FACADE -> PARTICIPANT_FACADE: Validate ParticipantLimit
+                alt Validate participantLimit (success)
+                    note right of PARTICIPANT_DAO #lightgrey
+                        If (record exists && isActive = 1)
+                            oldIsActive.isActive = 0
+                            insert Record
+                        Else
+                            insert Record
+                        End
+
+                    end note
+
+                    PARTICIPANT_FACADE ->PARTICIPANT_DAO:  (for ParticipantLimit) Insert new ParticipantLimit \n<color #FF0000><b>Error code:</b> 3200</color>
+
+                    activate PARTICIPANT_DAO
+
+                    PARTICIPANT_DAO -> DB: Insert ParticipantLimit
+                    activate DB
+                    hnote over DB #lightyellow
+                        participantLimit
+                    end note
+                    DB --> PARTICIPANT_DAO: Inserted ParticipantLimit
+                    deactivate DB
+                    PARTICIPANT_DAO --> PARTICIPANT_FACADE: Return ParticipantLimit
+
+                    PARTICIPANT_FACADE -> PARTICIPANT_FACADE: Validate status
+
+                    deactivate PARTICIPANT_DAO
+                else Validate participantLimit (failure)
+                    note right of PARTICIPANT_FACADE #red: Validation failure!
+
+                    note right of PARTICIPANT_FACADE #yellow
+                        Message:
+                            {
+                                "errorInformation": {
+                                    "errorCode": 3200,
+                                    "errorDescription": "ParticipantLimit Not Found",
+                                }
+                            }
+                    end note
+                end
+            else Validate participantCurrency (failure)
+                note right of PARTICIPANT_FACADE #red: Validation failure!
+
+                note right of PARTICIPANT_FACADE #yellow
+                    Message:
+                        {
+                            "errorInformation": {
+                                "errorCode": 3200,
+                                "errorDescription": "ParticipantCurrency Not Found",
+                            }
+                        }
+                end note
+            end
+
+            ' Release Lock on ParticipantLimit table
+        End
+
+    else Validate participant (failure)
+        note right of PARTICIPANT_FACADE #red: Validation failure!
+
+        note right of PARTICIPANT_FACADE #yellow
+            Message:
+                {
+                    "errorInformation": {
+                        "errorCode": 3200,
+                        "errorDescription": "FSP id Not Found",
+                    }
+                }
+        end note
+
+    end
+
+    deactivate PARTICIPANT_FACADE
+    deactivate PartHAPI
+    deactivate OPERATOR
+end
+@enduml
