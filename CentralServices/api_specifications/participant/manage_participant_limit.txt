@@ -1,0 +1,149 @@
+swagger: '2.0'
+info:
+ version: 0.0.1
+ title: MOJALOOP Participant Limit Adjustment.
+ description: Manage Participant Limit.
+host: '127.0.0.1:8080'
+basePath: /v1
+schemes:
+  - http
+consumes:
+  - application/json
+produces:
+  - application/json
+paths:
+ '/positions/{name}/limits':
+   post:
+     produces:
+       - application/json
+     consumes:
+       - application/json
+     deprecated: false
+     summary: TBD
+     operationId: adjustParticipantLimit
+     parameters:
+       - in: path
+         name: name
+         required: true
+         type: string
+       - in: body
+         name: limitAdjustmentByCurrency
+         description: Message body containing the limit adjustment info.
+         schema:
+           $ref: '#/definitions/LimitAdjustment'
+         required: true
+     responses:
+       '200':
+         description: Limit adjustment succesful.
+         schema:
+           $ref: '#/definitions/LimitAdjusted'
+       '400':
+         description: Bad request.
+         schema:
+           $ref: '#/definitions/ErrorCode400'
+       '401':
+         description: Not authorized to view limit information.
+         schema:
+           $ref: '#/definitions/ErrorCode401'
+       '404':
+         description: No data found.
+         schema:
+           $ref: '#/definitions/ErrorCode404'
+       '415':
+         description: Unsupported Media Type.
+         schema:
+           $ref: '#/definitions/ErrorCode415'
+       default:
+         description: Unexpected error
+         schema:
+           $ref: '#/definitions/Error'          
+definitions:
+ LimitAdjustment:
+   type: object
+   properties:
+     currencyId:
+       type: string
+     adjustmentValue:
+       type: number
+   required:
+     - currencyId
+     - adjustmentValue
+ LimitAdjusted:
+   type: object
+   properties:
+     newLimitValue:
+       type: number
+   required:  
+     - newLimitValue    
+ ErrorCode400:
+   required:
+     - status
+     - code
+     - message
+   properties:
+     status:
+       type: integer
+     code:
+       type: string
+       enum:
+         - 400
+     message:
+       type: string
+ ErrorCode401:
+   required:
+     - status
+     - code
+     - message
+   properties:
+     status:
+       type: integer
+     code:
+       type: string
+       enum:
+         - 401
+     message:
+       type: string
+ ErrorCode404:
+   required:
+     - status
+     - code
+     - message
+   properties:
+     status:
+       type: integer
+     code:
+       type: string
+       enum:
+         - 404
+     message:
+       type: string
+ ErrorCode415:
+   required:
+     - status
+     - code
+     - message
+   properties:
+     status:
+       type: integer
+     code:
+       type: string
+       enum:
+         - 415
+     message:
+       type: string
+ Error:
+   required:
+     - status
+     - code
+     - message
+   properties:
+     status:
+       type: integer
+     code:
+       type: string
+       enum:
+         - MISSING_REQUIRED_PARAMETER
+         - INVALID_INPUT
+         - OTHER
+     message:
+       type: string
