@@ -12,7 +12,7 @@ consumes:
 produces:
   - application/json
 paths:
- '/positions/{name}/limits':
+ '/participants/{name}/limits':
    post:
      produces:
        - application/json

@@ -21,7 +21,7 @@ end box
 
 activate OPERATOR
 group Manage Net Debit Cap
-    OPERATOR -> PartHAPI: Request to adjust ParticipantLimit for a certain Currency - POST - /participants/{name}/limit
+    OPERATOR -> PartHAPI: Request to adjust ParticipantLimit for a certain Currency - POST - /participants/{name}/limits
     note right of OPERATOR #yellow
         Message:
         {
