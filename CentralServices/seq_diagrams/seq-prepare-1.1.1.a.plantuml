@@ -48,19 +48,34 @@ group Prepare Handler Consume
     group Persist Event Information
         |||
         PREP_HANDLER -> TOPIC_EVENTS: Publish event information
-        ref over PREP_HANDLER, TOPIC_EVENTS :  Event Handler Consume {9.1.0.} \n
+        ref over PREP_HANDLER, TOPIC_EVENTS :  Event Handler Consume {9.1.0} \n
         |||
     end
 
     group Validate Prepare Transfer
-        PREP_HANDLER <-> PREP_HANDLER: <color #AAA>Validate incoming message against ML schema</color>
-        PREP_HANDLER <-> PREP_HANDLER: <color #AAA>Validate message signature (to be confirmed in future requirement)</color>
+        PREP_HANDLER <-> PREP_HANDLER: <color #AAA>Schema validation of the incoming message</color>
+        PREP_HANDLER <-> PREP_HANDLER: <color #AAA>Verify the message's signature (to be confirmed in future requirement)</color>
         note right of PREP_HANDLER #lightgrey
             The above validation steps are already handled by
             the ML-Adapter for the open source implementation.
             It may need to be added in future for custom adapters.
         end note
         group Validate Duplicate check
+            note right of PREP_HANDLER #lightblue
+                The steps for checking duplicates (currently #6 to #18) if not
+                already implemented, can be optimized by first trying to insert
+                into the table 'transferDuplicateCheck' which would succeed for 
+                valid/new Transfer requests. When it fails because the transferId
+                already exists in that table, then the hashes and transferState
+                can be verified and dealt with accordingly (as they are now).
+                This way, hashes and transferStates are retrieved only if it is
+                a duplicate (Prepare) (since that transerId exists in the table
+                'transferDuplicateCheck' already).
+                Steps #6-#9 Insert;
+                for failure (to insert) --> #10-#13 Transfer Exists, Retrieve Hash;
+                If Hash matches --> #14-#16 Retrieve Transfer State;
+                Hash does not match --> #17 
+            end note
             PREP_HANDLER -> TRANS_DAO: Request to retrieve Transfer message hash (if it exists)
             activate TRANS_DAO
             TRANS_DAO -> DB: Request Transfer message hash
@@ -86,7 +101,7 @@ group Prepare Handler Consume
                 TRANS_DAO --> PREP_HANDLER: Return Transfer state
                 deactivate TRANS_DAO
                 break
-                    PREP_HANDLER <-> PREP_HANDLER: <color #FF0000><b>Error handling:</b></color> If transferState is ['COMMITTED', 'ABORTED']\nthen send notification to Payer with complete transfer
+                    PREP_HANDLER <-> PREP_HANDLER: <color #FF0000><b>Error handling:</b></color> If transferState is ['COMMITTED', 'ABORTED']\nthen send callback to Payer with the completed transfer,\notherwise this new request can be ignored, because a callback is about to be sent to the client.
                 end
             else Transfer exists, hash does not match
                 break
