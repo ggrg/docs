@@ -1,0 +1,80 @@
+@startuml
+' declate title
+title 5.1.1. Notification Handler for Rejections
+
+autonumber
+
+' Actor Keys:
+
+' declare actors
+actor "DFSP1\nPayer" as DFSP1
+control "ML API Notification Event Handler" as NOTIFY_HANDLER
+boundary "Central Service API" as CSAPI
+collections "Notification-Topic" as TOPIC_NOTIFICATIONS
+
+box "Financial Service Providers" #lightGray
+	participant DFSP1
+end box
+
+box "ML API Adapter Service" #LightBlue
+	participant NOTIFY_HANDLER
+end box
+
+box "Central Service" #LightYellow
+    participant CSAPI
+    participant TOPIC_NOTIFICATIONS
+end box
+
+' start flow
+activate NOTIFY_HANDLER
+
+group DFSP Notified of Rejection
+    NOTIFY_HANDLER -> TOPIC_NOTIFICATIONS: Consume Notification event message \n <color #FF0000><b>Error code:</b> 2001 </color>
+    activate TOPIC_NOTIFICATIONS
+    deactivate TOPIC_NOTIFICATIONS
+        ref over NOTIFY_HANDLER, CSAPI: Event Handler {9.1.0}
+        note right of NOTIFY_HANDLER #lightblue
+            Update Event log upon consuming the notification
+        end note
+
+        alt
+        group Validate Event
+            NOTIFY_HANDLER <-> NOTIFY_HANDLER: Validate event - Rule: type == 'notification' && [action IN ['reject', 'timeout-received', 'timeout-reserved']] \n <color #FF0000><b>Error code:</b> 2001 </color>
+        end
+        NOTIFY_HANDLER -> CSAPI: Request Participant Callback details \n <color #FF0000><b>Error code:</b> 3201 </color>
+        ref over NOTIFY_HANDLER, CSAPI: Get Participant Callback Details {3.1.0}
+        NOTIFY_HANDLER <-- CSAPI: Return Participant Callback details
+        note right of NOTIFY_HANDLER #yellow
+            Message:
+            {
+                id: <ID>,
+                from: <transferHeaders.FSPIOP-Source>,
+                to: <transferHeaders.FSPIOP-Destination>,
+                type: application/json,
+                content: {
+                    payload: <transferMessage>
+                },
+            }
+        end note
+
+        NOTIFY_HANDLER --> DFSP1: Send Callback Notification \n <color #FF0000><b>Error code:</b> 1000, 1001, 3002 </color>
+    else Validate rule type != 'notification' / Error
+        note right of NOTIFY_HANDLER #yellow
+            Message:
+            {
+                "errorInformation": {
+                    "errorCode": <errorCode>,
+                    "errorDescription": <ErrorMessage>,
+                }
+            }
+        end note
+        ref over NOTIFY_HANDLER, CSAPI: Event Handler {9.1.0}
+        note right of NOTIFY_HANDLER #lightblue
+            Log ERROR Messages
+            Update Event log upon ERROR notification
+        end note
+    end
+end
+deactivate TOPIC_NOTIFICATIONS
+
+@enduml
