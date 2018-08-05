@@ -88,6 +88,12 @@ group Prepare Handler Consume
             TRANS_DAO --> PREP_HANDLER: Return transfer message hash if it exists
             deactivate TRANS_DAO
             alt Transfer exists, hash matches
+                group Persist Event Information
+                    |||
+                    PREP_HANDLER -> TOPIC_EVENTS: Publish event information
+                    ref over PREP_HANDLER, TOPIC_EVENTS :  Event Handler Consume {9.1.0} \n
+                    |||
+                end
                 PREP_HANDLER -> TRANS_DAO: Request to retrieve Transfer state
                 activate TRANS_DAO
                 TRANS_DAO -> DB: Request Transfer state
@@ -105,7 +111,7 @@ group Prepare Handler Consume
                 end
             else Transfer exists, hash does not match
                 break
-                    PREP_HANDLER <-> PREP_HANDLER: <color #FF0000><b>Error code:</b> 3100</color>
+                    PREP_HANDLER <-> PREP_HANDLER: <color #FF0000><b>Error code:</b> 3106</color>
                 end
             else Transfer hash does not exist
                 PREP_HANDLER -> TRANS_DAO: Request to persist transfer hash\n<color #FF0000><b>Error codes:</b> 2003</color>
