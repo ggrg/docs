@@ -21,7 +21,7 @@ const config = {
 ```
 As a result of calling `RandomTransfer.insert(config)` we got 1M transfers in the *transfer* table and approximately 3.5M records in *transferStateChange* table. The number of expired transfers in *RECEIVED_PREPARE* or *RESERVED* state was 1000 at the time of the generation of the transfers, but this number was quickly growing as time was passing and other randomly inserted transfers' expirationDate got passed by the present time. A quick fix to that is to shift the expirationDate of all 1M transfers in table *transfer* by the interval of time that passed since data generation:
 ```sql
-UPDATE central_ledger.transfer t
+UPDATE transfer t
 SET expirationDate = expirationDate + interval 1 hour;
 ```
 
@@ -69,7 +69,7 @@ Following is the process that is to be implemented in central-ledger. Here it is
 1. Get last segment as `@intervalMin`
 ```sql
 SELECT value INTO @intevalMin
-FROM central_ledger.segment
+FROM segment
 WHERE segmentType = 'timeout'
 AND enumeration = 0
 AND tableName = 'transferStateChange';
@@ -83,10 +83,10 @@ SET @intevalMin = IFNULL(@intevalMin, 0);
 3. Clean up *transferTimeout* from finalised transfers
 ```sql
 DELETE tt
-FROM central_ledger.transferTimeout AS tt
+FROM transferTimeout AS tt
 JOIN (SELECT tsc.transferId, MAX(tsc.transferStateChangeId) maxTransferStateChangeId
-      FROM central_ledger.transferTimeout tt1
-      JOIN central_ledger.transferStateChange tsc
+      FROM transferTimeout tt1
+      JOIN transferStateChange tsc
       ON tsc.transferId = tt1.transferId
       GROUP BY transferId) ts
 ON ts.transferId = tt.transferId
@@ -100,21 +100,21 @@ Another alternative to deleting records from transferTimeout table would be addi
 4. Get last *transferStateChangeId* as `@intervalMax`
 ```sql
 SELECT MAX(transferStateChangeId) INTO @intervalMax
-FROM central_ledger.transferStateChange;
+FROM transferStateChange;
 ```
 
 5. Insert all new transfers still in processing state
 ```sql
 INSERT INTO transferTimeout(transferId)
 SELECT t.transferId
-FROM central_ledger.transfer t
+FROM transfer t
 JOIN (SELECT transferId, MAX(transferStateChangeId) maxTransferStateChangeId
-      FROM central_ledger.transferStateChange
+      FROM transferStateChange
       WHERE transferStateChangeId > @intervalMin
       AND transferStateChangeId <= @intervalMax
       GROUP BY transferId) ts
 ON ts.transferId = t.transferId
-JOIN central_ledger.transferStateChange tsc
+JOIN transferStateChange tsc
 ON tsc.transferStateChangeId = ts.maxTransferStateChangeId
 WHERE tsc.transferStateId IN ('RECEIVED_PREPARE', 'RESERVED');
 ```
@@ -127,8 +127,8 @@ START TRANSACTION;
 7. Get all transfers to be expired
 ```sql
 SELECT t.*
-FROM central_ledger.transfer t
-JOIN central_ledger.transferTimeout tt
+FROM transfer t
+JOIN transferTimeout tt
 ON tt.transferId = t.transferId
 WHERE t.expirationDate < now();
 ```
@@ -139,12 +139,12 @@ WHERE t.expirationDate < now();
 ```sql
 IF @intervalMin = 0
   INSERT
-  INTO central_ledger.segment(segmentType, enumeration, tableName, value)
+  INTO segment(segmentType, enumeration, tableName, value)
   VALUES ('timeout', 0, 'transferStateChange', @intervalMax);
 ELSE
-  UPDATE central_ledger.segment
+  UPDATE segment
   SET value = @intervalMax
-  WHERE segmentType = 'segmentType'
+  WHERE segmentType = 'timeout'
   AND enumeration = 0
   AND tableName = 'transferStateChange';
 ```
@@ -162,21 +162,21 @@ The above process 1-10 may be tested against the inserted dataset of 1M transfer
 - Explore data from main tables
 ```sql
 SELECT COUNT(*), MIN(transferStateChangeId) minId, MAX(transferStateChangeId) maxId 
-FROM central_ledger.transferStateChange;
+FROM transferStateChange;
 
-SELECT COUNT(*) FROM central_ledger.transfer;
-SELECT COUNT(*) FROM central_ledger.transferTimeout;
+SELECT COUNT(*) FROM transfer;
+SELECT COUNT(*) FROM transferTimeout;
 ```
 
 - Select transfers for expiration without intermediate structures
 ```sql
 SELECT t.transferId, t.expirationDate, tsc.transferStateId, ts.transferStateChangeIdMax
-FROM central_ledger.transfer t
+FROM transfer t
 JOIN (SELECT transferId, MAX(transferStateChangeId) transferStateChangeIdMax
-      FROM central_ledger.transferStateChange
+      FROM transferStateChange
       GROUP BY transferId) ts
 ON ts.transferId = t.transferId
-JOIN central_ledger.transferStateChange tsc
+JOIN transferStateChange tsc
 ON tsc.transferStateChangeId = ts.transferStateChangeIdMax
 WHERE tsc.transferStateId IN ('RECEIVED_PREPARE', 'RESERVED')
 AND t.expirationDate < now()
@@ -197,8 +197,8 @@ LIMIT 10;
 INSERT 
 INTO transferStateChange(transferId, transferStateId)
 SELECT t.transferId, 'ABORTED'
-FROM central_ledger.transfer t
-JOIN central_ledger.transferTimeout tt
+FROM transfer t
+JOIN transferTimeout tt
 ON tt.transferId = t.transferId
 WHERE t.expirationDate < now();
 ```
