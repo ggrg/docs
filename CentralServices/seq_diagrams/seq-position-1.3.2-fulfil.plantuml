@@ -14,109 +14,101 @@ autonumber
 ' declare actors
 control "Position Handler" as POS_HANDLER
 collections "Transfer-Topic" as TOPIC_TRANSFERS
-entity "Position DAO" as POS_DAO
-' collections "Notification-Topic" as TOPIC_NOTIFICATIONS
-' entity "Participant DAO" as PARTICIPANT_DAO
+entity "Position Facade" as POS_FACADE
 entity "Transfer DAO" as TRANS_DAO
 database "Central Store" as DB
 
 box "Central Service" #LightYellow
     participant POS_HANDLER
     participant TOPIC_TRANSFERS
-    ' participant TOPIC_NOTIFICATIONS
-    participant POS_DAO
-    ' participant PARTICIPANT_DAO
     participant TRANS_DAO
+    participant POS_FACADE
     participant DB
 end box
 
 ' start flow
 activate POS_HANDLER
 group Fulfil Position Handler Consume
-   alt Calculate & Validate Latest Position Fulfil (success)
-        POS_HANDLER -> POS_DAO: Request current state of transfer from DB
-        activate POS_DAO
-        POS_DAO -> DB: Retrieve current state of transfer from DB
-        activate DB
-        hnote over DB #lightyellow
-            transferStateChange
-        end note
-        DB --> POS_DAO: Return current state of transfer from DB
-        deactivate DB
-        POS_DAO --> POS_HANDLER: Return current state of transfer from DB
-        deactivate POS_DAO
-        POS_HANDLER <-> POS_HANDLER: Validate current state (transferStateChange.transferStateId == 'RECEIVED-FULFIL')
-
-        group Calculate position and persist change
-            POS_HANDLER -> POS_DAO: Request latest position from DB for Payee
-            activate POS_DAO
-            POS_DAO -> DB: Retrieve latest position from DB for Payee
+    POS_HANDLER -> TRANS_DAO: Request current state of transfer from DB \n<color #FF0000><b>Error code:</b> 2003</color>
+    activate TRANS_DAO
+    TRANS_DAO -> DB: Retrieve current state of transfer from DB
+    activate DB
+    hnote over DB #lightyellow
+        transferStateChange
+        transferParticipant
+    end note
+    DB --> TRANS_DAO: Return current state of transfer from DB
+    deactivate DB
+    TRANS_DAO --> POS_HANDLER: Return current state of transfer from DB
+    deactivate TRANS_DAO
+    POS_HANDLER <-> POS_HANDLER: Validate current state (transferState is 'RECEIVED-FULFIL')\n<color #FF0000><b>Error code:</b> 2001</color>
+    group Persist Position change and Transfer State (with transferState='COMMITTED' on position check pass)
+        POS_HANDLER -> POS_FACADE: Request to persist latest position and state to DB\n<color #FF0000><b>Error code:</b> 2003</color>
+        group <color #blue>DB TRANSACTION</color>
+            activate POS_FACADE
+            POS_FACADE -> DB: Select participantPosition.value FOR UPDATE from DB for Payee
             activate DB
-            hnote over DB #lightyellow
-                participant
-                participantPosition
-            end note
-            DB --> POS_DAO: Retrieve latest position from DB for Payee
-            deactivate DB
-            POS_DAO --> POS_HANDLER: Return latest position
-            deactivate POS_DAO
-            POS_HANDLER <-> POS_HANDLER: Calculate latest position ($latestPosition = participantPosition.reservedAmount - payload.amount.amount)
-            POS_HANDLER -> POS_DAO: Request to persist latest position for Payee
-            activate POS_DAO
-            POS_DAO -> DB: Persist latest position to DB for Payee
             hnote over DB #lightyellow
                 participantPosition
             end note
-            activate DB
+            DB --> POS_FACADE: Return participantPosition.value from DB for Payee
             deactivate DB
-            POS_DAO --> POS_HANDLER: Return success
-            deactivate POS_DAO
-        end
-
-        group Persist Transfer State (with transferState='COMMITTED')
-            POS_HANDLER -> TRANS_DAO: Request to persist transfer
-            activate TRANS_DAO
-            TRANS_DAO -> DB: Persist transfer state
+            POS_FACADE <-> POS_FACADE: **latestPosition** = participantPosition.value - payload.amount.amount
+            POS_FACADE->DB: Persist latestPosition to DB for Payee
             hnote over DB #lightyellow
-                transferStateChange
+                UPDATE **participantPosition**
+                SET value = latestPosition
             end note
             activate DB
             deactivate DB
-            TRANS_DAO --> POS_HANDLER: Return success
+            POS_FACADE -> DB: Persist transfer state and participant position change
+            hnote over DB #lightyellow
+                    INSERT **transferStateChange** transferStateId = 'COMMITTED'
+
+                    INSERT **participantPositionChange**
+                    SET participantPositionId = participantPosition.participantPositionId,
+                    transferStateChangeId = transferStateChange.transferStateChangeId,
+                    value = latestPosition,
+                    reservedValue = participantPosition.reservedValue
+                    createdDate = new Date()
+            end note
+            activate DB
+            deactivate DB
             deactivate TRANS_DAO
         end
+        POS_FACADE --> POS_HANDLER: Return success
+        deactivate POS_FACADE
+    end
 
-        note right of POS_HANDLER #yellow
-            Message:
-            {
-                id: <transferMessage.transferId>
-                from: <transferMessage.payerFsp>,
-                to: <transferMessage.payeeFsp>,
-                type: application/json
-                content: {
-                    headers: <transferHeaders>,
-                    payload: <transferMessage>
-                },
-                metadata: {
-                    event: {
-                        id: <uuid>,
-                        responseTo: <previous.uuid>,
-                        type: transfer,
-                        action: commit,
-                        createdAt: <timestamp>,
-                        state: {
-                            status: "success",
-                            code: 0
-                        }
+    note right of POS_HANDLER #yellow
+        Message:
+        {
+            id: <transferMessage.transferId>
+            from: <transferMessage.payerFsp>,
+            to: <transferMessage.payeeFsp>,
+            type: application/json
+            content: {
+                headers: <transferHeaders>,
+                payload: <transferMessage>
+            },
+            metadata: {
+                event: {
+                    id: <uuid>,
+                    responseTo: <previous.uuid>,
+                    type: transfer,
+                    action: commit,
+                    createdAt: <timestamp>,
+                    state: {
+                        status: "success",
+                        code: 0
                     }
                 }
             }
-        end note
-        POS_HANDLER -> TOPIC_TRANSFERS: Publish Transfer event
-        activate TOPIC_TRANSFERS
-        deactivate TOPIC_TRANSFERS
-
-   end
+        }
+    end note
+    POS_HANDLER -> TOPIC_TRANSFERS: Publish Transfer event\n<color #FF0000><b>Error code:</b> 2003</color>
+    activate TOPIC_TRANSFERS
+    deactivate TOPIC_TRANSFERS
 end
 deactivate POS_HANDLER
 @enduml

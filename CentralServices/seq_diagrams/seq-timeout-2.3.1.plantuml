@@ -14,6 +14,7 @@ autonumber
 ' declare actors
 control "Transfer Timeout Handler" as EXP_HANDLER
 collections "Position-Topic-dfsp1" as TOPIC_POSITION_DFSP1
+collections "Notification-Topic" as TOPIC_NOTIFICATIONS
 collections "Event-Topic" as TOPIC_EVENT
 entity "Transfer DAO" as TRANS_DAO
 database "Central Store" as DB
@@ -21,6 +22,7 @@ database "Central Store" as DB
 box "Central Service" #LightYellow
     participant EXP_HANDLER
     participant TOPIC_POSITION_DFSP1
+    participant TOPIC_NOTIFICATIONS
     participant TOPIC_EVENT
     participant TRANS_DAO
     participant DB
@@ -31,7 +33,7 @@ activate EXP_HANDLER
 group Timeout Handler Consume
     group Persist Event Information
         EXP_HANDLER -> TOPIC_EVENT: Publish event information
-        ref over EXP_HANDLER, TOPIC_EVENT :  Event Handler Consume {9.1.0.} 
+        ref over EXP_HANDLER, TOPIC_EVENT :  Event Handler Consume {9.1.0.}
     end
 
     group Request expired transfers
@@ -51,7 +53,7 @@ group Timeout Handler Consume
 
     loop for each transfer in the list
         |||
-        alt transferState == 'RECEIVED'
+        alt transferState == 'RECEIVED_PENDING'
             note right of EXP_HANDLER #yellow
                 Message:
                 {
@@ -61,7 +63,13 @@ group Timeout Handler Consume
                     type: application/json,
                     <color #FF0000>content: {</color>
                         <color #FF0000>headers: <transferHeaders>,</color>
-                        <color #FF0000>payload: <transferMessage></color>
+                        payload: {
+                             "errorInformation": {
+                                 "errorCode": 3303,
+                                 "errorDescription": "Client requested to use a transfer that has already expired.",
+                                 "extensionList": <transferMessage.extensionList>
+                             }
+                        }
                     <color #FF0000>},</color>
                     metadata: {
                         event: {
@@ -70,13 +78,17 @@ group Timeout Handler Consume
                             action: timeout-received,
                             createdAt: <timestamp>,
                             state: {
-                                status: "success",
-                                code: 0
+                                status: 'error',
+                                code: <errorInformation.errorCode>
+                                description: <errorInformation.errorDescription>
                             }
                         }
                     }
                 }
             end note
+            EXP_HANDLER -> TOPIC_NOTIFICATIONS: Publish to Notification event
+            activate TOPIC_NOTIFICATIONS
+            deactivate TOPIC_NOTIFICATIONS
         else transferState == 'RESERVED'
             note right of EXP_HANDLER #yellow
                 Message:
