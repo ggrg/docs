@@ -38,9 +38,8 @@ The document takes the form of a journey through the stages of a transaction, id
 
 The following schematic shows the proposed structure of a cross-implementation payments system. In this system, Alice subscribes to a DFSP which is on the same VPN as Mojaloop implementation 1. She wants to make a payment to Bob, who subscribes to a DFSP on a different implementation (implementation 2.) The Mojaloop protocol means that, in the normal run of things, it would not be possible to transfer money between these systems. This proposal discusses how this could be done.
 
-[TODO]
+![Figure 1: schematic of a cross-implementation solution](https://github.com/mojaloop/docs/blob/master/Wiki/Fund_Transfer_One.png)
 
-Figure 1: schematic of a cross-implementation solution
 
 ## Cross-implementation providers
 
