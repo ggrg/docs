@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 5.7.17, for macos10.12 (x86_64)
 --
--- Host: 127.0.0.1    Database: central_ledger
+-- Host: 127.0.0.1    Database: central_ledger_
 -- ------------------------------------------------------
 -- Server version	5.7.22
 
@@ -34,15 +34,6 @@ CREATE TABLE `contactType` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `contactType`
---
-
-LOCK TABLES `contactType` WRITE;
-/*!40000 ALTER TABLE `contactType` DISABLE KEYS */;
-/*!40000 ALTER TABLE `contactType` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `currency`
 --
 
@@ -57,16 +48,6 @@ CREATE TABLE `currency` (
   PRIMARY KEY (`currencyId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `currency`
---
-
-LOCK TABLES `currency` WRITE;
-/*!40000 ALTER TABLE `currency` DISABLE KEYS */;
-INSERT INTO `currency` VALUES ('AED','UAE dirham',1,'2018-07-03 21:12:01'),('AFA','Afghanistan afghani',1,'2018-07-03 21:12:01'),('ALL','Albanian lek',1,'2018-07-03 21:12:01'),('AMD','Armenian dram',1,'2018-07-03 21:12:01'),('ANG','Netherlands Antillian guilder',1,'2018-07-03 21:12:01'),('AOR','Angolan kwanza reajustado',1,'2018-07-03 21:12:01'),('ARS','Argentine peso',1,'2018-07-03 21:12:01'),('AUD','Australian dollar',1,'2018-07-03 21:12:01'),('AWG','Aruban guilder',1,'2018-07-03 21:12:01'),('AZN','Azerbaijanian new manat',1,'2018-07-03 21:12:01'),('BBD','Barbados dollar',1,'2018-07-03 21:12:01'),('BDT','Bangladeshi taka',1,'2018-07-03 21:12:01'),('BGN','Bulgarian lev',1,'2018-07-03 21:12:01'),('BHD','Bahraini dinar',1,'2018-07-03 21:12:01'),('BIF','Burundi franc',1,'2018-07-03 21:12:01'),('BMD','Bermudian dollar',1,'2018-07-03 21:12:01'),('BND','Brunei dollar',1,'2018-07-03 21:12:01'),('BOB','Bolivian boliviano',1,'2018-07-03 21:12:01'),('BRL','Brazilian real',1,'2018-07-03 21:12:01'),('BSD','Bahamian dollar',1,'2018-07-03 21:12:01'),('BTN','Bhutan ngultrum',1,'2018-07-03 21:12:01'),('BWP','Botswana pula',1,'2018-07-03 21:12:01'),('BYN','Belarusian ruble',1,'2018-07-03 21:12:01'),('BZD','Belize dollar',1,'2018-07-03 21:12:01'),('CAD','Canadian dollar',1,'2018-07-03 21:12:01'),('CDF','Congolese franc',1,'2018-07-03 21:12:01'),('CHF','Swiss franc',1,'2018-07-03 21:12:01'),('CLP','Chilean peso',1,'2018-07-03 21:12:01'),('CNY','Chinese yuan renminbi',1,'2018-07-03 21:12:01'),('COP','Colombian peso',1,'2018-07-03 21:12:01'),('CRC','Costa Rican colon',1,'2018-07-03 21:12:01'),('CUP','Cuban peso',1,'2018-07-03 21:12:01'),('CVE','Cape Verde escudo',1,'2018-07-03 21:12:01'),('CZK','Czech koruna',1,'2018-07-03 21:12:01'),('DJF','Djibouti franc',1,'2018-07-03 21:12:01'),('DKK','Danish krone',1,'2018-07-03 21:12:01'),('DOP','Dominican peso',1,'2018-07-03 21:12:01'),('DZD','Algerian dinar',1,'2018-07-03 21:12:01'),('EEK','Estonian kroon',1,'2018-07-03 21:12:01'),('EGP','Egyptian pound',1,'2018-07-03 21:12:01'),('ERN','Eritrean nakfa',1,'2018-07-03 21:12:01'),('ETB','Ethiopian birr',1,'2018-07-03 21:12:01'),('EUR','EU euro',1,'2018-07-03 21:12:01'),('FJD','Fiji dollar',1,'2018-07-03 21:12:01'),('FKP','Falkland Islands pound',1,'2018-07-03 21:12:01'),('GBP','British pound',1,'2018-07-03 21:12:01'),('GEL','Georgian lari',1,'2018-07-03 21:12:01'),('GHS','Ghanaian new cedi',1,'2018-07-03 21:12:01'),('GIP','Gibraltar pound',1,'2018-07-03 21:12:01'),('GMD','Gambian dalasi',1,'2018-07-03 21:12:01'),('GNF','Guinean franc',1,'2018-07-03 21:12:01'),('GTQ','Guatemalan quetzal',1,'2018-07-03 21:12:01'),('GYD','Guyana dollar',1,'2018-07-03 21:12:01'),('HKD','Hong Kong SAR dollar',1,'2018-07-03 21:12:01'),('HNL','Honduran lempira',1,'2018-07-03 21:12:01'),('HRK','Croatian kuna',1,'2018-07-03 21:12:01'),('HTG','Haitian gourde',1,'2018-07-03 21:12:01'),('HUF','Hungarian forint',1,'2018-07-03 21:12:01'),('IDR','Indonesian rupiah',1,'2018-07-03 21:12:01'),('ILS','Israeli new shekel',1,'2018-07-03 21:12:01'),('INR','Indian rupee',1,'2018-07-03 21:12:01'),('IQD','Iraqi dinar',1,'2018-07-03 21:12:01'),('IRR','Iranian rial',1,'2018-07-03 21:12:01'),('ISK','Icelandic krona',1,'2018-07-03 21:12:01'),('JMD','Jamaican dollar',1,'2018-07-03 21:12:01'),('JOD','Jordanian dinar',1,'2018-07-03 21:12:01'),('JPY','Japanese yen',1,'2018-07-03 21:12:01'),('KES','Kenyan shilling',1,'2018-07-03 21:12:01'),('KGS','Kyrgyz som',1,'2018-07-03 21:12:01'),('KHR','Cambodian riel',1,'2018-07-03 21:12:01'),('KMF','Comoros franc',1,'2018-07-03 21:12:01'),('KPW','North Korean won',1,'2018-07-03 21:12:01'),('KRW','South Korean won',1,'2018-07-03 21:12:01'),('KWD','Kuwaiti dinar',1,'2018-07-03 21:12:01'),('KYD','Cayman Islands dollar',1,'2018-07-03 21:12:01'),('KZT','Kazakh tenge',1,'2018-07-03 21:12:01'),('LAK','Lao kip',1,'2018-07-03 21:12:01'),('LBP','Lebanese pound',1,'2018-07-03 21:12:01'),('LKR','Sri Lanka rupee',1,'2018-07-03 21:12:01'),('LRD','Liberian dollar',1,'2018-07-03 21:12:01'),('LSL','Lesotho loti',1,'2018-07-03 21:12:01'),('LTL','Lithuanian litas',1,'2018-07-03 21:12:01'),('LVL','Latvian lats',1,'2018-07-03 21:12:01'),('LYD','Libyan dinar',1,'2018-07-03 21:12:01'),('MAD','Moroccan dirham',1,'2018-07-03 21:12:01'),('MDL','Moldovan leu',1,'2018-07-03 21:12:01'),('MGA','Malagasy ariary',1,'2018-07-03 21:12:01'),('MKD','Macedonian denar',1,'2018-07-03 21:12:01'),('MMK','Myanmar kyat',1,'2018-07-03 21:12:01'),('MNT','Mongolian tugrik',1,'2018-07-03 21:12:01'),('MOP','Macao SAR pataca',1,'2018-07-03 21:12:01'),('MRO','Mauritanian ouguiya',1,'2018-07-03 21:12:01'),('MUR','Mauritius rupee',1,'2018-07-03 21:12:01'),('MVR','Maldivian rufiyaa',1,'2018-07-03 21:12:01'),('MWK','Malawi kwacha',1,'2018-07-03 21:12:01'),('MXN','Mexican peso',1,'2018-07-03 21:12:01'),('MYR','Malaysian ringgit',1,'2018-07-03 21:12:01'),('MZN','Mozambique new metical',1,'2018-07-03 21:12:01'),('NAD','Namibian dollar',1,'2018-07-03 21:12:01'),('NGN','Nigerian naira',1,'2018-07-03 21:12:01'),('NIO','Nicaraguan cordoba oro',1,'2018-07-03 21:12:01'),('NOK','Norwegian krone',1,'2018-07-03 21:12:01'),('NPR','Nepalese rupee',1,'2018-07-03 21:12:01'),('NZD','New Zealand dollar',1,'2018-07-03 21:12:01'),('OMR','Omani rial',1,'2018-07-03 21:12:01'),('PAB','Panamanian balboa',1,'2018-07-03 21:12:01'),('PEN','Peruvian nuevo sol',1,'2018-07-03 21:12:01'),('PGK','Papua New Guinea kina',1,'2018-07-03 21:12:01'),('PHP','Philippine peso',1,'2018-07-03 21:12:01'),('PKR','Pakistani rupee',1,'2018-07-03 21:12:01'),('PLN','Polish zloty',1,'2018-07-03 21:12:01'),('PYG','Paraguayan guarani',1,'2018-07-03 21:12:01'),('QAR','Qatari rial',1,'2018-07-03 21:12:01'),('RON','Romanian new leu',1,'2018-07-03 21:12:01'),('RSD','Serbian dinar',1,'2018-07-03 21:12:01'),('RUB','Russian ruble',1,'2018-07-03 21:12:01'),('RWF','Rwandan franc',1,'2018-07-03 21:12:01'),('SAR','Saudi riyal',1,'2018-07-03 21:12:01'),('SBD','Solomon Islands dollar',1,'2018-07-03 21:12:01'),('SCR','Seychelles rupee',1,'2018-07-03 21:12:01'),('SDG','Sudanese pound',1,'2018-07-03 21:12:01'),('SEK','Swedish krona',1,'2018-07-03 21:12:01'),('SGD','Singapore dollar',1,'2018-07-03 21:12:01'),('SHP','Saint Helena pound',1,'2018-07-03 21:12:01'),('SLL','Sierra Leone leone',1,'2018-07-03 21:12:01'),('SOS','Somali shilling',1,'2018-07-03 21:12:01'),('SRD','Suriname dollar',1,'2018-07-03 21:12:01'),('STD','Sao Tome and Principe dobra',1,'2018-07-03 21:12:01'),('SVC','El Salvador colon',1,'2018-07-03 21:12:01'),('SYP','Syrian pound',1,'2018-07-03 21:12:01'),('SZL','Swaziland lilangeni',1,'2018-07-03 21:12:01'),('THB','Thai baht',1,'2018-07-03 21:12:01'),('TJS','Tajik somoni',1,'2018-07-03 21:12:01'),('TMT','Turkmen new manat',1,'2018-07-03 21:12:01'),('TND','Tunisian dinar',1,'2018-07-03 21:12:01'),('TOP','Tongan pa\'anga',1,'2018-07-03 21:12:01'),('TRY','Turkish lira',1,'2018-07-03 21:12:01'),('TTD','Trinidad and Tobago dollar',1,'2018-07-03 21:12:01'),('TWD','Taiwan New dollar',1,'2018-07-03 21:12:01'),('TZS','Tanzanian shilling',1,'2018-07-03 21:12:01'),('UAH','Ukrainian hryvnia',1,'2018-07-03 21:12:01'),('UGX','Uganda new shilling',1,'2018-07-03 21:12:01'),('USD','US dollar',1,'2018-07-03 21:12:01'),('UYU','Uruguayan peso uruguayo',1,'2018-07-03 21:12:01'),('UZS','Uzbekistani sum',1,'2018-07-03 21:12:01'),('VEF','Venezuelan bolivar fuerte',1,'2018-07-03 21:12:01'),('VND','Vietnamese dong',1,'2018-07-03 21:12:01'),('VUV','Vanuatu vatu',1,'2018-07-03 21:12:01'),('WST','Samoan tala',1,'2018-07-03 21:12:01'),('XAF','CFA franc BEAC',1,'2018-07-03 21:12:01'),('XAG','Silver (ounce)',1,'2018-07-03 21:12:01'),('XAU','Gold (ounce)',1,'2018-07-03 21:12:01'),('XCD','East Caribbean dollar',1,'2018-07-03 21:12:01'),('XDR','IMF special drawing right',1,'2018-07-03 21:12:01'),('XFO','Gold franc',1,'2018-07-03 21:12:01'),('XFU','UIC franc',1,'2018-07-03 21:12:01'),('XOF','CFA franc BCEAO',1,'2018-07-03 21:12:01'),('XPD','Palladium (ounce)',1,'2018-07-03 21:12:01'),('XPF','CFP franc',1,'2018-07-03 21:12:01'),('XPT','Platinum (ounce)',1,'2018-07-03 21:12:01'),('YER','Yemeni rial',1,'2018-07-03 21:12:01'),('ZAR','South African rand',1,'2018-07-03 21:12:01'),('ZMK','Zambian kwacha',1,'2018-07-03 21:12:01'),('ZWL','Zimbabwe dollar',1,'2018-07-03 21:12:01');
-/*!40000 ALTER TABLE `currency` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `endpointType`
@@ -87,15 +68,6 @@ CREATE TABLE `endpointType` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `endpointType`
---
-
-LOCK TABLES `endpointType` WRITE;
-/*!40000 ALTER TABLE `endpointType` DISABLE KEYS */;
-/*!40000 ALTER TABLE `endpointType` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `event`
 --
 
@@ -112,15 +84,6 @@ CREATE TABLE `event` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `event`
---
-
-LOCK TABLES `event` WRITE;
-/*!40000 ALTER TABLE `event` DISABLE KEYS */;
-/*!40000 ALTER TABLE `event` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `ilpPacket`
 --
 
@@ -135,15 +98,6 @@ CREATE TABLE `ilpPacket` (
   CONSTRAINT `ilppacket_transferid_foreign` FOREIGN KEY (`transferId`) REFERENCES `transfer` (`transferId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `ilpPacket`
---
-
-LOCK TABLES `ilpPacket` WRITE;
-/*!40000 ALTER TABLE `ilpPacket` DISABLE KEYS */;
-/*!40000 ALTER TABLE `ilpPacket` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `ledgerEntryType`
@@ -164,15 +118,6 @@ CREATE TABLE `ledgerEntryType` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `ledgerEntryType`
---
-
-LOCK TABLES `ledgerEntryType` WRITE;
-/*!40000 ALTER TABLE `ledgerEntryType` DISABLE KEYS */;
-/*!40000 ALTER TABLE `ledgerEntryType` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `migration`
 --
 
@@ -189,16 +134,6 @@ CREATE TABLE `migration` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `migration`
---
-
-LOCK TABLES `migration` WRITE;
-/*!40000 ALTER TABLE `migration` DISABLE KEYS */;
-INSERT INTO `migration` VALUES (1,'100100_event.js',1,'2018-07-04 00:11:50'),(2,'110100_contactType.js',1,'2018-07-04 00:11:50'),(3,'110101_contactType-indexes.js',1,'2018-07-04 00:11:50'),(4,'110200_currency.js',1,'2018-07-04 00:11:50'),(5,'110300_endpointType.js',1,'2018-07-04 00:11:50'),(6,'110301_endpointType-indexes.js',1,'2018-07-04 00:11:50'),(7,'110400_ledgerEntryType.js',1,'2018-07-04 00:11:50'),(8,'110401_ledgerEntryType-indexes.js',1,'2018-07-04 00:11:50'),(9,'110500_participantLimitType.js',1,'2018-07-04 00:11:50'),(10,'110501_participantLimitType-indexes.js',1,'2018-07-04 00:11:50'),(11,'110600_transferParticipantRoleType.js',1,'2018-07-04 00:11:50'),(12,'110601_transferParticipantRoleType-indexes.js',1,'2018-07-04 00:11:50'),(13,'110700_transferState.js',1,'2018-07-04 00:11:50'),(14,'110701_transferState-indexes.js',1,'2018-07-04 00:11:50'),(15,'200100_participant.js',1,'2018-07-04 00:11:50'),(16,'200101_participant-indexes.js',1,'2018-07-04 00:11:50'),(17,'200200_participantContact.js',1,'2018-07-04 00:11:50'),(18,'200201_participantContact-indexes.js',1,'2018-07-04 00:11:50'),(19,'200300_participantEndpoint.js',1,'2018-07-04 00:11:50'),(20,'200301_participantEndpoint-indexes.js',1,'2018-07-04 00:11:50'),(21,'200400_participantParty.js',1,'2018-07-04 00:11:50'),(22,'200401_participantParty-indexes.js',1,'2018-07-04 00:11:50'),(23,'200500_participantSettlement.js',1,'2018-07-04 00:11:50'),(24,'200501_participantSettlement-indexes.js',1,'2018-07-04 00:11:50'),(25,'200600_token.js',1,'2018-07-04 00:11:51'),(26,'200601_token-indexes.js',1,'2018-07-04 00:11:51'),(27,'300100_transfer.js',1,'2018-07-04 00:11:51'),(28,'300101_transfer-indexes.js',1,'2018-07-04 00:11:51'),(29,'300200_ilpPacket.js',1,'2018-07-04 00:11:51'),(30,'300300_transferDuplicateCheck.js',1,'2018-07-04 00:11:51'),(31,'300400_transferStateChange.js',1,'2018-07-04 00:11:51'),(32,'300401_transferStateChange-indexes.js',1,'2018-07-04 00:11:51'),(33,'310100_participantCurrency.js',1,'2018-07-04 00:11:51'),(34,'310101_participantCurrency-indexes.js',1,'2018-07-04 00:11:51'),(35,'310200_transferParticipant.js',1,'2018-07-04 00:11:51'),(36,'310201_transferParticipant-indexes.js',1,'2018-07-04 00:11:51'),(37,'310300_participantPosition.js',1,'2018-07-04 00:11:51'),(38,'310301_participantPosition-indexes.js',1,'2018-07-04 00:11:51'),(39,'310400_participantPositionChange.js',1,'2018-07-04 00:11:51'),(40,'310401_participantPositionChange-indexes.js',1,'2018-07-04 00:11:51'),(41,'310500_participantLimit.js',1,'2018-07-04 00:11:51'),(42,'310501_participantLimit-indexes.js',1,'2018-07-04 00:11:51'),(43,'400100_settlementWindow.js',1,'2018-07-04 00:11:51'),(44,'400200_settlement.js',1,'2018-07-04 00:11:52'),(45,'400201_settlement-indexes.js',1,'2018-07-04 00:11:52'),(46,'400500_settledFee.js',1,'2018-07-04 00:11:52'),(47,'400501_settledFee-indexes.js',1,'2018-07-04 00:11:52'),(48,'410100_transferFulfilmentDuplicateCheck.js',1,'2018-07-04 00:11:52'),(49,'410101_transferFulfilmentDuplicateCheck-indexes.js',1,'2018-07-04 00:11:52'),(50,'410200_transferFulfilment.js',1,'2018-07-04 00:11:52'),(51,'410201_transferFulfilment-indexes.js',1,'2018-07-04 00:11:52'),(52,'410300_transferExtension.js',1,'2018-07-04 00:11:52'),(53,'410301_transferExtension-indexes.js',1,'2018-07-04 00:11:52');
-/*!40000 ALTER TABLE `migration` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `migration_lock`
 --
 
@@ -209,16 +144,6 @@ CREATE TABLE `migration_lock` (
   `is_locked` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `migration_lock`
---
-
-LOCK TABLES `migration_lock` WRITE;
-/*!40000 ALTER TABLE `migration_lock` DISABLE KEYS */;
-INSERT INTO `migration_lock` VALUES (0);
-/*!40000 ALTER TABLE `migration_lock` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `participant`
@@ -238,15 +163,6 @@ CREATE TABLE `participant` (
   UNIQUE KEY `participant_name_unique` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `participant`
---
-
-LOCK TABLES `participant` WRITE;
-/*!40000 ALTER TABLE `participant` DISABLE KEYS */;
-/*!40000 ALTER TABLE `participant` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `participantContact`
@@ -273,15 +189,6 @@ CREATE TABLE `participantContact` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `participantContact`
---
-
-LOCK TABLES `participantContact` WRITE;
-/*!40000 ALTER TABLE `participantContact` DISABLE KEYS */;
-/*!40000 ALTER TABLE `participantContact` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `participantCurrency`
 --
 
@@ -305,15 +212,6 @@ CREATE TABLE `participantCurrency` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `participantCurrency`
---
-
-LOCK TABLES `participantCurrency` WRITE;
-/*!40000 ALTER TABLE `participantCurrency` DISABLE KEYS */;
-/*!40000 ALTER TABLE `participantCurrency` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `participantEndpoint`
 --
 
@@ -335,15 +233,6 @@ CREATE TABLE `participantEndpoint` (
   CONSTRAINT `participantendpoint_participantid_foreign` FOREIGN KEY (`participantId`) REFERENCES `participant` (`participantId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `participantEndpoint`
---
-
-LOCK TABLES `participantEndpoint` WRITE;
-/*!40000 ALTER TABLE `participantEndpoint` DISABLE KEYS */;
-/*!40000 ALTER TABLE `participantEndpoint` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `participantLimit`
@@ -373,15 +262,6 @@ CREATE TABLE `participantLimit` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `participantLimit`
---
-
-LOCK TABLES `participantLimit` WRITE;
-/*!40000 ALTER TABLE `participantLimit` DISABLE KEYS */;
-/*!40000 ALTER TABLE `participantLimit` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `participantLimitType`
 --
 
@@ -398,15 +278,6 @@ CREATE TABLE `participantLimitType` (
   UNIQUE KEY `participantlimittype_name_unique` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `participantLimitType`
---
-
-LOCK TABLES `participantLimitType` WRITE;
-/*!40000 ALTER TABLE `participantLimitType` DISABLE KEYS */;
-/*!40000 ALTER TABLE `participantLimitType` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `participantParty`
@@ -427,15 +298,6 @@ CREATE TABLE `participantParty` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `participantParty`
---
-
-LOCK TABLES `participantParty` WRITE;
-/*!40000 ALTER TABLE `participantParty` DISABLE KEYS */;
-/*!40000 ALTER TABLE `participantParty` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `participantPosition`
 --
 
@@ -453,15 +315,6 @@ CREATE TABLE `participantPosition` (
   CONSTRAINT `participantposition_participantcurrencyid_foreign` FOREIGN KEY (`participantCurrencyId`) REFERENCES `participantCurrency` (`participantCurrencyId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `participantPosition`
---
-
-LOCK TABLES `participantPosition` WRITE;
-/*!40000 ALTER TABLE `participantPosition` DISABLE KEYS */;
-/*!40000 ALTER TABLE `participantPosition` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `participantPositionChange`
@@ -486,66 +339,22 @@ CREATE TABLE `participantPositionChange` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `participantPositionChange`
+-- Table structure for table `segment`
 --
 
-LOCK TABLES `participantPositionChange` WRITE;
-/*!40000 ALTER TABLE `participantPositionChange` DISABLE KEYS */;
-/*!40000 ALTER TABLE `participantPositionChange` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `participantSettlement`
---
-
-DROP TABLE IF EXISTS `participantSettlement`;
+DROP TABLE IF EXISTS `segment`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `participantSettlement` (
-  `participantSettlementId` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `participantId` int(10) unsigned NOT NULL,
-  `participantNumber` varchar(16) NOT NULL,
-  `routingNumber` varchar(16) NOT NULL,
-  PRIMARY KEY (`participantSettlementId`),
-  KEY `participantsettlement_participantid_index` (`participantId`),
-  CONSTRAINT `participantsettlement_participantid_foreign` FOREIGN KEY (`participantId`) REFERENCES `participant` (`participantId`)
+CREATE TABLE `segment` (
+  `segmentId` int(11) NOT NULL AUTO_INCREMENT,
+  `segmentType` varchar(50) NOT NULL,
+  `enumeration` int(11) NOT NULL DEFAULT '0',
+  `tableName` varchar(50) NOT NULL,
+  `value` bigint(20) NOT NULL,
+  `changedDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`segmentId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `participantSettlement`
---
-
-LOCK TABLES `participantSettlement` WRITE;
-/*!40000 ALTER TABLE `participantSettlement` DISABLE KEYS */;
-/*!40000 ALTER TABLE `participantSettlement` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `settledFee`
---
-
-DROP TABLE IF EXISTS `settledFee`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `settledFee` (
-  `settledFeeId` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `feeId` bigint(20) unsigned DEFAULT NULL,
-  `settlementId` bigint(20) unsigned NOT NULL,
-  PRIMARY KEY (`settledFeeId`),
-  KEY `settledfee_settlementid_index` (`settlementId`),
-  CONSTRAINT `settledfee_settlementid_foreign` FOREIGN KEY (`settlementId`) REFERENCES `settlement` (`settlementId`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `settledFee`
---
-
-LOCK TABLES `settledFee` WRITE;
-/*!40000 ALTER TABLE `settledFee` DISABLE KEYS */;
-/*!40000 ALTER TABLE `settledFee` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `settlement`
@@ -556,23 +365,140 @@ DROP TABLE IF EXISTS `settlement`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `settlement` (
   `settlementId` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `settlementWindowId` bigint(20) unsigned NOT NULL,
-  `settlementType` varchar(16) NOT NULL,
-  `settledDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`settlementId`),
-  KEY `settlement_settlementwindowid_index` (`settlementWindowId`),
-  CONSTRAINT `settlement_settlementwindowid_foreign` FOREIGN KEY (`settlementWindowId`) REFERENCES `settlementWindow` (`settlementWindowId`)
+  `reason` varchar(512) DEFAULT NULL,
+  `createdDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`settlementId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `settlement`
+-- Table structure for table `settlementParticipantCurrency`
 --
 
-LOCK TABLES `settlement` WRITE;
-/*!40000 ALTER TABLE `settlement` DISABLE KEYS */;
-/*!40000 ALTER TABLE `settlement` ENABLE KEYS */;
-UNLOCK TABLES;
+DROP TABLE IF EXISTS `settlementParticipantCurrency`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `settlementParticipantCurrency` (
+  `settlementParticipantCurrencyId` bigint(20) unsigned NOT NULL,
+  `settlementId` bigint(20) unsigned NOT NULL,
+  `participantCurrencyId` int(10) unsigned NOT NULL,
+  `netAmount` decimal(18,2) NOT NULL,
+  `createdDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`settlementParticipantCurrencyId`),
+  KEY `settlementparticipantcurrency_settlementid_foreign_idx` (`settlementId`),
+  KEY `settlementparticipantcurrency_participantcurrencyid_foreign_idx` (`participantCurrencyId`),
+  CONSTRAINT `settlementparticipantcurrency_participantcurrencyid_foreign` FOREIGN KEY (`participantCurrencyId`) REFERENCES `participantCurrency` (`participantCurrencyId`),
+  CONSTRAINT `settlementparticipantcurrency_settlementid_foreign` FOREIGN KEY (`settlementId`) REFERENCES `settlement` (`settlementId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `settlementParticipantCurrencyStateChange`
+--
+
+DROP TABLE IF EXISTS `settlementParticipantCurrencyStateChange`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `settlementParticipantCurrencyStateChange` (
+  `settlementParticipantCurrencyStateChangeId` bigint(20) unsigned NOT NULL,
+  `settlementParticipantCurrencyId` bigint(20) unsigned NOT NULL,
+  `settlementStateId` varchar(50) NOT NULL,
+  `reason` varchar(512) DEFAULT NULL,
+  `createdDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`settlementParticipantCurrencyStateChangeId`),
+  KEY `settlementparticipantcurrencystatechangeid_foreign_idx` (`settlementParticipantCurrencyId`),
+  KEY `settlementstateid_foreign_idx` (`settlementStateId`),
+  CONSTRAINT `settlementParticipantCurrencyStateChangeId_foreign` FOREIGN KEY (`settlementParticipantCurrencyId`) REFERENCES `settlementParticipantCurrency` (`settlementParticipantCurrencyId`),
+  CONSTRAINT `settlementstateid_foreign` FOREIGN KEY (`settlementStateId`) REFERENCES `settlementState` (`settlementStateId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `settlementSettlementWindow`
+--
+
+DROP TABLE IF EXISTS `settlementSettlementWindow`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `settlementSettlementWindow` (
+  `settlementSettlementWindowId` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `settlementId` bigint(20) unsigned NOT NULL,
+  `settlementWindowId` bigint(20) unsigned NOT NULL,
+  `createdDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`settlementSettlementWindowId`),
+  UNIQUE KEY `settlementsettlementwindow_unique` (`settlementId`,`settlementWindowId`),
+  KEY `settlementsettlementwindow_settlementid_foreign_idx` (`settlementId`),
+  KEY `settlementsettlementwindow_settlementwindowid_foreign_idx` (`settlementWindowId`),
+  CONSTRAINT `settlementsettlementwindow_settlementid_foreign` FOREIGN KEY (`settlementId`) REFERENCES `settlement` (`settlementId`),
+  CONSTRAINT `settlementsettlementwindow_settlementwindowid_foreign` FOREIGN KEY (`settlementWindowId`) REFERENCES `settlementWindow` (`settlementWindowId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `settlementState`
+--
+
+DROP TABLE IF EXISTS `settlementState`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `settlementState` (
+  `settlementStateId` varchar(50) NOT NULL,
+  `enumeration` varchar(50) NOT NULL,
+  `description` varchar(512) DEFAULT NULL,
+  `isActive` tinyint(1) NOT NULL DEFAULT '1',
+  `createdDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`settlementStateId`),
+  UNIQUE KEY `enumeration_UNIQUE` (`enumeration`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `settlementStateChange`
+--
+
+DROP TABLE IF EXISTS `settlementStateChange`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `settlementStateChange` (
+  `settlementStateChangeId` bigint(20) unsigned NOT NULL,
+  `settlementId` bigint(20) unsigned NOT NULL,
+  `settlementStateId` varchar(50) NOT NULL,
+  `reason` varchar(512) DEFAULT NULL,
+  `createdDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`settlementStateChangeId`),
+  KEY `settlementstatechange_settlementid_foreign_idx` (`settlementId`),
+  KEY `settlementstatechange_settlementstateid_foreign_idx` (`settlementStateId`),
+  CONSTRAINT `settlementstatechange_settlementid_foreign` FOREIGN KEY (`settlementId`) REFERENCES `settlement` (`settlementId`),
+  CONSTRAINT `settlementstatechange_settlementstateid_foreign` FOREIGN KEY (`settlementStateId`) REFERENCES `settlementState` (`settlementStateId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `settlementTransferParticipant`
+--
+
+DROP TABLE IF EXISTS `settlementTransferParticipant`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `settlementTransferParticipant` (
+  `settlementTransferParticipantId` bigint(20) unsigned NOT NULL,
+  `settlementId` bigint(20) unsigned NOT NULL,
+  `participantCurrencyId` int(10) unsigned NOT NULL,
+  `transferParticipantRoleTypeId` int(10) unsigned NOT NULL,
+  `ledgerEntryTypeId` int(10) unsigned NOT NULL,
+  `amount` decimal(18,2) NOT NULL,
+  `createdDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`settlementTransferParticipantId`),
+  KEY `settlementtransferparticipant_settlementid_foreign_idx` (`settlementId`),
+  KEY `settlementtransferparticipant_participantcurrencyid_foreign_idx` (`participantCurrencyId`),
+  KEY `settlementtransferparticipant_transferparticipantroletypeid_idx` (`transferParticipantRoleTypeId`),
+  KEY `settlementtransferparticipant_ledgerentrytypeid_foreign_idx` (`ledgerEntryTypeId`),
+  CONSTRAINT `settlementtransferparticipant_ledgerentrytypeid_foreign` FOREIGN KEY (`ledgerEntryTypeId`) REFERENCES `ledgerEntryType` (`ledgerEntryTypeId`),
+  CONSTRAINT `settlementtransferparticipant_participantcurrencyid_foreign` FOREIGN KEY (`participantCurrencyId`) REFERENCES `participantCurrency` (`participantCurrencyId`),
+  CONSTRAINT `settlementtransferparticipant_participantroletypeid_foreign` FOREIGN KEY (`transferParticipantRoleTypeId`) REFERENCES `transferParticipantRoleType` (`transferParticipantRoleTypeId`),
+  CONSTRAINT `settlementtransferparticipant_settlementid_foreign` FOREIGN KEY (`settlementId`) REFERENCES `settlement` (`settlementId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `settlementWindow`
@@ -583,20 +509,50 @@ DROP TABLE IF EXISTS `settlementWindow`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `settlementWindow` (
   `settlementWindowId` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `state` varchar(50) DEFAULT NULL,
+  `reason` varchar(512) DEFAULT NULL,
   `createdDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`settlementWindowId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `settlementWindow`
+-- Table structure for table `settlementWindowState`
 --
 
-LOCK TABLES `settlementWindow` WRITE;
-/*!40000 ALTER TABLE `settlementWindow` DISABLE KEYS */;
-/*!40000 ALTER TABLE `settlementWindow` ENABLE KEYS */;
-UNLOCK TABLES;
+DROP TABLE IF EXISTS `settlementWindowState`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `settlementWindowState` (
+  `settlementWindowStateId` varchar(50) NOT NULL,
+  `enumeration` varchar(50) NOT NULL,
+  `description` varchar(512) DEFAULT NULL,
+  `isActive` tinyint(1) NOT NULL DEFAULT '1',
+  `createdDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`settlementWindowStateId`),
+  UNIQUE KEY `enumeration_UNIQUE` (`enumeration`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `settlementWindowStateChange`
+--
+
+DROP TABLE IF EXISTS `settlementWindowStateChange`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `settlementWindowStateChange` (
+  `settlementWindowStateChangeId` bigint(20) unsigned NOT NULL,
+  `settlementWindowId` bigint(20) unsigned NOT NULL,
+  `settlementWindowStateId` varchar(50) NOT NULL,
+  `reason` varchar(512) DEFAULT NULL,
+  `createdDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`settlementWindowStateChangeId`),
+  KEY `settlementwindowstatechange_settlementwindowid_foreign_idx` (`settlementWindowId`),
+  KEY `settlementwindowstatechange_settlementwindowstateid_foreign_idx` (`settlementWindowStateId`),
+  CONSTRAINT `settlementwindowstatechange_settlementwindowid_foreign` FOREIGN KEY (`settlementWindowId`) REFERENCES `settlementWindow` (`settlementWindowId`),
+  CONSTRAINT `settlementwindowstatechange_settlementwindowstateid_foreign` FOREIGN KEY (`settlementWindowStateId`) REFERENCES `settlementWindowState` (`settlementWindowStateId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `token`
@@ -619,15 +575,6 @@ CREATE TABLE `token` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `token`
---
-
-LOCK TABLES `token` WRITE;
-/*!40000 ALTER TABLE `token` DISABLE KEYS */;
-/*!40000 ALTER TABLE `token` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `transfer`
 --
 
@@ -648,15 +595,6 @@ CREATE TABLE `transfer` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `transfer`
---
-
-LOCK TABLES `transfer` WRITE;
-/*!40000 ALTER TABLE `transfer` DISABLE KEYS */;
-/*!40000 ALTER TABLE `transfer` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `transferDuplicateCheck`
 --
 
@@ -673,13 +611,23 @@ CREATE TABLE `transferDuplicateCheck` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `transferDuplicateCheck`
+-- Table structure for table `transferError`
 --
 
-LOCK TABLES `transferDuplicateCheck` WRITE;
-/*!40000 ALTER TABLE `transferDuplicateCheck` DISABLE KEYS */;
-/*!40000 ALTER TABLE `transferDuplicateCheck` ENABLE KEYS */;
-UNLOCK TABLES;
+DROP TABLE IF EXISTS `transferError`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `transferError` (
+  `transferErrorId` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `transferStateChangeId` bigint(20) unsigned NOT NULL,
+  `errorCode` int(10) unsigned NOT NULL,
+  `errorDesciption` varchar(128) NOT NULL,
+  `createdDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`transferErrorId`),
+  KEY `transfererror_transferstatechangeid_foreign_idx` (`transferStateChangeId`),
+  CONSTRAINT `transfererror_transferstatechangeid_foreign` FOREIGN KEY (`transferStateChangeId`) REFERENCES `transferStateChange` (`transferStateChangeId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `transferExtension`
@@ -689,28 +637,19 @@ DROP TABLE IF EXISTS `transferExtension`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `transferExtension` (
-  `transferExtentionId` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `transferExtensionId` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `transferId` varchar(36) NOT NULL,
   `transferFulfilmentId` varchar(36) DEFAULT NULL,
   `key` varchar(128) NOT NULL,
   `value` text,
   `createdDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`transferExtentionId`),
+  PRIMARY KEY (`transferExtensionId`),
   KEY `transferextension_transferid_index` (`transferId`),
   KEY `transferextension_transferfulfilmentid_index` (`transferFulfilmentId`),
   CONSTRAINT `transferextension_transferfulfilmentid_foreign` FOREIGN KEY (`transferFulfilmentId`) REFERENCES `transferFulfilment` (`transferFulfilmentId`),
   CONSTRAINT `transferextension_transferid_foreign` FOREIGN KEY (`transferId`) REFERENCES `transfer` (`transferId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `transferExtension`
---
-
-LOCK TABLES `transferExtension` WRITE;
-/*!40000 ALTER TABLE `transferExtension` DISABLE KEYS */;
-/*!40000 ALTER TABLE `transferExtension` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `transferFulfilment`
@@ -737,15 +676,6 @@ CREATE TABLE `transferFulfilment` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `transferFulfilment`
---
-
-LOCK TABLES `transferFulfilment` WRITE;
-/*!40000 ALTER TABLE `transferFulfilment` DISABLE KEYS */;
-/*!40000 ALTER TABLE `transferFulfilment` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `transferFulfilmentDuplicateCheck`
 --
 
@@ -762,15 +692,6 @@ CREATE TABLE `transferFulfilmentDuplicateCheck` (
   CONSTRAINT `transferfulfilmentduplicatecheck_transferid_foreign` FOREIGN KEY (`transferId`) REFERENCES `transfer` (`transferId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `transferFulfilmentDuplicateCheck`
---
-
-LOCK TABLES `transferFulfilmentDuplicateCheck` WRITE;
-/*!40000 ALTER TABLE `transferFulfilmentDuplicateCheck` DISABLE KEYS */;
-/*!40000 ALTER TABLE `transferFulfilmentDuplicateCheck` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `transferParticipant`
@@ -800,15 +721,6 @@ CREATE TABLE `transferParticipant` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `transferParticipant`
---
-
-LOCK TABLES `transferParticipant` WRITE;
-/*!40000 ALTER TABLE `transferParticipant` DISABLE KEYS */;
-/*!40000 ALTER TABLE `transferParticipant` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `transferParticipantRoleType`
 --
 
@@ -825,15 +737,6 @@ CREATE TABLE `transferParticipantRoleType` (
   UNIQUE KEY `transferparticipantroletype_name_unique` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `transferParticipantRoleType`
---
-
-LOCK TABLES `transferParticipantRoleType` WRITE;
-/*!40000 ALTER TABLE `transferParticipantRoleType` DISABLE KEYS */;
-/*!40000 ALTER TABLE `transferParticipantRoleType` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `transferState`
@@ -854,15 +757,6 @@ CREATE TABLE `transferState` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `transferState`
---
-
-LOCK TABLES `transferState` WRITE;
-/*!40000 ALTER TABLE `transferState` DISABLE KEYS */;
-/*!40000 ALTER TABLE `transferState` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `transferStateChange`
 --
 
@@ -873,7 +767,7 @@ CREATE TABLE `transferStateChange` (
   `transferStateChangeId` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `transferId` varchar(36) NOT NULL,
   `transferStateId` varchar(50) NOT NULL,
-  `reason` text,
+  `reason` varchar(512) DEFAULT NULL,
   `createdDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`transferStateChangeId`),
   KEY `transferstatechange_transferid_index` (`transferId`),
@@ -884,13 +778,22 @@ CREATE TABLE `transferStateChange` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `transferStateChange`
+-- Table structure for table `transferTimeout`
 --
 
-LOCK TABLES `transferStateChange` WRITE;
-/*!40000 ALTER TABLE `transferStateChange` DISABLE KEYS */;
-/*!40000 ALTER TABLE `transferStateChange` ENABLE KEYS */;
-UNLOCK TABLES;
+DROP TABLE IF EXISTS `transferTimeout`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `transferTimeout` (
+  `transferTimeoutId` bigint(20) NOT NULL AUTO_INCREMENT,
+  `transferId` varchar(36) NOT NULL,
+  `expirationDate` datetime NOT NULL,
+  `createdDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`transferTimeoutId`),
+  UNIQUE KEY `transfertimeout_transferid_unique` (`transferId`),
+  CONSTRAINT `transfertimeout_transferid_foreign` FOREIGN KEY (`transferId`) REFERENCES `transfer` (`transferId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -901,4 +804,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-07-04  0:15:00
+-- Dump completed on 2018-08-14 16:50:18
