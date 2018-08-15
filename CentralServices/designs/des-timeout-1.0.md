@@ -126,7 +126,6 @@ ON tsc.transferStateChangeId = ts.maxTransferStateChangeId
 WHERE tsc.transferStateId IN ('RECEIVED_PREPARE', 'RESERVED');
 ```
 
-
 7. Get all transfers to be expired
 ```sql
 SELECT tt.*
