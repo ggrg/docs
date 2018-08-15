@@ -52,14 +52,14 @@ group Abort Position Handler Consume
             POS_HANDLER -> POS_DAO: Request to persist latest position and state to DB\n<color #FF0000><b>Error code:</b> 2003</color>
             group <color #blue>DB TRANSACTION IMPLEMENTATION</color>
                 activate POS_DAO
-                POS_DAO -> DB: Select participantPosition.value FOR UPDATE from DB for Payer
+                POS_DAO -> DB: Select participantPosition.value FOR UPDATE for payerCurrencyId
                 activate DB
                 hnote over DB #lightyellow
                     participantPosition
                 end note
-                DB --> POS_DAO: Return participantPosition.value from DB for Payer
+                DB --> POS_DAO: Return participantPosition
                 deactivate DB
-                POS_DAO <-> POS_DAO: **latestPosition** = participantPosition.value - payload.amount.amount
+                POS_DAO <-> POS_DAO: **latestPosition** = participantPosition - payload.amount.amount
                 POS_DAO->DB: Persist latestPosition to DB for Payer
                 hnote over DB #lightyellow
                     UPDATE **participantPosition**
@@ -69,7 +69,7 @@ group Abort Position Handler Consume
                 deactivate DB
                 POS_DAO -> DB: Persist participant position change and state change
                 hnote over DB #lightyellow
-                        INSERT **transferStateChange** transferStateId = 'ABORTED'
+                        INSERT **transferStateChange** transferStateId = 'EXPIRED_RESERVED'
 
                         INSERT **participantPositionChange**
                         SET participantPositionId = participantPosition.participantPositionId,
@@ -95,10 +95,10 @@ group Abort Position Handler Consume
                     payload: {
                          "errorInformation": {
                              "errorCode": 3303,
-                             "errorDescription": "Client requested to use a transfer that has already expired.",
+                             "errorDescription": "Transfer expired",
                              "extensionList": <transferMessage.extensionList>
                          }
-                     }
+                    }
                 },
                 metadata: {
                     event: {

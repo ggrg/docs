@@ -1,6 +1,6 @@
 @startuml
 ' declate title
-title 2.3.1. Transfer Handler Consume (Timeout)
+title 2.3.3. Transfer Handler Consume (Timeout)
 
 autonumber
 
@@ -34,7 +34,7 @@ group Transfer Handler Consume (Timeout)
 
         break
             group Validate Event
-                TRANS_HANDLER <-> TRANS_HANDLER: Validate event - Rule: type == 'transfer' && action IN ['timeout-received', 'timeout-reserved']
+                TRANS_HANDLER <-> TRANS_HANDLER: Validate event - Rule: type == 'transfer' && action = 'abort'
             end
         end
 
@@ -43,63 +43,39 @@ group Transfer Handler Consume (Timeout)
 	        ref over TRANS_HANDLER, TOPIC_EVENT :  Event Handler Consume {9.1.0.}
         end
 
-        alt action == 'timeout-received'
-            note right of TRANS_HANDLER #yellow
-                Message:
-                {
-                    id: <transferId>,
-                    from: <payerParticipantId>,
-                    to: <payeeParticipantId>,
-                    type: application/json,
-                    <color #FF0000>content: {</color>
-                        <color #FF0000>headers: <transferHeaders>,</color>
-                        <color #FF0000>payload: <transferMessage></color>
-                    <color #FF0000>},</color>
-                    metadata: {
-                        event: {
-                            id: <uuid>,
-                            responseTo: <previous.uuid>,
-                            type: notification,
-                            action: timeout-received,
-                            createdAt: <timestamp>,
-                            state: {
-                                status: "success",
-                                code: 0
-                            }
+        note right of TRANS_HANDLER #yellow
+            Message: {
+                id: <transferMessage.transferId>
+                from: <transferMessage.payerFsp>,
+                to: <transferMessage.payeeFsp>,
+                type: application/json
+                content: {
+                    headers: <transferHeaders>,
+                    payload: {
+                        "errorInformation": {
+                            "errorCode": 3303,
+                            "errorDescription": "Transfer expired",
+                            "extensionList": <transferMessage.extensionList>
+                        }
+                    }
+                },
+                metadata: {
+                    event: {
+                        id: <uuid>,
+                        responseTo: <previous.uuid>,
+                        type: notification,
+                        action: abort,
+                        createdAt: <timestamp>,
+                        state: {
+                            status: 'error',
+                            code: <errorInformation.errorCode>
+                            description: <errorInformation.errorDescription>
                         }
                     }
                 }
-            end note
-        else action == 'timeout-reserved'
-            note right of TRANS_HANDLER #yellow
-                Message:
-                {
-                    id: <transferId>,
-                    from: <payerParticipantId>,
-                    to: <payeeParticipantId>,
-                    type: application/json,
-                    <color #FF0000>content: {</color>
-                        <color #FF0000>headers: <transferHeaders>,</color>
-                        <color #FF0000>payload: <transferMessage></color>
-                    <color #FF0000>},</color>
-                    metadata: {
-                        event: {
-                            id: <uuid>,
-                            responseTo: <previous.uuid>,
-                            type: notification,
-                            action: timeout-reserved,
-                            createdAt: <timestamp>,
-                            state: {
-                                status: "success",
-                                code: 0
-                            }
-                        }
-                    }
-                }
-            end note
-        end
-
-        TRANS_HANDLER -> TOPIC_NOTIFICATIONS: Publish Notification event for successful timeout
+            }
+        end note
+        TRANS_HANDLER -> TOPIC_NOTIFICATIONS: Publish Notification event
         activate TOPIC_NOTIFICATIONS
         deactivate TOPIC_NOTIFICATIONS
 

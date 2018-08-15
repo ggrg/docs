@@ -55,6 +55,7 @@ DROP TABLE IF EXISTS `transferTimeout`;
 CREATE TABLE `transferTimeout` (
   `transferTimeoutId` bigint(20) NOT NULL AUTO_INCREMENT,
   `transferId` varchar(36) NOT NULL,
+  `expirationDate` datetime NOT NULL,
   `createdDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`transferTimeoutId`),
   UNIQUE KEY `transfertimeout_transferid_unique` (`transferId`),
@@ -93,7 +94,7 @@ ON ts.transferId = tt.transferId
 JOIN transferStateChange tsc
 ON tsc.transferStateChangeId = ts.maxTransferStateChangeId
 WHERE tsc.transferStateId IN ('RECEIVED_FULFIL', 'COMMITTED', 'FAILED',
-      'EXPIRED', 'REJECTED', 'PENDING_SETTLEMENT', 'SETTLED', 'ABORTED');
+      'EXPIRED',  'EXPIRED_PREPARED', 'EXPIRED_RESERVED', 'REJECTED', 'ABORTED');
 ```
 Another alternative to deleting records from transferTimeout table would be adding isActive BIT DEFAULT 1 column and marking it as *false* for the above *transferIds*
 
@@ -103,10 +104,16 @@ SELECT MAX(transferStateChangeId) INTO @intervalMax
 FROM transferStateChange;
 ```
 
-5. Insert all new transfers still in processing state
+5. Start a transaction - so far we've been just preparing for the main job of marking the transfers as expired by the TimeoutHandler. The code 1-5 could be run fully or separately multiple times without negative consequence, but what follows should be completed in single batch (or rolled back)
 ```sql
-INSERT INTO transferTimeout(transferId)
-SELECT t.transferId
+START TRANSACTION;
+SET @transactionTimestamp = now()
+```
+
+6. Insert all new transfers still in processing state
+```sql
+INSERT INTO transferTimeout(transferId, expirationDate)
+SELECT t.transferId, t.expirationDate
 FROM transfer t
 JOIN (SELECT transferId, MAX(transferStateChangeId) maxTransferStateChangeId
       FROM transferStateChange
@@ -119,18 +126,12 @@ ON tsc.transferStateChangeId = ts.maxTransferStateChangeId
 WHERE tsc.transferStateId IN ('RECEIVED_PREPARE', 'RESERVED');
 ```
 
-6. Start a transaction - so far we've been just preparing for the main job of marking the transfers as expired by the TimeoutHandler. The code 1-5 could be run fully or separately multiple times without negative consequence, but what follows should be completed in single batch (or rolled back)
-```sql
-START TRANSACTION;
-```
 
 7. Get all transfers to be expired
 ```sql
-SELECT t.*
-FROM transfer t
-JOIN transferTimeout tt
-ON tt.transferId = t.transferId
-WHERE t.expirationDate < now();
+SELECT tt.*
+FROM transferTimeout tt
+WHERE tt.expirationDate < @transactionTimestamp;
 ```
 
 8. Process the list - here's actually where the TimeoutHandler logic will be implemented. It is not part of the current study which focuses on getting the list of transfers for expiration.
