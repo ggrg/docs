@@ -52,7 +52,7 @@ group Prepare Handler Consume
         |||
     end
 
-    group Validate Prepare Transfer
+    group Validate Prepare Transfer 
         PREP_HANDLER <-> PREP_HANDLER: <color #AAA>Schema validation of the incoming message</color>
         PREP_HANDLER <-> PREP_HANDLER: <color #AAA>Verify the message's signature (to be confirmed in future requirement)</color>
         note right of PREP_HANDLER #lightgrey
@@ -61,71 +61,69 @@ group Prepare Handler Consume
             It may need to be added in future for custom adapters.
         end note
         group Validate Duplicate check
-            note right of PREP_HANDLER #lightblue
-                The steps for checking duplicates (currently #6 to #18) if not
-                already implemented, can be optimized by first trying to insert
-                into the table 'transferDuplicateCheck' which would succeed for 
-                valid/new Transfer requests. When it fails because the transferId
-                already exists in that table, then the hashes and transferState
-                can be verified and dealt with accordingly (as they are now).
-                This way, hashes and transferStates are retrieved only if it is
-                a duplicate (Prepare) (since that transerId exists in the table
-                'transferDuplicateCheck' already).
-                Steps #6-#9 Insert;
-                for failure (to insert) --> #10-#13 Transfer Exists, Retrieve Hash;
-                If Hash matches --> #14-#16 Retrieve Transfer State;
-                Hash does not match --> #17 
-            end note
-            PREP_HANDLER -> TRANS_DAO: Request to retrieve Transfer message hash (if it exists)
+            PREP_HANDLER -> TRANS_DAO: Request to retrieve Transfer Hash for a transferId
             activate TRANS_DAO
-            TRANS_DAO -> DB: Request Transfer message hash
+            TRANS_DAO -> DB: Request Transfer Hash for a transferId
+            activate DB
             hnote over DB #lightyellow
                 transferDuplicateCheck
             end note
-            activate DB
-            TRANS_DAO <-- DB: Return hash if it exists 
+            TRANS_DAO <-- DB: Return hash if it exists
             deactivate DB
-            TRANS_DAO --> PREP_HANDLER: Return transfer message hash if it exists
+            PREP_HANDLER <-- TRANS_DAO: Return hash if it exists
             deactivate TRANS_DAO
-            alt Transfer exists, hash matches
+
+            alt If transferId exists
                 group Persist Event Information
                     |||
                     PREP_HANDLER -> TOPIC_EVENTS: Publish event information
                     ref over PREP_HANDLER, TOPIC_EVENTS :  Event Handler Consume {9.1.0} \n
                     |||
                 end
-                PREP_HANDLER -> TRANS_DAO: Request to retrieve Transfer state
-                activate TRANS_DAO
-                TRANS_DAO -> DB: Request Transfer state
-                hnote over DB #lightyellow
-                    transfer
-                    transferStateChange
-                end note
-                activate DB
-                TRANS_DAO <-- DB: Return Transfer state
-                deactivate DB
-                TRANS_DAO --> PREP_HANDLER: Return Transfer state
-                deactivate TRANS_DAO
-                break
-                    PREP_HANDLER <-> PREP_HANDLER: <color #FF0000><b>Error handling:</b></color> If transferState is ['COMMITTED', 'ABORTED']\nthen send callback to Payer with the completed transfer,\notherwise this new request can be ignored, because a callback is about to be sent to the client.
+                PREP_HANDLER -> PREP_HANDLER: Generate Hash for the incoming message and compare hashes
+
+                alt Transfer exists, hash matches    
+                    PREP_HANDLER -> TRANS_DAO: Request to retrieve Transfer state \n<color #FF0000><b>Error code:</b> 2003</color>
+                    activate TRANS_DAO
+                    TRANS_DAO -> DB: Request Transfer state
+                    hnote over DB #lightyellow
+                        transfer
+                        transferStateChange
+                    end note
+                    activate DB
+                    TRANS_DAO <-- DB: Return Transfer state
+                    deactivate DB
+                    TRANS_DAO --> PREP_HANDLER: Return Transfer state
+                    deactivate TRANS_DAO
+                    break
+                        alt If transferState IN Enumeration ['COMMITTED', 'ABORTED']
+                            PREP_HANDLER -> TOPIC_NOTIFICATIONS: Publish Notification event for Payer with the completed transer \nFor the Data Model, refer to the Swagger (transerState - mandatory, fulfilment, completedTimestamp).
+                        else If transferState in Enumeration ['RECEIVED', 'RESERVED']
+                            PREP_HANDLER <-> PREP_HANDLER: This request can be ignored, because a callback is about to be sent to the client.
+                        else If transferState doesn't exist
+                            PREP_HANDLER -> TOPIC_NOTIFICATIONS: Send /error callback with appropriate error message\n(Invalid duplicate request)\n<color #FF0000><b>Error code:</b> 3100</color>
+                        end
+                    end
+                else Transfer exists, hash does not match
+                    break
+                        PREP_HANDLER -> TOPIC_NOTIFICATIONS: Publish Notification (failure) event for Payer\n<color #FF0000><b>Error codes:</b> 3106</color> \nFor the Data Model, refer to the final step in this diagram (has the same text).
+                    end
                 end
-            else Transfer exists, hash does not match
-                break
-                    PREP_HANDLER <-> PREP_HANDLER: <color #FF0000><b>Error code:</b> 3106</color>
-                end
-            else Transfer hash does not exist
-                PREP_HANDLER -> TRANS_DAO: Request to persist transfer hash\n<color #FF0000><b>Error codes:</b> 2003</color>
+
+            else If transferId does NOT exist
+                PREP_HANDLER -> TRANS_DAO: Request to persist Transfer Hash \n<color #FF0000><b>Error code:</b> 2003</color>
                 activate TRANS_DAO
-                TRANS_DAO -> DB: Persist hash
+                TRANS_DAO -> DB: Persist Transfer message hash
                 hnote over DB #lightyellow
                     transferDuplicateCheck
                 end note
-                activate DB
-                deactivate DB
                 TRANS_DAO --> PREP_HANDLER: Return success
-                deactivate TRANS_DAO 
+                deactivate TRANS_DAO
             end
+            deactivate TRANS_DAO
+            
         end
+
         group Validate Payer
             PREP_HANDLER -> PARTICIPANT_DAO: Request to retrieve Payer Participant details (if it exists)
             activate PARTICIPANT_DAO
@@ -157,25 +155,46 @@ group Prepare Handler Consume
             PREP_HANDLER <-> PREP_HANDLER: Validate Payee\n<color #FF0000><b>Error codes:</b> 3203</color>
         end
         PREP_HANDLER <-> PREP_HANDLER: Validate crypto-condition\n<color #FF0000><b>Error codes:</b> 3100</color>
-    end
-    alt Validate Prepare Transfer (success)
-        group Persist Transfer State (with transferState='RECEIVED-PREPARE')
-            PREP_HANDLER -> TRANS_DAO: Request to persist transfer\n<color #FF0000><b>Error codes:</b> 2003</color>
-            activate TRANS_DAO
-            TRANS_DAO -> DB: Persist transfer
-            hnote over DB #lightyellow
-                transfer
-                transferParticipant
-                transferStateChange
-                transferExtension
-                ilpPacket
-            end note
-            activate DB
-            deactivate DB
-            TRANS_DAO --> PREP_HANDLER: Return success
-            deactivate TRANS_DAO
+        
+        alt Validate Prepare Transfer (success)
+            group Persist Transfer State (with transferState='RECEIVED-PREPARE')
+                PREP_HANDLER -> TRANS_DAO: Request to persist transfer\n<color #FF0000><b>Error codes:</b> 2003</color>
+                activate TRANS_DAO
+                TRANS_DAO -> DB: Persist transfer
+                hnote over DB #lightyellow
+                    transfer
+                    transferParticipant
+                    transferStateChange
+                    transferExtension
+                    ilpPacket
+                end note
+                activate DB
+                deactivate DB
+                TRANS_DAO --> PREP_HANDLER: Return success
+                deactivate TRANS_DAO
+            end
+        else Validate Prepare Transfer (failure)
+            group Persist Transfer State (with transferState='INVALID') (Introducing a new status INVALID to mark these entries)
+                PREP_HANDLER -> TRANS_DAO: Request to persist transfer\n(when Payee/Payer/crypto-condition validation fails)\n<color #FF0000><b>Error codes:</b> 2003</color>
+                activate TRANS_DAO
+                TRANS_DAO -> DB: Persist transfer
+                hnote over DB #lightyellow
+                    transfer
+                    transferParticipant
+                    transferStateChange
+                    transferExtension
+                    transferError
+                    ilpPacket
+                end note
+                activate DB
+                deactivate DB
+                TRANS_DAO --> PREP_HANDLER: Return success
+                deactivate TRANS_DAO
+            end
         end
 
+    end
+    alt Validate Prepare Transfer (success)
         note right of PREP_HANDLER #yellow
             Message:
             {
