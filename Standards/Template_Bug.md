@@ -1,3 +1,6 @@
+**Summary**:
+<Description regarding what the issue is (with important details) and where it is>
+
 **Severity**:
 (Low, Medium, High)
 
@@ -7,10 +10,7 @@
 **Expected Behavior**
 
 
-**Actual Behavior**
-
-
-**Steps to Reproduce the Problem**
+**Steps to Reproduce**
   1.
   2.
   3.
