@@ -97,7 +97,48 @@ group Prepare Handler Consume
                     deactivate TRANS_DAO
                     break
                         alt If transferState IN Enumeration ['COMMITTED', 'ABORTED']
-                            PREP_HANDLER -> TOPIC_NOTIFICATIONS: Publish Notification event for Payer with the completed transer \nFor the Data Model, refer to the Swagger (transerState - mandatory, fulfilment, completedTimestamp).
+                            PREP_HANDLER -> TRANS_DAO: Request to retrieve fulfilment, completedTimestamp for the transferId
+                            activate TRANS_DAO
+                            TRANS_DAO -> DB: Request fulfilment, completedTimestamp for the transferId
+                            activate DB
+                            hnote over DB #lightyellow
+                                transferFulfilment
+                            end note
+                            TRANS_DAO <-- DB: Return fulfilment, completedTimestamp (if they exist)
+                            deactivate DB
+                            PREP_HANDLER <-- TRANS_DAO: Return fulfilment, completedTimestamp (if they exist)
+                            deactivate TRANS_DAO
+                            note right of PREP_HANDLER #yellow
+                            Message:
+                            {
+                                id: <transferMessage.transferId>
+                                from: <transferMessage.payerFsp>,
+                                to: <transferMessage.payeeFsp>,
+                                type: application/json
+                                content: {
+                                    headers: <transferHeaders>,
+                                    payload: {
+                                        transferState: "COMMITTED",
+                                        fulfilment: "WLctttbu2HvTsa1XWvUoGRcQozHsqeu9Ahl2JW9Bsu8",
+                                        completedTimestamp: "2018-10-24T08:38:08.699-04:00"
+                                    }
+                                },
+                                metadata: {
+                                    event: {
+                                        id: <uuid>,
+                                        responseTo: <previous.uuid>,
+                                        type: notification,
+                                        action: prepare-duplicate,
+                                        createdAt: <timestamp>,
+                                        state: {
+                                            status: "success",
+                                            code: 0
+                                        }
+                                    }
+                                }
+                            }
+                        end note
+                            PREP_HANDLER -> TOPIC_NOTIFICATIONS: Publish Notification event for Payer with the completed transfer \nFor the Data Model, refer to the Swagger (transferState - mandatory, fulfilment, completedTimestamp - sample values above).
                         else If transferState in Enumeration ['RECEIVED', 'RESERVED']
                             PREP_HANDLER <-> PREP_HANDLER: This request can be ignored, because a callback is about to be sent to the client.
                         else If transferState doesn't exist
