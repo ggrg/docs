@@ -46,7 +46,7 @@ group Abort Position Handler Consume
         deactivate DB
         POS_DAO --> POS_HANDLER: Return current state of transfer from DB
         deactivate POS_DAO
-        POS_HANDLER <-> POS_HANDLER: Validate current state (transferStateChange.transferStateId == 'EXPIRED')\n<color #FF0000><b>Error code:</b> 2001</color>
+        POS_HANDLER <-> POS_HANDLER: Validate current state (transferStateChange.transferStateId == 'RESERVED_TIMEOUT')\n<color #FF0000><b>Error code:</b> 2001</color>
 
         group Persist Position change
             POS_HANDLER -> POS_DAO: Request to persist latest position and state to DB\n<color #FF0000><b>Error code:</b> 2003</color>
@@ -116,6 +116,9 @@ group Abort Position Handler Consume
                 }
             }
         end note
+        POS_HANDLER -> TOPIC_NOTIFICATIONS: Publish Notification event\n<color #FF0000><b>Error code:</b> 2003</color>
+        activate TOPIC_NOTIFICATIONS
+        deactivate TOPIC_NOTIFICATIONS
     end
     opt type == 'position' && action == 'reject'
         POS_HANDLER -> POS_DAO: Request current state of transfer from DB\n<color #FF0000><b>Error code:</b> 2003</color>
@@ -167,6 +170,9 @@ group Abort Position Handler Consume
                 }
             }
         end note
+        POS_HANDLER -> TOPIC_TRANSFERS: Publish Transfer event\n<color #FF0000><b>Error code:</b> 2003</color>
+        activate TOPIC_TRANSFERS
+        deactivate TOPIC_TRANSFERS
     end
     ' We do not see how this scenario will be triggered
     opt type == 'position' && action == 'fail' (Unable to currently trigger this scenario)
@@ -226,10 +232,10 @@ group Abort Position Handler Consume
                 }
             }
         end note
+        POS_HANDLER -> TOPIC_TRANSFERS: Publish Transfer event\n<color #FF0000><b>Error code:</b> 2003</color>
+        activate TOPIC_TRANSFERS
+        deactivate TOPIC_TRANSFERS
     end
-    POS_HANDLER -> TOPIC_TRANSFERS: Publish Transfer event\n<color #FF0000><b>Error code:</b> 2003</color>
-    activate TOPIC_TRANSFERS
-    deactivate TOPIC_TRANSFERS
 end
 deactivate POS_HANDLER
 @enduml

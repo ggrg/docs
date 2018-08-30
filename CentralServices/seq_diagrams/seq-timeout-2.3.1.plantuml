@@ -126,16 +126,15 @@ group Timeout Handler Consume
             TRANSFER_DAO -> DB: Insert transfer state ABORTED for\nexpired RECEIVED_PREPARE transfers
             hnote over DB #lightyellow
                 INSERT INTO **transferStateChange**
-                SELECT t.transferId, 'EXPIRED_PREPARED' AS transferStateId, 'Aborted by timeout handler' AS reason
+                SELECT tt.transferId, 'EXPIRED_PREPARED' AS transferStateId, 'Aborted by Timeout Handler' AS reason
                 FROM **transferTimeout** tt
-                ON tt.transferId = t.transferId
                 JOIN ( <color #FF0000>-- Following subquery is reused 3 times and may be optimized if needed</color>
-                      SELECT tsc.transferId, MAX(tsc.transferStateChangeId) maxTransferStateChangeId
-                      FROM **transferTimeout** tt1
-                      JOIN **transferStateChange** tsc
-                      ON tsc.transferId = tt1.transferId
-                      GROUP BY transferId) ts
-                ON ts.transferId = t.transferId
+                      SELECT tsc1.transferId, MAX(tsc1.transferStateChangeId) maxTransferStateChangeId
+                      FROM **transferStateChange** tsc1
+                      JOIN **transferTimeout** tt1
+                      ON tt1.transferId = tsc1.transferId
+                      GROUP BY tsc1.transferId) ts
+                ON ts.transferId = tt.transferId
                 JOIN **transferStateChange** tsc
                 ON tsc.transferStateChangeId = ts.maxTransferStateChangeId
                 WHERE tt.expirationDate < {transactionTimestamp}
@@ -147,15 +146,14 @@ group Timeout Handler Consume
             TRANSFER_DAO -> DB: Insert transfer state EXPIRED for\nexpired RESERVED transfers
             hnote over DB #lightyellow
                 INSERT INTO **transferStateChange**
-                SELECT t.transferId, 'EXPIRED' AS transferStateId, 'Expired by timeout handler' AS reason
+                SELECT tt.transferId, 'RESERVED_TIMEOUT' AS transferStateId, 'Expired by Timeout Handler' AS reason
                 FROM **transferTimeout** tt
-                ON tt.transferId = t.transferId
-                JOIN (SELECT tsc.transferId, MAX(tsc.transferStateChangeId) maxTransferStateChangeId
-                      FROM **transferTimeout** tt1
-                      JOIN **transferStateChange** tsc
-                      ON tsc.transferId = tt1.transferId
-                      GROUP BY transferId) ts
-                ON ts.transferId = t.transferId
+                JOIN (SELECT tsc1.transferId, MAX(tsc1.transferStateChangeId) maxTransferStateChangeId
+                      FROM **transferStateChange** tsc1
+                      JOIN **transferTimeout** tt1
+                      ON tt1.transferId = tsc1.transferId
+                      GROUP BY tsc1.transferId) ts
+                ON ts.transferId = tt.transferId
                 JOIN **transferStateChange** tsc
                 ON tsc.transferStateChangeId = ts.maxTransferStateChangeId
                 WHERE tt.expirationDate < {transactionTimestamp}
@@ -179,35 +177,34 @@ group Timeout Handler Consume
             end note
             activate DB
             deactivate DB
-
-            TRANSFER_DAO -> DB: Get list of transfers to be expired with current state
-            hnote over DB #lightyellow
-                SELECT t.*, tsc.transferStateId, tp1.participantCurrencyId payerParticipantId, 
-                      tp2.participantCurrencyId payeeParticipantId
-                FROM **transferTimeout** tt
-                ON tt.transferId = t.transferId
-                JOIN (SELECT tsc.transferId, MAX(tsc.transferStateChangeId) maxTransferStateChangeId
-                      FROM **transferTimeout** tt1
-                      JOIN **transferStateChange** tsc
-                      ON tsc.transferId = tt1.transferId
-                      GROUP BY transferId) ts
-                ON ts.transferId = t.transferId
-                JOIN **transferStateChange** tsc
-                ON tsc.transferStateChangeId = ts.maxTransferStateChangeId
-                JOIN **transferParticipant** tp1
-                ON tp1.transferId = t.transferId
-                AND tp1.transferParticipantRoleTypeId = {PAYER_DFSP}
-                AND tp1.ledgerEntryTypeId = {PRINCIPLE_VALUE}
-                JOIN **transferParticipant** tp2
-                ON tp2.transferId = t.transferId
-                AND tp2.transferParticipantRoleTypeId = {PAYEE_DFSP}
-                AND tp2.ledgerEntryTypeId = {PRINCIPLE_VALUE}
-                WHERE tt.expirationDate < {transactionTimestamp}
-            end note
-            activate DB
-            TRANSFER_DAO <-- DB: Return list
-            deactivate DB
         end
+
+        TRANSFER_DAO -> DB: Get list of transfers to be expired with current state
+        hnote over DB #lightyellow
+            SELECT tt.*, tsc.transferStateId, tp1.participantCurrencyId payerParticipantId, 
+                    tp2.participantCurrencyId payeeParticipantId
+            FROM **transferTimeout** tt
+            JOIN (SELECT tsc1.transferId, MAX(tsc1.transferStateChangeId) maxTransferStateChangeId
+                    FROM **transferStateChange** tsc1
+                    JOIN **transferTimeout** tt1
+                    ON tt1.transferId = tsc1.transferId
+                    GROUP BY tsc1.transferId) ts
+            ON ts.transferId = tt.transferId
+            JOIN **transferStateChange** tsc
+            ON tsc.transferStateChangeId = ts.maxTransferStateChangeId
+            JOIN **transferParticipant** tp1
+            ON tp1.transferId = tt.transferId
+            AND tp1.transferParticipantRoleTypeId = {PAYER_DFSP}
+            AND tp1.ledgerEntryTypeId = {PRINCIPLE_VALUE}
+            JOIN **transferParticipant** tp2
+            ON tp2.transferId = tt.transferId
+            AND tp2.transferParticipantRoleTypeId = {PAYEE_DFSP}
+            AND tp2.ledgerEntryTypeId = {PRINCIPLE_VALUE}
+            WHERE tt.expirationDate < {transactionTimestamp}
+        end note
+        activate DB
+        TRANSFER_DAO <-- DB: Return list
+        deactivate DB
         TRANSFER_DAO --> TIMEOUT_HANDLER: Return list
         deactivate TRANSFER_DAO
     end
