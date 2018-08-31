@@ -1,6 +1,6 @@
 @startuml
 ' declate title
-title 2.1.1. Fulfil Handler Consume (Success)
+title 2.1.1. Fulfil Handler Consume (Reject)
 autonumber
 ' Actor Keys:
 '   boundary - APIs/Interfaces, etc

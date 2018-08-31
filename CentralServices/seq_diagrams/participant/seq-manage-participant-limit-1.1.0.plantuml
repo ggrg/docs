@@ -1,6 +1,6 @@
 @startuml
 ' declare title
-title 2.06 Design an API to manage NET DEBIT CAP #330
+title 1.1.0 Manage Participant Limits
 
 autonumber
 
