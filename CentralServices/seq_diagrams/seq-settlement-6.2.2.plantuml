@@ -58,10 +58,10 @@ group Query Settlements by Parameters
         ON ssc.settlementStateChangeId = s.currentStateChangeId
         JOIN **settlementSettlementWindow** ssw
         ON ssw.settlementId = s.settlementId
-        JOIN **settlementWindowStateChange** swsc
-        ON swsc.settlementWindowStateChangeId = ssw.currentStateChangeId
         JOIN **settlementWindow** sw
         ON sw.settlementWindowId = ssw.settlementWindowId
+        JOIN **settlementWindowStateChange** swsc
+        ON swsc.settlementWindowStateChangeId = sw.currentStateChangeId
         JOIN <color 006>**//settlementTransferParticipant//**</color> stp
         ON stp.settlementWindowId = s.settlementId
         AND stp.settlementWindowId = sw.settlementWindowId
@@ -96,20 +96,18 @@ group Query Settlements by Parameters
             note right of SSAPI #lightgray
                 if (!settlements[settlementsData.settlementId]) {
                     settlements[settlementsData.settlementId] = {
-                        settlements[settlementsData.settlementId] = {
-                            "id: settlementsData.settlementId,
-                            "state": settlementsData.settlementStateId
-                        }
+                        "id: settlementsData.settlementId,
+                        "state": settlementsData.settlementStateId
                     }
                 }
                 settlement = settlements[settlementsData.settlementId]
                 if (!settlement.settlementWindows[settlementsData.settlementWindowId]) {
                     settlement.settlementWindows[settlementsData.settlementWindowId] = {
-                        "id": settlementWindows.settlementWindowId,
-                        "state": settlementWindows.settlementWindowStateId,
-                        "reason": settlementWindows.settlementWindowReason,
-                        "createdDate": settlementWindows.createdDate,
-                        "changedDate": settlementWindows.changedDate
+                        "id": settlementsData.settlementWindowId,
+                        "state": settlementsData.settlementWindowStateId,
+                        "reason": settlementsData.settlementWindowReason,
+                        "createdDate": settlementsData.createdDate,
+                        "changedDate": settlementsData.changedDate
                     }
                 }
                 if (!settlement.participants[settlementsData.participantId]) {
@@ -129,6 +127,7 @@ group Query Settlements by Parameters
                 }
             end note
         end
+        SSAPI -> SSAPI: Transform **settlements** map to array
         deactivate SETTLE_DAO
         note left of SSAPI #yellow
             [
