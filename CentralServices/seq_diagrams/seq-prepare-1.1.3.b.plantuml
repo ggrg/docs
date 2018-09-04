@@ -35,7 +35,7 @@ group Transfer Handler Consume
     
     |||
     TRANS_HANDLER -> TOPIC_EVENTS: Publish event information
-    ref over TRANS_HANDLER, TOPIC_EVENTS :  Event Handler Consume {9.1.0.} \n
+    ref over TRANS_HANDLER, TOPIC_EVENTS :  Event Handler Consume {[[https://github.com/mojaloop/docs/blob/develop/CentralServices/seq_diagrams/seq-event-9.1.0.svg 9.1.0.]]} \n
     |||
 
     ' group Update Prepare batch Transfer State with transferState='RESERVED'

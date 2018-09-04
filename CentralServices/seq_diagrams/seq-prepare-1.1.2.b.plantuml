@@ -42,7 +42,7 @@ group Position Handler Consume
     group Persist Event Information
         |||
         POS_HANDLER -> TOPIC_EVENTS: Publish event information
-        ref over POS_HANDLER, TOPIC_EVENTS : Event Handler Consume {9.1.0.} \n
+        ref over POS_HANDLER, TOPIC_EVENTS : Event Handler Consume {[[https://github.com/mojaloop/docs/blob/develop/CentralServices/seq_diagrams/seq-event-9.1.0.svg 9.1.0.]]} \n
         |||
     end
 

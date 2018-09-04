@@ -41,7 +41,7 @@ group Transfer Handler Consume (Success)
     
         group Persist Event Information
             TRANS_HANDLER -> TOPIC_EVENT: Publish event information
-	        ref over TRANS_HANDLER, TOPIC_EVENT :  Event Handler Consume {9.1.0.}
+	        ref over TRANS_HANDLER, TOPIC_EVENT :  Event Handler Consume {[[https://github.com/mojaloop/docs/blob/develop/CentralServices/seq_diagrams/seq-event-9.1.0.svg 9.1.0.]]}
         end
 
         note right of TRANS_HANDLER #yellow
