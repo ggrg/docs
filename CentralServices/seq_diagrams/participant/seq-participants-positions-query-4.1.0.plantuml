@@ -12,38 +12,40 @@ autonumber
 '   database - Database Persistance Store
 
 ' declare actors
-entity "ML-API-ADAPTER" as MLAPI
+entity "HUB OPERATOR" as OPERATOR
 boundary "Central Service API" as CSAPI
 control "Participant Handler" as PARTICIPANT_HANDLER
 entity "Central Service API" as CSAPI
 entity "Participant DAO" as PARTICIPANT_DAO
+entity "Position Facade" as POSITION_DAO
 database "Central Store" as DB
-box "ML API Adapter Service" #LightBlue
-	participant MLAPI
+box "HUB Operator" #LightBlue
+participant OPERATOR
 end box
 
 box "Central Service" #LightYellow
-    participant CSAPI
-    participant PARTICIPANT_HANDLER
-    participant PARTICIPANT_DAO
-    participant DB
+participant CSAPI
+participant PARTICIPANT_HANDLER
+participant PARTICIPANT_DAO
+participant POSITION_DAO
+participant DB
 end box
 
 ' start flow
 
-activate MLAPI
+activate OPERATOR
 group Get Position Details
-MLAPI -> CSAPI: Request to get positions - GET - /participants/{name}/positions
+    OPERATOR -> CSAPI: Request to get positions - GET - /participants/{name}/positions?currency={currencyId}
     activate CSAPI
     CSAPI -> PARTICIPANT_HANDLER: Fetch Positions for Participant
     activate PARTICIPANT_HANDLER
-        PARTICIPANT_HANDLER ->PARTICIPANT_DAO: Fetch Participant \n<color #FF0000><b>Error code:</b> 2003,3201 </color>
+    PARTICIPANT_HANDLER ->PARTICIPANT_DAO: Fetch Participant \n<color #FF0000><b>Error code:</b> 2003,3201 </color>
 
     activate PARTICIPANT_DAO
     PARTICIPANT_DAO ->DB: Fetch Participant
     activate DB
     hnote over DB #lightyellow
-            participant
+        participant
     end note
     DB --> PARTICIPANT_DAO: Retrieved Participant
     deactivate DB
@@ -51,67 +53,87 @@ MLAPI -> CSAPI: Request to get positions - GET - /participants/{name}/positions
     deactivate PARTICIPANT_DAO
     PARTICIPANT_HANDLER ->PARTICIPANT_HANDLER: Validate DFSP \n<color #FF0000><b>Error code:</b> 3201</color>
     alt Validate participant (success)
-    PARTICIPANT_HANDLER ->PARTICIPANT_DAO: Fetch Positions for Participant \n<color #FF0000><b>Error code:</b> 2003 </color>
-    activate PARTICIPANT_DAO
-    PARTICIPANT_DAO ->DB: Fetch Positions for Participant \n For all active Currencies \n Use participant-<participantCurrency-<participantPosition lookup
-    activate DB
-    hnote over DB #lightyellow
-            participantCurrency
-            participantPosition
-    end note
-    DB --> PARTICIPANT_DAO: Retrieved Positions for Participant
-    deactivate DB
-    PARTICIPANT_DAO -->PARTICIPANT_HANDLER: Return Positions for Participant
-    deactivate PARTICIPANT_DAO
-    note right of PARTICIPANT_HANDLER #yellow
-            Message:
-            {
-                participantId: <participantId>,
-                respondedAt: <timeStamp0>
-                participantPositions:
+        PARTICIPANT_HANDLER ->PARTICIPANT_HANDLER: currency parameter passed ?
+
+        alt currency parameter passed
+
+            PARTICIPANT_HANDLER ->POSITION_DAO: Fetch Participant position for a currency id\n<color #FF0000><b>Error code:</b> 2003 </color>
+            activate POSITION_DAO
+            POSITION_DAO ->DB: Fetch Participant position for a currency id
+            activate DB
+            hnote over DB #lightyellow
+                participantCurrency
+                participantPosition
+            end note
+            DB --> POSITION_DAO: Retrieved Participant position for a currency id
+            deactivate DB
+            POSITION_DAO -->PARTICIPANT_HANDLER: Return Positions for Participant
+            deactivate POSITION_DAO
+            note right of PARTICIPANT_HANDLER #yellow
+                Message:
+                {
+                    {
+                        currency: <currencyId>,
+                        value: <positionValue>,
+                        updatedTime: <timeStamp1>
+                    }
+                }
+            end note
+            PARTICIPANT_HANDLER -->CSAPI: Return Participant position for a currency id
+            CSAPI -->OPERATOR: Return Participant position for a currency id
+        else currency parameter not passed
+            PARTICIPANT_HANDLER ->POSITION_DAO: Fetch Participant Positions for all currencies\n<color #FF0000><b>Error code:</b> 2003 </color>
+            activate POSITION_DAO
+            POSITION_DAO ->DB: Fetch Participant Positions for all currencies
+            activate DB
+            hnote over DB #lightyellow
+                participantCurrency
+                participantPosition
+            end note
+            DB --> POSITION_DAO: Retrieved Participant Positions for all currencies
+            deactivate DB
+            POSITION_DAO -->PARTICIPANT_HANDLER: Return Participant Positions for all currencies
+            deactivate POSITION_DAO
+            note right of PARTICIPANT_HANDLER #yellow
+                Message:
+                {
                     [
                         {
-                            currentPosition: {
-                                currency: <currency1>,
-                                value: <amount1>,
-                                reservedValue: <amount2>,
-                                lastUpdated: <timeStamp1>
-                            }
+                            currency: <currencyId1>,
+                            value: <positionValue1>,
+                            updatedTime: <timeStamp1>
                         },
                         {
-                            currentPosition: {
-                                currency: <currency2>,
-                                value: <amount3>,
-                                reservedValue: <amount4>,
-                                lastUpdated: <timeStamp2>
-                            }
+                            currency: <currencyId2>,
+                            value: <positionValue2>,
+                            updatedTime: <timeStamp2>
                         }
                     ]
-            }
-        end note
-    PARTICIPANT_HANDLER -->CSAPI: Return Positions for Participant
-	deactivate PARTICIPANT_HANDLER
-CSAPI -->MLAPI: Return Positions for Participant
-else Validate participant (failure)
-note right of PARTICIPANT_HANDLER #red: Validation failure!
-    activate PARTICIPANT_HANDLER
-    note right of PARTICIPANT_HANDLER #yellow
+                }
+            end note
+            PARTICIPANT_HANDLER -->CSAPI: Return Participant Positions for all currencies
+            CSAPI -->OPERATOR: Return Participant Positions for all currencies
+        end
+    else Validate participant (failure)
+        note right of PARTICIPANT_HANDLER #red: Validation failure!
+        activate PARTICIPANT_HANDLER
+        note right of PARTICIPANT_HANDLER #yellow
             Message:
             {
                 "errorInformation": {
-                    "errorCode": 3201,
-                    "errorDescription": "FSP id does not exist or not found",
+                "errorCode": 3201,
+                "errorDescription": "FSP id does not exist or not found",
                 }
             }
         end note
-    PARTICIPANT_HANDLER -->CSAPI: Return <color #FF0000><b>Error code:</b> 3201</color>
-	deactivate PARTICIPANT_HANDLER
-CSAPI -->MLAPI: Return <color #FF0000><b>Error code:</b> 3201</color>
-end
+        PARTICIPANT_HANDLER -->CSAPI: Return <color #FF0000><b>Error code:</b> 3201</color>
+        deactivate PARTICIPANT_HANDLER
+        CSAPI -->OPERATOR: Return <color #FF0000><b>Error code:</b> 3201</color>
+    end
 
 end
 
-    deactivate CSAPI
-deactivate MLAPI
+deactivate CSAPI
+deactivate OPERATOR
 
 @enduml
