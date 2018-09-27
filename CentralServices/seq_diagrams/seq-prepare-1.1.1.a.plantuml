@@ -96,7 +96,7 @@ group Prepare Handler Consume
                     TRANS_DAO --> PREP_HANDLER: Return Transfer state
                     deactivate TRANS_DAO
                     break
-                        alt If transferState IN Enumeration ['COMMITTED', 'ABORTED']
+                        alt If transferState IN ['COMMITTED', 'ABORTED']
                             PREP_HANDLER -> TRANS_DAO: Request to retrieve fulfilment, completedTimestamp for the transferId
                             activate TRANS_DAO
                             TRANS_DAO -> DB: Request fulfilment, completedTimestamp for the transferId
@@ -139,9 +139,9 @@ group Prepare Handler Consume
                             }
                         end note
                             PREP_HANDLER -> TOPIC_NOTIFICATIONS: Publish Notification event for Payer with the completed transfer \nFor the Data Model, refer to the Swagger (transferState - mandatory, fulfilment, completedTimestamp - sample values above).
-                        else If transferState in Enumeration ['RECEIVED', 'RESERVED']
+                        else If transferState IN ['RECEIVED', 'RESERVED']
                             PREP_HANDLER <-> PREP_HANDLER: This request can be ignored, because a callback is about to be sent to the client.
-                        else If transferState doesn't exist
+                        else If transferState does not exist
                             PREP_HANDLER -> TOPIC_NOTIFICATIONS: Send /error callback with appropriate error message\n(Invalid duplicate request)\n<color #FF0000><b>Error code:</b> 3100</color>
                         end
                     end
@@ -305,3 +305,4 @@ group Prepare Handler Consume
 end
 deactivate PREP_HANDLER
 @enduml
+

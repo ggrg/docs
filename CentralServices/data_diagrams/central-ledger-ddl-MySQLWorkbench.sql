@@ -1,13 +1,13 @@
--- MySQL dump 10.13  Distrib 5.7.17, for macos10.12 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.12, for macos10.13 (x86_64)
 --
 -- Host: 127.0.0.1    Database: central_ledger
 -- ------------------------------------------------------
--- Server version	5.7.22
+-- Server version	8.0.12
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8 */;
+ SET NAMES utf8 ;
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
 /*!40103 SET TIME_ZONE='+00:00' */;
 /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
@@ -21,7 +21,7 @@
 
 DROP TABLE IF EXISTS `contactType`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `contactType` (
   `contactTypeId` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(50) NOT NULL,
@@ -39,7 +39,7 @@ CREATE TABLE `contactType` (
 
 DROP TABLE IF EXISTS `currency`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `currency` (
   `currencyId` varchar(3) NOT NULL,
   `name` varchar(128) DEFAULT NULL,
@@ -55,7 +55,7 @@ CREATE TABLE `currency` (
 
 DROP TABLE IF EXISTS `endpointType`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `endpointType` (
   `endpointTypeId` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(50) NOT NULL,
@@ -73,7 +73,7 @@ CREATE TABLE `endpointType` (
 
 DROP TABLE IF EXISTS `event`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `event` (
   `eventId` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(128) NOT NULL,
@@ -89,14 +89,32 @@ CREATE TABLE `event` (
 
 DROP TABLE IF EXISTS `ilpPacket`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `ilpPacket` (
   `transferId` varchar(36) NOT NULL,
   `value` text NOT NULL,
   `createdDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`transferId`),
-  CONSTRAINT `ilppacket_transferid_foreign` FOREIGN KEY (`transferId`) REFERENCES `transfer` (`transferId`)
+  CONSTRAINT `ilppacket_transferid_foreign` FOREIGN KEY (`transferId`) REFERENCES `transfer` (`transferid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `ledgerAccountType`
+--
+
+DROP TABLE IF EXISTS `ledgerAccountType`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+ SET character_set_client = utf8mb4 ;
+CREATE TABLE `ledgerAccountType` (
+  `ledgerAccountTypeId` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(50) NOT NULL,
+  `description` varchar(512) DEFAULT NULL,
+  `isActive` tinyint(1) NOT NULL DEFAULT '1',
+  `createdDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`ledgerAccountTypeId`),
+  UNIQUE KEY `ledgeraccounttype_name_unique` (`name`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -105,7 +123,7 @@ CREATE TABLE `ilpPacket` (
 
 DROP TABLE IF EXISTS `ledgerEntryType`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `ledgerEntryType` (
   `ledgerEntryTypeId` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(50) NOT NULL,
@@ -114,7 +132,7 @@ CREATE TABLE `ledgerEntryType` (
   `createdDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`ledgerEntryTypeId`),
   UNIQUE KEY `ledgerentrytype_name_unique` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -123,14 +141,14 @@ CREATE TABLE `ledgerEntryType` (
 
 DROP TABLE IF EXISTS `migration`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `migration` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(255) DEFAULT NULL,
   `batch` int(11) DEFAULT NULL,
-  `migration_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `migration_time` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=69 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=71 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -139,7 +157,7 @@ CREATE TABLE `migration` (
 
 DROP TABLE IF EXISTS `migration_lock`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `migration_lock` (
   `index` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `is_locked` int(11) DEFAULT NULL,
@@ -153,7 +171,7 @@ CREATE TABLE `migration_lock` (
 
 DROP TABLE IF EXISTS `participant`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `participant` (
   `participantId` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(256) NOT NULL,
@@ -172,7 +190,7 @@ CREATE TABLE `participant` (
 
 DROP TABLE IF EXISTS `participantContact`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `participantContact` (
   `participantContactId` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `participantId` int(10) unsigned NOT NULL,
@@ -185,8 +203,8 @@ CREATE TABLE `participantContact` (
   PRIMARY KEY (`participantContactId`),
   KEY `participantcontact_participantid_index` (`participantId`),
   KEY `participantcontact_contacttypeid_index` (`contactTypeId`),
-  CONSTRAINT `participantcontact_contacttypeid_foreign` FOREIGN KEY (`contactTypeId`) REFERENCES `contactType` (`contactTypeId`),
-  CONSTRAINT `participantcontact_participantid_foreign` FOREIGN KEY (`participantId`) REFERENCES `participant` (`participantId`)
+  CONSTRAINT `participantcontact_contacttypeid_foreign` FOREIGN KEY (`contactTypeId`) REFERENCES `contactType` (`contacttypeid`),
+  CONSTRAINT `participantcontact_participantid_foreign` FOREIGN KEY (`participantId`) REFERENCES `participant` (`participantid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -196,20 +214,23 @@ CREATE TABLE `participantContact` (
 
 DROP TABLE IF EXISTS `participantCurrency`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `participantCurrency` (
   `participantCurrencyId` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `participantId` int(10) unsigned NOT NULL,
   `currencyId` varchar(3) NOT NULL,
+  `ledgerAccountTypeId` int(10) unsigned NOT NULL,
   `isActive` tinyint(1) NOT NULL DEFAULT '1',
   `createdDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `createdBy` varchar(128) NOT NULL,
   PRIMARY KEY (`participantCurrencyId`),
   UNIQUE KEY `participantcurrency_participantid_currencyid_unique` (`participantId`,`currencyId`),
+  KEY `participantcurrency_ledgeraccounttypeid_foreign` (`ledgerAccountTypeId`),
   KEY `participantcurrency_participantid_index` (`participantId`),
   KEY `participantcurrency_currencyid_index` (`currencyId`),
-  CONSTRAINT `participantcurrency_currencyid_foreign` FOREIGN KEY (`currencyId`) REFERENCES `currency` (`currencyId`),
-  CONSTRAINT `participantcurrency_participantid_foreign` FOREIGN KEY (`participantId`) REFERENCES `participant` (`participantId`)
+  CONSTRAINT `participantcurrency_currencyid_foreign` FOREIGN KEY (`currencyId`) REFERENCES `currency` (`currencyid`),
+  CONSTRAINT `participantcurrency_ledgeraccounttypeid_foreign` FOREIGN KEY (`ledgerAccountTypeId`) REFERENCES `ledgerAccountType` (`ledgeraccounttypeid`),
+  CONSTRAINT `participantcurrency_participantid_foreign` FOREIGN KEY (`participantId`) REFERENCES `participant` (`participantid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -219,7 +240,7 @@ CREATE TABLE `participantCurrency` (
 
 DROP TABLE IF EXISTS `participantEndpoint`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `participantEndpoint` (
   `participantEndpointId` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `participantId` int(10) unsigned NOT NULL,
@@ -231,8 +252,8 @@ CREATE TABLE `participantEndpoint` (
   PRIMARY KEY (`participantEndpointId`),
   KEY `participantendpoint_participantid_index` (`participantId`),
   KEY `participantendpoint_endpointtypeid_index` (`endpointTypeId`),
-  CONSTRAINT `participantendpoint_endpointtypeid_foreign` FOREIGN KEY (`endpointTypeId`) REFERENCES `endpointType` (`endpointTypeId`),
-  CONSTRAINT `participantendpoint_participantid_foreign` FOREIGN KEY (`participantId`) REFERENCES `participant` (`participantId`)
+  CONSTRAINT `participantendpoint_endpointtypeid_foreign` FOREIGN KEY (`endpointTypeId`) REFERENCES `endpointType` (`endpointtypeid`),
+  CONSTRAINT `participantendpoint_participantid_foreign` FOREIGN KEY (`participantId`) REFERENCES `participant` (`participantid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -242,7 +263,7 @@ CREATE TABLE `participantEndpoint` (
 
 DROP TABLE IF EXISTS `participantLimit`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `participantLimit` (
   `participantLimitId` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `participantCurrencyId` int(10) unsigned NOT NULL,
@@ -257,9 +278,9 @@ CREATE TABLE `participantLimit` (
   KEY `participantlimit_participantcurrencyid_index` (`participantCurrencyId`),
   KEY `participantlimit_participantlimittypeid_index` (`participantLimitTypeId`),
   KEY `participantlimit_startafterparticipantpositionchangeid_index` (`startAfterParticipantPositionChangeId`),
-  CONSTRAINT `participantlimit_participantcurrencyid_foreign` FOREIGN KEY (`participantCurrencyId`) REFERENCES `participantCurrency` (`participantCurrencyId`),
-  CONSTRAINT `participantlimit_participantlimittypeid_foreign` FOREIGN KEY (`participantLimitTypeId`) REFERENCES `participantLimitType` (`participantLimitTypeId`),
-  CONSTRAINT `participantlimit_startafterparticipantpositionchangeid_foreign` FOREIGN KEY (`startAfterParticipantPositionChangeId`) REFERENCES `participantPositionChange` (`participantPositionChangeId`)
+  CONSTRAINT `participantlimit_participantcurrencyid_foreign` FOREIGN KEY (`participantCurrencyId`) REFERENCES `participantCurrency` (`participantcurrencyid`),
+  CONSTRAINT `participantlimit_participantlimittypeid_foreign` FOREIGN KEY (`participantLimitTypeId`) REFERENCES `participantLimitType` (`participantlimittypeid`),
+  CONSTRAINT `participantlimit_startafterparticipantpositionchangeid_foreign` FOREIGN KEY (`startAfterParticipantPositionChangeId`) REFERENCES `participantPositionChange` (`participantpositionchangeid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -269,7 +290,7 @@ CREATE TABLE `participantLimit` (
 
 DROP TABLE IF EXISTS `participantLimitType`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `participantLimitType` (
   `participantLimitTypeId` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(50) NOT NULL,
@@ -287,7 +308,7 @@ CREATE TABLE `participantLimitType` (
 
 DROP TABLE IF EXISTS `participantParty`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `participantParty` (
   `participantPartyId` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `participantId` int(10) unsigned NOT NULL,
@@ -295,7 +316,7 @@ CREATE TABLE `participantParty` (
   PRIMARY KEY (`participantPartyId`),
   UNIQUE KEY `participantparty_participantid_partyid_unique` (`participantId`,`partyId`),
   KEY `participantparty_participantid_index` (`participantId`),
-  CONSTRAINT `participantparty_participantid_foreign` FOREIGN KEY (`participantId`) REFERENCES `participant` (`participantId`)
+  CONSTRAINT `participantparty_participantid_foreign` FOREIGN KEY (`participantId`) REFERENCES `participant` (`participantid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -305,7 +326,7 @@ CREATE TABLE `participantParty` (
 
 DROP TABLE IF EXISTS `participantPosition`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `participantPosition` (
   `participantPositionId` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `participantCurrencyId` int(10) unsigned NOT NULL,
@@ -314,7 +335,7 @@ CREATE TABLE `participantPosition` (
   `changedDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`participantPositionId`),
   KEY `participantposition_participantcurrencyid_index` (`participantCurrencyId`),
-  CONSTRAINT `participantposition_participantcurrencyid_foreign` FOREIGN KEY (`participantCurrencyId`) REFERENCES `participantCurrency` (`participantCurrencyId`)
+  CONSTRAINT `participantposition_participantcurrencyid_foreign` FOREIGN KEY (`participantCurrencyId`) REFERENCES `participantCurrency` (`participantcurrencyid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -324,7 +345,7 @@ CREATE TABLE `participantPosition` (
 
 DROP TABLE IF EXISTS `participantPositionChange`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `participantPositionChange` (
   `participantPositionChangeId` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `participantPositionId` bigint(20) unsigned NOT NULL,
@@ -335,8 +356,8 @@ CREATE TABLE `participantPositionChange` (
   PRIMARY KEY (`participantPositionChangeId`),
   KEY `participantpositionchange_participantpositionid_index` (`participantPositionId`),
   KEY `participantpositionchange_transferstatechangeid_index` (`transferStateChangeId`),
-  CONSTRAINT `participantpositionchange_participantpositionid_foreign` FOREIGN KEY (`participantPositionId`) REFERENCES `participantPosition` (`participantPositionId`),
-  CONSTRAINT `participantpositionchange_transferstatechangeid_foreign` FOREIGN KEY (`transferStateChangeId`) REFERENCES `transferStateChange` (`transferStateChangeId`)
+  CONSTRAINT `participantpositionchange_participantpositionid_foreign` FOREIGN KEY (`participantPositionId`) REFERENCES `participantPosition` (`participantpositionid`),
+  CONSTRAINT `participantpositionchange_transferstatechangeid_foreign` FOREIGN KEY (`transferStateChangeId`) REFERENCES `transferStateChange` (`transferstatechangeid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -346,7 +367,7 @@ CREATE TABLE `participantPositionChange` (
 
 DROP TABLE IF EXISTS `segment`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `segment` (
   `segmentId` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `segmentType` varchar(50) NOT NULL,
@@ -356,7 +377,7 @@ CREATE TABLE `segment` (
   `changedDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`segmentId`),
   KEY `segment_keys_index` (`segmentType`,`enumeration`,`tableName`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -365,7 +386,7 @@ CREATE TABLE `segment` (
 
 DROP TABLE IF EXISTS `settlement`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `settlement` (
   `settlementId` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `reason` varchar(512) DEFAULT NULL,
@@ -373,7 +394,7 @@ CREATE TABLE `settlement` (
   `currentStateChangeId` bigint(20) unsigned DEFAULT NULL,
   PRIMARY KEY (`settlementId`),
   KEY `settlement_currentstatechangeid_foreign` (`currentStateChangeId`),
-  CONSTRAINT `settlement_currentstatechangeid_foreign` FOREIGN KEY (`currentStateChangeId`) REFERENCES `settlementStateChange` (`settlementStateChangeId`)
+  CONSTRAINT `settlement_currentstatechangeid_foreign` FOREIGN KEY (`currentStateChangeId`) REFERENCES `settlementStateChange` (`settlementstatechangeid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -383,7 +404,7 @@ CREATE TABLE `settlement` (
 
 DROP TABLE IF EXISTS `settlementParticipantCurrency`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `settlementParticipantCurrency` (
   `settlementParticipantCurrencyId` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `settlementId` bigint(20) unsigned NOT NULL,
@@ -391,13 +412,15 @@ CREATE TABLE `settlementParticipantCurrency` (
   `netAmount` decimal(18,2) NOT NULL,
   `createdDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `currentStateChangeId` bigint(20) unsigned DEFAULT NULL,
+  `settlementTransferId` varchar(36) DEFAULT NULL,
   PRIMARY KEY (`settlementParticipantCurrencyId`),
   KEY `settlementparticipantcurrency_settlementid_index` (`settlementId`),
   KEY `settlementparticipantcurrency_participantcurrencyid_index` (`participantCurrencyId`),
+  KEY `settlementparticipantcurrency_settlementtransferid_index` (`settlementTransferId`),
   KEY `spc_currentstatechangeid_foreign` (`currentStateChangeId`),
-  CONSTRAINT `settlementparticipantcurrency_participantcurrencyid_foreign` FOREIGN KEY (`participantCurrencyId`) REFERENCES `participantCurrency` (`participantCurrencyId`),
-  CONSTRAINT `settlementparticipantcurrency_settlementid_foreign` FOREIGN KEY (`settlementId`) REFERENCES `settlement` (`settlementId`),
-  CONSTRAINT `spc_currentstatechangeid_foreign` FOREIGN KEY (`currentStateChangeId`) REFERENCES `settlementParticipantCurrencyStateChange` (`settlementParticipantCurrencyStateChangeId`)
+  CONSTRAINT `settlementparticipantcurrency_participantcurrencyid_foreign` FOREIGN KEY (`participantCurrencyId`) REFERENCES `participantCurrency` (`participantcurrencyid`),
+  CONSTRAINT `settlementparticipantcurrency_settlementid_foreign` FOREIGN KEY (`settlementId`) REFERENCES `settlement` (`settlementid`),
+  CONSTRAINT `spc_currentstatechangeid_foreign` FOREIGN KEY (`currentStateChangeId`) REFERENCES `settlementParticipantCurrencyStateChange` (`settlementparticipantcurrencystatechangeid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -407,7 +430,7 @@ CREATE TABLE `settlementParticipantCurrency` (
 
 DROP TABLE IF EXISTS `settlementParticipantCurrencyStateChange`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `settlementParticipantCurrencyStateChange` (
   `settlementParticipantCurrencyStateChangeId` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `settlementParticipantCurrencyId` bigint(20) unsigned NOT NULL,
@@ -417,8 +440,8 @@ CREATE TABLE `settlementParticipantCurrencyStateChange` (
   PRIMARY KEY (`settlementParticipantCurrencyStateChangeId`),
   KEY `spcsc_settlementparticipantcurrencyid_index` (`settlementParticipantCurrencyId`),
   KEY `spcsc_settlementstateid_index` (`settlementStateId`),
-  CONSTRAINT `spcsc_settlementparticipantcurrencyid_foreign` FOREIGN KEY (`settlementParticipantCurrencyId`) REFERENCES `settlementParticipantCurrency` (`settlementParticipantCurrencyId`),
-  CONSTRAINT `spcsc_settlementstateid_foreign` FOREIGN KEY (`settlementStateId`) REFERENCES `settlementState` (`settlementStateId`)
+  CONSTRAINT `spcsc_settlementparticipantcurrencyid_foreign` FOREIGN KEY (`settlementParticipantCurrencyId`) REFERENCES `settlementParticipantCurrency` (`settlementparticipantcurrencyid`),
+  CONSTRAINT `spcsc_settlementstateid_foreign` FOREIGN KEY (`settlementStateId`) REFERENCES `settlementState` (`settlementstateid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -428,7 +451,7 @@ CREATE TABLE `settlementParticipantCurrencyStateChange` (
 
 DROP TABLE IF EXISTS `settlementSettlementWindow`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `settlementSettlementWindow` (
   `settlementSettlementWindowId` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `settlementId` bigint(20) unsigned NOT NULL,
@@ -438,8 +461,8 @@ CREATE TABLE `settlementSettlementWindow` (
   UNIQUE KEY `settlementsettlementwindow_unique` (`settlementId`,`settlementWindowId`),
   KEY `settlementsettlementwindow_settlementid_index` (`settlementId`),
   KEY `settlementsettlementwindow_settlementwindowid_index` (`settlementWindowId`),
-  CONSTRAINT `settlementsettlementwindow_settlementid_foreign` FOREIGN KEY (`settlementId`) REFERENCES `settlement` (`settlementId`),
-  CONSTRAINT `settlementsettlementwindow_settlementwindowid_foreign` FOREIGN KEY (`settlementWindowId`) REFERENCES `settlementWindow` (`settlementWindowId`)
+  CONSTRAINT `settlementsettlementwindow_settlementid_foreign` FOREIGN KEY (`settlementId`) REFERENCES `settlement` (`settlementid`),
+  CONSTRAINT `settlementsettlementwindow_settlementwindowid_foreign` FOREIGN KEY (`settlementWindowId`) REFERENCES `settlementWindow` (`settlementwindowid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -449,7 +472,7 @@ CREATE TABLE `settlementSettlementWindow` (
 
 DROP TABLE IF EXISTS `settlementState`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `settlementState` (
   `settlementStateId` varchar(50) NOT NULL,
   `enumeration` varchar(50) NOT NULL,
@@ -466,7 +489,7 @@ CREATE TABLE `settlementState` (
 
 DROP TABLE IF EXISTS `settlementStateChange`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `settlementStateChange` (
   `settlementStateChangeId` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `settlementId` bigint(20) unsigned NOT NULL,
@@ -476,8 +499,8 @@ CREATE TABLE `settlementStateChange` (
   PRIMARY KEY (`settlementStateChangeId`),
   KEY `settlementstatechange_settlementid_index` (`settlementId`),
   KEY `settlementstatechange_settlementstateid_index` (`settlementStateId`),
-  CONSTRAINT `settlementstatechange_settlementid_foreign` FOREIGN KEY (`settlementId`) REFERENCES `settlement` (`settlementId`),
-  CONSTRAINT `settlementstatechange_settlementstateid_foreign` FOREIGN KEY (`settlementStateId`) REFERENCES `settlementState` (`settlementStateId`)
+  CONSTRAINT `settlementstatechange_settlementid_foreign` FOREIGN KEY (`settlementId`) REFERENCES `settlement` (`settlementid`),
+  CONSTRAINT `settlementstatechange_settlementstateid_foreign` FOREIGN KEY (`settlementStateId`) REFERENCES `settlementState` (`settlementstateid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -487,7 +510,7 @@ CREATE TABLE `settlementStateChange` (
 
 DROP TABLE IF EXISTS `settlementTransferParticipant`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `settlementTransferParticipant` (
   `settlementTransferParticipantId` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `settlementId` bigint(20) unsigned NOT NULL,
@@ -503,11 +526,11 @@ CREATE TABLE `settlementTransferParticipant` (
   KEY `settlementtransferparticipant_participantcurrencyid_index` (`participantCurrencyId`),
   KEY `stp_transferparticipantroletypeid_index` (`transferParticipantRoleTypeId`),
   KEY `settlementtransferparticipant_ledgerentrytypeid_index` (`ledgerEntryTypeId`),
-  CONSTRAINT `settlementtransferparticipant_ledgerentrytypeid_foreign` FOREIGN KEY (`ledgerEntryTypeId`) REFERENCES `ledgerEntryType` (`ledgerEntryTypeId`),
-  CONSTRAINT `settlementtransferparticipant_participantcurrencyid_foreign` FOREIGN KEY (`participantCurrencyId`) REFERENCES `participantCurrency` (`participantCurrencyId`),
-  CONSTRAINT `settlementtransferparticipant_settlementid_foreign` FOREIGN KEY (`settlementId`) REFERENCES `settlement` (`settlementId`),
-  CONSTRAINT `settlementtransferparticipant_settlementwindowid_foreign` FOREIGN KEY (`settlementWindowId`) REFERENCES `settlementWindow` (`settlementWindowId`),
-  CONSTRAINT `stp_transferparticipantroletypeid_foreign` FOREIGN KEY (`transferParticipantRoleTypeId`) REFERENCES `transferParticipantRoleType` (`transferParticipantRoleTypeId`)
+  CONSTRAINT `settlementtransferparticipant_ledgerentrytypeid_foreign` FOREIGN KEY (`ledgerEntryTypeId`) REFERENCES `ledgerEntryType` (`ledgerentrytypeid`),
+  CONSTRAINT `settlementtransferparticipant_participantcurrencyid_foreign` FOREIGN KEY (`participantCurrencyId`) REFERENCES `participantCurrency` (`participantcurrencyid`),
+  CONSTRAINT `settlementtransferparticipant_settlementid_foreign` FOREIGN KEY (`settlementId`) REFERENCES `settlement` (`settlementid`),
+  CONSTRAINT `settlementtransferparticipant_settlementwindowid_foreign` FOREIGN KEY (`settlementWindowId`) REFERENCES `settlementWindow` (`settlementwindowid`),
+  CONSTRAINT `stp_transferparticipantroletypeid_foreign` FOREIGN KEY (`transferParticipantRoleTypeId`) REFERENCES `transferParticipantRoleType` (`transferparticipantroletypeid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -517,7 +540,7 @@ CREATE TABLE `settlementTransferParticipant` (
 
 DROP TABLE IF EXISTS `settlementWindow`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `settlementWindow` (
   `settlementWindowId` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `reason` varchar(512) DEFAULT NULL,
@@ -525,8 +548,8 @@ CREATE TABLE `settlementWindow` (
   `currentStateChangeId` bigint(20) unsigned DEFAULT NULL,
   PRIMARY KEY (`settlementWindowId`),
   KEY `settlementwindow_currentstatechangeid_foreign` (`currentStateChangeId`),
-  CONSTRAINT `settlementwindow_currentstatechangeid_foreign` FOREIGN KEY (`currentStateChangeId`) REFERENCES `settlementWindowStateChange` (`settlementWindowStateChangeId`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  CONSTRAINT `settlementwindow_currentstatechangeid_foreign` FOREIGN KEY (`currentStateChangeId`) REFERENCES `settlementWindowStateChange` (`settlementwindowstatechangeid`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -535,7 +558,7 @@ CREATE TABLE `settlementWindow` (
 
 DROP TABLE IF EXISTS `settlementWindowState`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `settlementWindowState` (
   `settlementWindowStateId` varchar(50) NOT NULL,
   `enumeration` varchar(50) NOT NULL,
@@ -552,7 +575,7 @@ CREATE TABLE `settlementWindowState` (
 
 DROP TABLE IF EXISTS `settlementWindowStateChange`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `settlementWindowStateChange` (
   `settlementWindowStateChangeId` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `settlementWindowId` bigint(20) unsigned NOT NULL,
@@ -562,9 +585,9 @@ CREATE TABLE `settlementWindowStateChange` (
   PRIMARY KEY (`settlementWindowStateChangeId`),
   KEY `settlementwindowstatechange_settlementwindowid_index` (`settlementWindowId`),
   KEY `settlementwindowstatechange_settlementwindowstateid_index` (`settlementWindowStateId`),
-  CONSTRAINT `settlementwindowstatechange_settlementwindowid_foreign` FOREIGN KEY (`settlementWindowId`) REFERENCES `settlementWindow` (`settlementWindowId`),
-  CONSTRAINT `settlementwindowstatechange_settlementwindowstateid_foreign` FOREIGN KEY (`settlementWindowStateId`) REFERENCES `settlementWindowState` (`settlementWindowStateId`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  CONSTRAINT `settlementwindowstatechange_settlementwindowid_foreign` FOREIGN KEY (`settlementWindowId`) REFERENCES `settlementWindow` (`settlementwindowid`),
+  CONSTRAINT `settlementwindowstatechange_settlementwindowstateid_foreign` FOREIGN KEY (`settlementWindowStateId`) REFERENCES `settlementWindowState` (`settlementwindowstateid`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -573,7 +596,7 @@ CREATE TABLE `settlementWindowStateChange` (
 
 DROP TABLE IF EXISTS `token`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `token` (
   `tokenId` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `participantId` int(10) unsigned NOT NULL,
@@ -583,7 +606,7 @@ CREATE TABLE `token` (
   PRIMARY KEY (`tokenId`),
   UNIQUE KEY `token_value_unique` (`value`),
   KEY `token_participantid_index` (`participantId`),
-  CONSTRAINT `token_participantid_foreign` FOREIGN KEY (`participantId`) REFERENCES `participant` (`participantId`)
+  CONSTRAINT `token_participantid_foreign` FOREIGN KEY (`participantId`) REFERENCES `participant` (`participantid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -593,7 +616,7 @@ CREATE TABLE `token` (
 
 DROP TABLE IF EXISTS `transfer`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `transfer` (
   `transferId` varchar(36) NOT NULL,
   `amount` decimal(18,2) NOT NULL,
@@ -603,8 +626,8 @@ CREATE TABLE `transfer` (
   `createdDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`transferId`),
   KEY `transfer_currencyid_index` (`currencyId`),
-  CONSTRAINT `transfer_currencyid_foreign` FOREIGN KEY (`currencyId`) REFERENCES `currency` (`currencyId`),
-  CONSTRAINT `transfer_transferid_foreign` FOREIGN KEY (`transferId`) REFERENCES `transferDuplicateCheck` (`transferId`)
+  CONSTRAINT `transfer_currencyid_foreign` FOREIGN KEY (`currencyId`) REFERENCES `currency` (`currencyid`),
+  CONSTRAINT `transfer_transferid_foreign` FOREIGN KEY (`transferId`) REFERENCES `transferDuplicateCheck` (`transferid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -614,7 +637,7 @@ CREATE TABLE `transfer` (
 
 DROP TABLE IF EXISTS `transferDuplicateCheck`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `transferDuplicateCheck` (
   `transferId` varchar(36) NOT NULL,
   `hash` varchar(256) NOT NULL,
@@ -629,7 +652,7 @@ CREATE TABLE `transferDuplicateCheck` (
 
 DROP TABLE IF EXISTS `transferError`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `transferError` (
   `transferErrorId` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `transferStateChangeId` bigint(20) unsigned NOT NULL,
@@ -638,7 +661,7 @@ CREATE TABLE `transferError` (
   `createdDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`transferErrorId`),
   KEY `transfererror_transferstatechangeid_index` (`transferStateChangeId`),
-  CONSTRAINT `transfererror_transferstatechangeid_foreign` FOREIGN KEY (`transferStateChangeId`) REFERENCES `transferStateChange` (`transferStateChangeId`)
+  CONSTRAINT `transfererror_transferstatechangeid_foreign` FOREIGN KEY (`transferStateChangeId`) REFERENCES `transferStateChange` (`transferstatechangeid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -648,7 +671,7 @@ CREATE TABLE `transferError` (
 
 DROP TABLE IF EXISTS `transferExtension`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `transferExtension` (
   `transferExtensionId` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `transferId` varchar(36) NOT NULL,
@@ -659,8 +682,8 @@ CREATE TABLE `transferExtension` (
   PRIMARY KEY (`transferExtensionId`),
   KEY `transferextension_transferid_index` (`transferId`),
   KEY `transferextension_transferfulfilmentid_index` (`transferFulfilmentId`),
-  CONSTRAINT `transferextension_transferfulfilmentid_foreign` FOREIGN KEY (`transferFulfilmentId`) REFERENCES `transferFulfilment` (`transferFulfilmentId`),
-  CONSTRAINT `transferextension_transferid_foreign` FOREIGN KEY (`transferId`) REFERENCES `transfer` (`transferId`)
+  CONSTRAINT `transferextension_transferfulfilmentid_foreign` FOREIGN KEY (`transferFulfilmentId`) REFERENCES `transferFulfilment` (`transferfulfilmentid`),
+  CONSTRAINT `transferextension_transferid_foreign` FOREIGN KEY (`transferId`) REFERENCES `transfer` (`transferid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -670,7 +693,7 @@ CREATE TABLE `transferExtension` (
 
 DROP TABLE IF EXISTS `transferFulfilment`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `transferFulfilment` (
   `transferFulfilmentId` varchar(36) NOT NULL,
   `transferId` varchar(36) NOT NULL,
@@ -683,8 +706,8 @@ CREATE TABLE `transferFulfilment` (
   UNIQUE KEY `transferfulfilment_transferid_ilpfulfilment_unique` (`transferId`,`ilpFulfilment`),
   KEY `transferfulfilment_transferid_index` (`transferId`),
   KEY `transferfulfilment_settlementwindowid_index` (`settlementWindowId`),
-  CONSTRAINT `transferfulfilment_settlementwindowid_foreign` FOREIGN KEY (`settlementWindowId`) REFERENCES `settlementWindow` (`settlementWindowId`),
-  CONSTRAINT `transferfulfilment_transferid_foreign` FOREIGN KEY (`transferId`) REFERENCES `transfer` (`transferId`)
+  CONSTRAINT `transferfulfilment_settlementwindowid_foreign` FOREIGN KEY (`settlementWindowId`) REFERENCES `settlementWindow` (`settlementwindowid`),
+  CONSTRAINT `transferfulfilment_transferid_foreign` FOREIGN KEY (`transferId`) REFERENCES `transfer` (`transferid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -694,7 +717,7 @@ CREATE TABLE `transferFulfilment` (
 
 DROP TABLE IF EXISTS `transferFulfilmentDuplicateCheck`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `transferFulfilmentDuplicateCheck` (
   `transferFulfilmentId` varchar(36) NOT NULL,
   `transferId` varchar(36) NOT NULL,
@@ -702,7 +725,7 @@ CREATE TABLE `transferFulfilmentDuplicateCheck` (
   `createdDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`transferFulfilmentId`),
   KEY `transferfulfilmentduplicatecheck_transferid_index` (`transferId`),
-  CONSTRAINT `transferfulfilmentduplicatecheck_transferid_foreign` FOREIGN KEY (`transferId`) REFERENCES `transfer` (`transferId`)
+  CONSTRAINT `transferfulfilmentduplicatecheck_transferid_foreign` FOREIGN KEY (`transferId`) REFERENCES `transfer` (`transferid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -712,7 +735,7 @@ CREATE TABLE `transferFulfilmentDuplicateCheck` (
 
 DROP TABLE IF EXISTS `transferParticipant`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `transferParticipant` (
   `transferParticipantId` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `transferId` varchar(36) NOT NULL,
@@ -726,10 +749,10 @@ CREATE TABLE `transferParticipant` (
   KEY `transferparticipant_participantcurrencyid_index` (`participantCurrencyId`),
   KEY `transferparticipant_transferparticipantroletypeid_index` (`transferParticipantRoleTypeId`),
   KEY `transferparticipant_ledgerentrytypeid_index` (`ledgerEntryTypeId`),
-  CONSTRAINT `transferparticipant_ledgerentrytypeid_foreign` FOREIGN KEY (`ledgerEntryTypeId`) REFERENCES `ledgerEntryType` (`ledgerEntryTypeId`),
-  CONSTRAINT `transferparticipant_participantcurrencyid_foreign` FOREIGN KEY (`participantCurrencyId`) REFERENCES `participantCurrency` (`participantCurrencyId`),
-  CONSTRAINT `transferparticipant_transferid_foreign` FOREIGN KEY (`transferId`) REFERENCES `transfer` (`transferId`),
-  CONSTRAINT `transferparticipant_transferparticipantroletypeid_foreign` FOREIGN KEY (`transferParticipantRoleTypeId`) REFERENCES `transferParticipantRoleType` (`transferParticipantRoleTypeId`)
+  CONSTRAINT `transferparticipant_ledgerentrytypeid_foreign` FOREIGN KEY (`ledgerEntryTypeId`) REFERENCES `ledgerEntryType` (`ledgerentrytypeid`),
+  CONSTRAINT `transferparticipant_participantcurrencyid_foreign` FOREIGN KEY (`participantCurrencyId`) REFERENCES `participantCurrency` (`participantcurrencyid`),
+  CONSTRAINT `transferparticipant_transferid_foreign` FOREIGN KEY (`transferId`) REFERENCES `transfer` (`transferid`),
+  CONSTRAINT `transferparticipant_transferparticipantroletypeid_foreign` FOREIGN KEY (`transferParticipantRoleTypeId`) REFERENCES `transferParticipantRoleType` (`transferparticipantroletypeid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -739,7 +762,7 @@ CREATE TABLE `transferParticipant` (
 
 DROP TABLE IF EXISTS `transferParticipantRoleType`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `transferParticipantRoleType` (
   `transferParticipantRoleTypeId` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(50) NOT NULL,
@@ -748,7 +771,7 @@ CREATE TABLE `transferParticipantRoleType` (
   `createdDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`transferParticipantRoleTypeId`),
   UNIQUE KEY `transferparticipantroletype_name_unique` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -757,7 +780,7 @@ CREATE TABLE `transferParticipantRoleType` (
 
 DROP TABLE IF EXISTS `transferState`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `transferState` (
   `transferStateId` varchar(50) NOT NULL,
   `enumeration` varchar(50) NOT NULL COMMENT 'transferState associated to the Mojaloop API',
@@ -774,7 +797,7 @@ CREATE TABLE `transferState` (
 
 DROP TABLE IF EXISTS `transferStateChange`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `transferStateChange` (
   `transferStateChangeId` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `transferId` varchar(36) NOT NULL,
@@ -784,8 +807,8 @@ CREATE TABLE `transferStateChange` (
   PRIMARY KEY (`transferStateChangeId`),
   KEY `transferstatechange_transferid_index` (`transferId`),
   KEY `transferstatechange_transferstateid_index` (`transferStateId`),
-  CONSTRAINT `transferstatechange_transferid_foreign` FOREIGN KEY (`transferId`) REFERENCES `transfer` (`transferId`),
-  CONSTRAINT `transferstatechange_transferstateid_foreign` FOREIGN KEY (`transferStateId`) REFERENCES `transferState` (`transferStateId`)
+  CONSTRAINT `transferstatechange_transferid_foreign` FOREIGN KEY (`transferId`) REFERENCES `transfer` (`transferid`),
+  CONSTRAINT `transferstatechange_transferstateid_foreign` FOREIGN KEY (`transferStateId`) REFERENCES `transferState` (`transferstateid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -795,7 +818,7 @@ CREATE TABLE `transferStateChange` (
 
 DROP TABLE IF EXISTS `transferTimeout`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `transferTimeout` (
   `transferTimeoutId` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `transferId` varchar(36) NOT NULL,
@@ -803,7 +826,7 @@ CREATE TABLE `transferTimeout` (
   `createdDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`transferTimeoutId`),
   UNIQUE KEY `transfertimeout_transferid_unique` (`transferId`),
-  CONSTRAINT `transfertimeout_transferid_foreign` FOREIGN KEY (`transferId`) REFERENCES `transfer` (`transferId`)
+  CONSTRAINT `transfertimeout_transferid_foreign` FOREIGN KEY (`transferId`) REFERENCES `transfer` (`transferid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -816,4 +839,4 @@ CREATE TABLE `transferTimeout` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-08-23 23:03:56
+-- Dump completed on 2018-09-24 12:18:52

@@ -124,17 +124,10 @@ activate OPERATOR
             SETTLE_DAO -> DB: Populate settlementParticipantCurrency with aggregated data
             activate DB
             hnote over DB #lightyellow
-                INSERT INTO settlementParticipantCurrency
+                INSERT INTO **settlementParticipantCurrency**
                        (settlementId, participantCurrencyId, createdDate, netAmount)
-                SELECT settlementId, participantCurrencyId, {transactionTimestamp},
-                SUM(CASE
-                    WHEN stp.transferParticipantRoleTypeId = {PAYER_DFSP} 
-                        AND stp.ledgerEntryTypeId = {PRINCIPLE_VALUE} THEN amount
-                    WHEN stp.transferParticipantRoleTypeId = {PAYEE_DFSP} 
-                        AND stp.ledgerEntryTypeId = {PRINCIPLE_VALUE} THEN -amount
-                    WHEN stp.ledgerEntryTypeId = {INTERCHANGE_FEE} THEN -amount
-                    WHEN stp.ledgerEntryTypeId = {HUB_FEE} THEN amount END)
-                FROM settlementTransferParticipant AS stp
+                SELECT settlementId, participantCurrencyId, {transactionTimestamp}, SUM(amount)
+                FROM settlementTransferParticipant
                 WHERE settlementId = {settlementId}
                 GROUP BY settlementId, participantCurrencyId
             end hnote

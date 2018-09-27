@@ -479,13 +479,17 @@ group Acknowledgement of Settlement Transfer
             hnote over DB #lightyellow
                 UPDATE **settlementParticipantCurrency**
                 SET currentStateChangeId = 
-                    {settlementParticipantCurrencyStateChangeIdList}
+                    {settlementParticipantCurrencyStateChangeIdList},
+                    settlementTransferId = Uuid()
+                    (<color F00>only for PENDING_SETTLEMENT to SETTLED</color>)
+                    {[[https://github.com/mojaloop/central-settlement/blob/develop/src/models/settlement/facade.js#L303 src/models/settlement/facade.js]]}
                 WHERE settlementParticipantCurrencyId =
                         {settlementParticipantCurrencyStateChange
                         .settlementParticipantCurrencyIdList}
             end hnote
             deactivate DB
         end
+        ref over SETTLE_DAO, DB: Settlement Transfer Prepare {[[https://github.com/mojaloop/docs/blob/develop/CentralServices/seq_diagrams/seq-settransfer-prepare-6.3.1.svg 6.3.1]]}\n**Inputs**: transactionTimestamp\n
         group Prepare and insert settlementWindowStateChange
             note right of SETTLE_DAO #lightgray
                 let settlementWindowStateChange = []
