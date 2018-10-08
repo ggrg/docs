@@ -422,7 +422,8 @@ group Acknowledgement of Settlement Transfer
                         settlementParticipantCurrencyStateChange.push({
                             settlementParticipantCurrencyId: allAccounts[accountPayload.id].key,
                             settlementStateId: accountPayload.state,
-                            reason: accountPayload.reason
+                            reason: accountPayload.reason,
+                            settlementTransferId: Uuid()
                         })
                         settlementAccounts.pendingSettlementCount--
                         settlementAccounts.settledCount++
@@ -480,16 +481,16 @@ group Acknowledgement of Settlement Transfer
                 UPDATE **settlementParticipantCurrency**
                 SET currentStateChangeId = 
                     {settlementParticipantCurrencyStateChangeIdList},
-                    settlementTransferId = Uuid()
-                    (<color F00>only for PENDING_SETTLEMENT to SETTLED</color>)
-                    {[[https://github.com/mojaloop/central-settlement/blob/develop/src/models/settlement/facade.js#L303 src/models/settlement/facade.js]]}
+                    <color 00F>settlementTransferId =</color>
+                    <color 00F>settlementParticipantCurrencyStateChange.settlementTransferId</color>
+                    <color 00F>-- only for PENDING_SETTLEMENT to SETTLED</color>
                 WHERE settlementParticipantCurrencyId =
                         {settlementParticipantCurrencyStateChange
                         .settlementParticipantCurrencyIdList}
             end hnote
             deactivate DB
         end
-        ref over SETTLE_DAO, DB: Settlement Transfer Prepare {[[https://github.com/mojaloop/docs/blob/develop/CentralServices/seq_diagrams/seq-settransfer-prepare-6.3.1.svg 6.3.1]]}\n**Inputs**: transactionTimestamp\n
+        ref over SETTLE_DAO, DB: Settlement Transfer Prepare {[[https://github.com/mojaloop/docs/blob/develop/CentralServices/seq_diagrams/seq-settransfer-prepare-6.3.1.svg 6.3.1]]}\n\n**Inputs**: settlementId, transactionTimestamp, enums, trx\n
         group Prepare and insert settlementWindowStateChange
             note right of SETTLE_DAO #lightgray
                 let settlementWindowStateChange = []
@@ -560,6 +561,8 @@ group Acknowledgement of Settlement Transfer
                     UPDATE **settlement**.currentStateChangeId
                 end hnote
                 deactivate DB
+
+                ref over SETTLE_DAO, DB: Settlement Transfer Commit {[[https://github.com/mojaloop/docs/blob/develop/CentralServices/seq_diagrams/seq-settransfer-commit-6.3.2.svg 6.3.2]]}\n\n**Inputs**: settlementId, transactionTimestamp, enums, trx\n
             end
         end
     end

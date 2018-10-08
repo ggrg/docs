@@ -19,8 +19,7 @@ end box
 activate SETTLE_DAO
 group Settlement Transfer Prepare
     note right of SETTLE_DAO #lightgray
-        **Inputs**: settlementId, transactionTimestamp as **tTimestamp**,
-            expDelaySeconds
+        **Inputs**: settlementId, transactionTimestamp, enums, trx; transferValiditySeconds (config)
     end note
     SETTLE_DAO -> DB: Retrieve the list of SETTLED, but not prepared
     activate DB
@@ -32,6 +31,7 @@ group Settlement Transfer Prepare
         LEFT JOIN **transferDuplicateCheck** tdc
         ON tdc.transferId = spc.settlementTransferId
         WHERE spc.settlementId = {settlementId}
+        AND spc.settlementTransferId IS NOT NULL
         AND tdc.transferId IS NULL
 
     end hnote
@@ -43,7 +43,7 @@ group Settlement Transfer Prepare
             activate DB
             hnote over DB #lightyellow
                 INSERT INTO **transferDuplicateCheck** (transferId, hash, createdDate)
-                VALUES (t.settlementTransferId, hashCode(t.settlementTransferId), {tTimestamp})
+                VALUES (t.settlementTransferId, hashCode(t.settlementTransferId), {transactionTimestamp})
             end hnote
             deactivate DB
             SETTLE_DAO -> DB: Insert transfer
@@ -51,8 +51,8 @@ group Settlement Transfer Prepare
             hnote over DB #lightyellow
                 INSERT INTO **transfer** (transferId, amount, currencyId, 
                        ilpCondition, expirationDate, createdDate)
-                VALUES (t.settlementTransferId, t.netAmount, t.currencyId,
-                       0, new Date(+new Date()+1000*expDelaySeconds), {tTimestamp})
+                VALUES (t.settlementTransferId, ABS(t.netAmount), t.currencyId,
+                       0, new Date(+new Date()+1000*transferValiditySeconds), {transactionTimestamp})
             end hnote
             deactivate DB
             SETTLE_DAO -> DB: Retrieve participant settlement account
@@ -63,7 +63,7 @@ group Settlement Transfer Prepare
                 JOIN **participantCurrency** pc2
                 ON pc2.participantId = pc1.participantId
                 AND pc2.currencyId = pc1.currencyId
-                AND pc2.ledgerAccountType = {SETTLEMENT}
+                AND pc2.ledgerAccountTypeId = {SETTLEMENT}
                 AND pc2.isActive = 1
                 WHERE pc1.participantCurrencyId = t.participantCurrencyId
             end hnote
@@ -88,19 +88,19 @@ group Settlement Transfer Prepare
                 INSERT INTO **transferParticipant** (transferId, participantCurrencyId, 
                        transferParticipantRoleTypeId, ledgerEntryTypeId, amount, createdDate)
                 VALUES (t.settlementTransferId, {settlementAccountId},
-                       {DFSP_SETTLEMENT_ACCOUNT}, {ledgerEntryTypeId}, t.netAmount, {tTimestamp})
+                       {DFSP_SETTLEMENT_ACCOUNT}, {ledgerEntryTypeId}, t.netAmount, {transactionTimestamp})
                 
                 INSERT INTO **transferParticipant** (transferId, participantCurrencyId, 
                        transferParticipantRoleTypeId, ledgerEntryTypeId, amount, createdDate)
                 VALUES (t.settlementTransferId, t.participantCurrencyId,
-                       {DFSP_POSITION_ACCOUNT}, {ledgerEntryTypeId}, -t.netAmount, {tTimestamp})
+                       {DFSP_POSITION_ACCOUNT}, {ledgerEntryTypeId}, -t.netAmount, {transactionTimestamp})
             end hnote
             deactivate DB
             SETTLE_DAO -> DB: Insert transferStateChange
             activate DB
             hnote over DB #lightyellow
                 INSERT INTO **transferStateChange** (transferId, transferStateId, reason, createdDate)
-                VALUES (t.settlementTransferId, {RESERVED}, 'Settlement transfer prepare', {tTimestamp})
+                VALUES (t.settlementTransferId, {RESERVED}, 'Settlement transfer prepare', {transactionTimestamp})
             end hnote
             deactivate DB
             |||

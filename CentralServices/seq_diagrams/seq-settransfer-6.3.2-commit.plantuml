@@ -19,7 +19,7 @@ end box
 activate SETTLE_DAO
 group Settlement Transfer Commit
     note right of SETTLE_DAO #lightgray
-        **Inputs**: **settlementId** that has just been SETTLED
+        **Inputs**: settlementId that has just been SETTLED, transactionTimestamp, enums, trx
     end note
     SETTLE_DAO -> DB: Retrieve the list of RESERVED, but not COMMITTED
     activate DB
@@ -45,22 +45,22 @@ group Settlement Transfer Commit
             SETTLE_DAO -> DB: Select participantPosition FOR UPDATE
             activate DB
             hnote over DB #lightyellow
-                SELECT value positionValue, reservedValue
+                SELECT participantPositionId, value positionValue, reservedValue
                 FROM **participantPosition**
                 WHERE participantCurrencyId = t.participantCurrencyId
                 FOR UPDATE
             end note
-            DB --> SETTLE_DAO: Return **positionValue** and **reservedValue**
+            DB --> SETTLE_DAO: Return **participantPositionId**, **positionValue** and **reservedValue**
             deactivate DB
             SETTLE_DAO -> DB: Select participant NET_DEBIT_CAP limit
             activate DB
             hnote over DB #lightyellow
-                SELECT value AS netDebitCap, thresholdAlarmPercentage
+                SELECT value AS netDebitCap
                 FROM **participantLimit**
                 WHERE participantCurrencyId = t.participantCurrencyId
                 AND participantLimitTypeId = {NET_DEBIT_CAP}
             end note
-            DB --> SETTLE_DAO: Return **netDebitCap** and **thresholdAlarmPercentage**
+            DB --> SETTLE_DAO: Return **netDebitCap**
             deactivate DB
             note right of SETTLE_DAO #lightgray
                 **isLimitExceeded** = netDebitCap - positionValue - reservedValue - t.amount < 0
@@ -70,16 +70,15 @@ group Settlement Transfer Commit
             activate DB
             hnote over DB #lightyellow
                 UPDATE **participantPosition**
-                SET value = {latestPosition},
-                    participantPositionId = LAST_INSERT_ID(participantPositionId)
-                WHERE participantCurrencyId = t.participantCurrencyId
+                SET value = {latestPosition}
+                WHERE participantPositionId = participantPositionId
 
                 SELECT LAST_INSERT_ID() AS participantPositionId
             end note
             DB-->SETTLE_DAO: Return **participantPositionId**
             deactivate DB
             opt isLimitExceeded == true
-                SETTLE_DAO->SETTLE_DAO: Increase NET_DEBIT_CAP with the value of t.amount\n(using this method: [[https://github.com/mojaloop/central-ledger/blob/develop/src/models/participant/facade.js#L320 participantFacade.adjustLimits]])\n<color #red>TODO:</color> Notify DFSP for NDC change  is not implemented yet
+                SETTLE_DAO->SETTLE_DAO: Increase NET_DEBIT_CAP with the value of t.amount\n<color #red>TODO:</color> Notify DFSP for NDC change
             end
             deactivate DB
             SETTLE_DAO -> DB: Persist transfer state and participant position change
@@ -93,7 +92,7 @@ group Settlement Transfer Commit
 
                 INSERT INTO **participantPositionChange**
                        (participantPositionId, transferStateChangeId, value)
-                VALUES ({participantPositionId}, {COMMITTED}, {latestPosition})
+                VALUES ({participantPositionId}, {transferStateChangeId}, {latestPosition})
             end note
             activate DB
             deactivate DB
