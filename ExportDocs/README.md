@@ -22,7 +22,7 @@ Because building the documentation requires md files from multiple repos, you ne
 You can use the following script to clone all of the needed repositories:
 
 ```
-for repo in mojaloop central-directory central-fraud-sharing central-ledger docs ilp-service forensic-logging-sidecar interop-ilp-ledger interop-dfsp-directory; do git clone git@github.com:mojaloop/"$repo".git; done
+For repo in mojaloop central-directory central-fraud-sharing central-ledger docs ilp-service forensic-logging-sidecar interop-ilp-ledger interop-dfsp-directory; do git clone git@github.com:mojaloop/"$repo".git; done
 ```
 
 Later, you can update all the repositories to the latest with the following:
