@@ -1,0 +1,104 @@
+@startuml
+' declate title
+title 6.3.2. Settlement Transfer Commit
+autonumber
+
+' declare actors
+entity "Settlement DAO" as SETTLE_DAO
+database "Central Store" as DB
+
+box "Settlement Service" #lightgreen
+    participant SETTLE_DAO
+end box
+
+box "Central Services" #lightyellow
+    participant DB
+end box
+
+' start flow
+activate SETTLE_DAO
+group Settlement Transfer Commit
+    note right of SETTLE_DAO #lightgray
+        **Inputs**: settlementId that has just been SETTLED, transactionTimestamp, enums, trx
+    end note
+    SETTLE_DAO -> DB: Retrieve the list of RESERVED, but not COMMITTED
+    activate DB
+    hnote over DB #lightyellow
+        SELECT tp.transferId, tp.participantCurrencyId, tp.amount
+        FROM **settlementParticipantCurrency** spc
+        JOIN **transferStateChange** tsc1
+        ON tsc1.transferId = spc.settlementTransferId
+        AND tsc1.transferStateId = {RESERVED}
+        LEFT JOIN **transferStateChange** tsc2
+        ON tsc2.transferId = spc.settlementTransferId
+        AND tsc2.transferStateId = {COMMITTED}
+        JOIN **transferParticipant** tp
+        ON tp.transferId = spc.settlementTransferId
+        AND tp.participantCurrencyId = spc.participantCurrencyId
+        WHERE spc.settlementId = {settlementId}
+        AND tsc2.transferId IS NULL
+    end hnote
+    DB --> SETTLE_DAO: Return **settlementTransferList**
+    deactivate DB
+    group <color #blue>DB TRANSACTION</color>
+        loop t IN settlementTransferList
+            SETTLE_DAO -> DB: Select participantPosition FOR UPDATE
+            activate DB
+            hnote over DB #lightyellow
+                SELECT participantPositionId, value positionValue, reservedValue
+                FROM **participantPosition**
+                WHERE participantCurrencyId = t.participantCurrencyId
+                FOR UPDATE
+            end note
+            DB --> SETTLE_DAO: Return **participantPositionId**, **positionValue** and **reservedValue**
+            deactivate DB
+            SETTLE_DAO -> DB: Select participant NET_DEBIT_CAP limit
+            activate DB
+            hnote over DB #lightyellow
+                SELECT value AS netDebitCap
+                FROM **participantLimit**
+                WHERE participantCurrencyId = t.participantCurrencyId
+                AND participantLimitTypeId = {NET_DEBIT_CAP}
+            end note
+            DB --> SETTLE_DAO: Return **netDebitCap**
+            deactivate DB
+            note right of SETTLE_DAO #lightgray
+                **isLimitExceeded** = netDebitCap - positionValue - reservedValue - t.amount < 0
+                **latestPosition** = positionValue + t.amount
+            end note
+            SETTLE_DAO->DB: Persist latestPosition
+            activate DB
+            hnote over DB #lightyellow
+                UPDATE **participantPosition**
+                SET value = {latestPosition}
+                WHERE participantPositionId = participantPositionId
+
+                SELECT LAST_INSERT_ID() AS participantPositionId
+            end note
+            DB-->SETTLE_DAO: Return **participantPositionId**
+            deactivate DB
+            opt isLimitExceeded == true
+                SETTLE_DAO->SETTLE_DAO: Increase NET_DEBIT_CAP with the value of t.amount\n<color #red>TODO:</color> Notify DFSP for NDC change
+            end
+            deactivate DB
+            SETTLE_DAO -> DB: Persist transfer state and participant position change
+            hnote over DB #lightyellow
+                INSERT INTO **transferFulfilment** (transferId, ilpFulfilment, completedDate, 
+                       isValid, settlementWindowId, createdDate)
+                VALUES (t.transferId, 0, tTimestamp, 1, NULL, tTimestamp)
+
+                INSERT INTO **transferStateChange** (transferId, transferStateId, reason)
+                VALUES (t.transferId, {COMMITTED}, 'Settlement transfer commit')
+
+                INSERT INTO **participantPositionChange**
+                       (participantPositionId, transferStateChangeId, value)
+                VALUES ({participantPositionId}, {transferStateChangeId}, {latestPosition})
+            end note
+            activate DB
+            deactivate DB
+        end
+    end
+end
+deactivate SETTLE_DAO
+
+@enduml

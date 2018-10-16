@@ -1,0 +1,78 @@
+@startuml
+' declate title
+title 1.1.4.a. Send notification to Participant (Payer/Payee) (single message)
+
+autonumber
+
+' Actor Keys:
+'   boundary - APIs/Interfaces, etc
+'   collections - Kafka Topics
+'   control - Kafka Consumers
+'   entity - Database Access Objects
+'   database - Database Persistance Store
+
+' declare actors
+actor "DFSP(n)\nParticipant" as DFSP
+control "ML API Notification Event Handler" as NOTIFY_HANDLER
+boundary "Central Service API" as CSAPI
+collections "Notification-Topic" as TOPIC_NOTIFICATIONS
+collections "Event-Topic" as TOPIC_EVENTS
+entity "Notification DAO" as NOTIFY_DAO
+database "Central Store" as DB
+
+box "Financial Service Provider" #lightGray
+	participant DFSP
+end box
+
+box "ML API Adapter Service" #LightBlue
+	participant NOTIFY_HANDLER
+end box
+
+box "Central Service" #LightYellow
+participant TOPIC_NOTIFICATIONS
+    participant CSAPI
+    participant TOPIC_EVENTS
+    participant NOTIFY_DAO
+    participant DB
+end box
+
+' start flow
+activate NOTIFY_HANDLER
+group Send notification to Participant
+    TOPIC_NOTIFICATIONS <- NOTIFY_HANDLER: Consume Notification event
+    activate TOPIC_NOTIFICATIONS
+    deactivate TOPIC_NOTIFICATIONS
+
+    group Persist Event Information
+        NOTIFY_HANDLER -> CSAPI: Request to persist event information - POST - /events
+        activate CSAPI
+        CSAPI -> TOPIC_EVENTS: Publish event information
+        activate TOPIC_EVENTS
+        |||
+        ref over TOPIC_EVENTS :  Event Handler Consume {[[https://github.com/mojaloop/docs/blob/develop/CentralServices/seq_diagrams/seq-event-9.1.0.svg 9.1.0.]]} \n
+        |||
+        TOPIC_EVENTS --> CSAPI: Return success
+        deactivate TOPIC_EVENTS
+        CSAPI --> NOTIFY_HANDLER: Return success
+        deactivate CSAPI
+    end
+    NOTIFY_HANDLER -> CSAPI: Request Notification details for Participant - GET - /notifications/DFSP(n)\n<color #FF0000><b>Error code:</b> 2003</color>
+    activate CSAPI
+    CSAPI -> NOTIFY_DAO: Fetch Notification details for Participant\n<color #FF0000><b>Error code:</b> 2003</color>
+    activate NOTIFY_DAO
+    NOTIFY_DAO -> DB: Fetch Notification details for Participant
+    activate DB
+    hnote over DB #lightyellow
+        transferPosition
+    end note
+    DB -> NOTIFY_DAO: Retrieved Notification details for Participant
+    deactivate DB
+    NOTIFY_DAO --> CSAPI: Return Notification details for Participant
+    deactivate NOTIFY_DAO
+    CSAPI --> NOTIFY_HANDLER: Return Notification details for Participant\n<color #FF0000><b>Error codes:</b> 3202, 3203</color>
+    deactivate CSAPI
+    NOTIFY_HANDLER -> DFSP: Callback with Prepare result to Participant to specified URL - PUT - /<dfsp-host>>/transfers\n<color #FF0000><b>Error code:</b> 1001</color>
+    NOTIFY_HANDLER <-- DFSP: HTTP 200 OK 
+end
+deactivate NOTIFY_HANDLER
+@enduml

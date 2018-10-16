@@ -1,0 +1,153 @@
+@startuml
+' declate title
+title 2.1.0. DFSP2 sends a Fulfil Success Transfer request
+
+autonumber
+
+' Actor Keys:
+'   boundary - APIs/Interfaces, etc
+'   collections - Kafka Topics
+'   control - Kafka Consumers
+'   entity - Database Access Objects
+'   database - Database Persistance Store
+
+' declare actors
+actor "DFSP1\nPayer" as DFSP1
+actor "DFSP2\nPayee" as DFSP2
+boundary "ML API Adapter" as MLAPI
+control "ML API Notification Event Handler" as NOTIFY_HANDLER
+boundary "Central Service API" as CSAPI
+collections "Fulfil-Topic" as TOPIC_FULFIL
+control "Fulfil Event Handler" as FULF_HANDLER
+collections "Position-Topic-dfsp2" as TOPIC_POSITION_DFSP2
+control "Position Event Handler" as POS_HANDLER
+collections "Transfer-Topic" as TOPIC_TRANSFERS
+collections "Event-Topic" as TOPIC_EVENTS
+control "Transfer Event Handler" as TRANS_HANDLER
+collections "Notification-Topic" as TOPIC_NOTIFICATIONS
+
+box "Financial Service Providers" #lightGray
+	participant DFSP1
+	participant DFSP2
+end box
+
+box "ML API Adapter Service" #LightBlue
+	participant MLAPI
+	participant NOTIFY_HANDLER
+end box
+
+box "Central Service" #LightYellow
+    participant CSAPI
+	participant TOPIC_FULFIL
+    participant FULF_HANDLER
+    participant TOPIC_POSITION_DFSP2
+    participant TOPIC_EVENTS
+    participant POS_HANDLER
+    participant TOPIC_TRANSFERS
+    participant TRANS_HANDLER
+    participant TOPIC_NOTIFICATIONS
+end box
+
+' start flow
+activate NOTIFY_HANDLER
+activate FULF_HANDLER
+activate POS_HANDLER
+activate TRANS_HANDLER
+group DFSP2 sends a Fulfil Success Transfer request
+    DFSP2 <-> DFSP2: Retrieve fulfilment string generated during\nthe quoting process or regenerate it using\n**Local secret** and **ILP Packet** as inputs
+    note right of DFSP2 #yellow
+        Headers - transferHeaders: {
+            Content-Length: <Content-Length>,
+            Content-Type: <Content-Type>,
+            Date: <Date>,
+            X-Forwarded-For: <X-Forwarded-For>,
+            FSPIOP-Source: <FSPIOP-Source>,
+            FSPIOP-Destination: <FSPIOP-Destination>,
+            FSPIOP-Encryption: <FSPIOP-Encryption>,
+            FSPIOP-Signature: <FSPIOP-Signature>,
+            FSPIOP-URI: <FSPIOP-URI>,
+            FSPIOP-HTTP-Method: <FSPIOP-HTTP-Method>
+        }
+
+        Payload - transferMessage:
+        {
+            "fulfilment": <IlpFulfilment>,
+            "completedTimestamp": <DateTime>,
+            "transferState": "COMMITTED",
+            "extensionList": {
+                "extension": [
+                    {
+                        "key": <string>,
+                        "value": <string>
+                    }
+                ]
+            }
+        }
+    end note
+    DFSP2 -> MLAPI: PUT - /transfers/<ID>
+    activate MLAPI
+    MLAPI -> MLAPI: Validate incoming token and originator matching Payee\n<color #FF0000><b>Error codes:</b> 3000-3002, 3100-3107</color>
+    note right of MLAPI #yellow
+        Message:
+        {
+            id: <ID>,
+            from: <transferHeaders.FSPIOP-Source>,
+            to: <transferHeaders.FSPIOP-Destination>,
+            type: application/json,
+            content: {
+                headers: <transferHeaders>,
+                payload: <transferMessage>
+            },
+            metadata: {
+                event: {
+                    id: <uuid>,
+                    type: fulfil,
+                    action: commit,
+                    createdAt: <timestamp>,
+                    state: {
+                        status: "success",
+                        code: 0
+                    }
+                }
+            }
+        }
+    end note
+    MLAPI -> TOPIC_FULFIL: Route & Publish Fulfil event for Payee\n<color #FF0000><b>Error code:</b> 2003</color>
+    activate TOPIC_FULFIL
+    TOPIC_FULFIL <-> TOPIC_FULFIL: Ensure event is replicated as configured (ACKS=all)\n<color #FF0000><b>Error code:</b> 2003</color>
+    TOPIC_FULFIL --> MLAPI: Respond replication acknowledgements have been received
+    deactivate TOPIC_FULFIL
+    MLAPI --> DFSP2: Respond HTTP - 200 (OK)
+    deactivate MLAPI
+    TOPIC_FULFIL <- FULF_HANDLER: Consume message
+    ref over TOPIC_FULFIL, TOPIC_EVENTS: Fulfil Handler Consume (Success) {[[https://github.com/mojaloop/docs/blob/develop/CentralServices/seq_diagrams/seq-fulfil-2.1.1.svg 2.1.1.]]} \n
+    FULF_HANDLER -> TOPIC_POSITION_DFSP2: Produce message
+    |||
+    TOPIC_POSITION_DFSP2 <- POS_HANDLER: Consume message
+    ref over TOPIC_POSITION_DFSP2, TOPIC_TRANSFERS:  Position Handler Consume (Success) {[[https://github.com/mojaloop/docs/blob/develop/CentralServices/seq_diagrams/seq-position-1.3.2-fulfil.svg seq-position-1.3.2-fulfil]]} \n
+    POS_HANDLER -> TOPIC_TRANSFERS: Produce message
+    |||
+    TOPIC_TRANSFERS <- TRANS_HANDLER: Consume message
+    ref over TOPIC_EVENTS, TOPIC_NOTIFICATIONS: Transfer Handler Consume (Success) {[[https://github.com/mojaloop/docs/blob/develop/CentralServices/seq_diagrams/seq-fulfil-2.1.3.svg 2.1.3.]]} \n
+    TRANS_HANDLER -> TOPIC_NOTIFICATIONS: Produce message
+    |||
+    TOPIC_NOTIFICATIONS <- NOTIFY_HANDLER: Consume message
+    opt action == 'commit'
+        |||
+        ref over DFSP1, TOPIC_NOTIFICATIONS: Send notification to Participant (Payer) {[[https://github.com/mojaloop/docs/blob/develop/CentralServices/seq_diagrams/seq-prepare-1.1.4.a.svg 1.1.4.a.]]} \n
+        NOTIFY_HANDLER -> DFSP1: Send callback notification
+    end
+    |||
+    TOPIC_NOTIFICATIONS <- NOTIFY_HANDLER: Consume message
+    opt action == 'commit'
+        |||
+        ref over DFSP2, TOPIC_NOTIFICATIONS: Send notification to Participant (Payee) {[[https://github.com/mojaloop/docs/blob/develop/CentralServices/seq_diagrams/seq-prepare-1.1.4.a.svg 1.1.4.a.]]} \n
+        NOTIFY_HANDLER -> DFSP2: Send callback notification
+    end
+    |||
+end
+deactivate TRANS_HANDLER
+deactivate POS_HANDLER
+deactivate FULF_HANDLER
+deactivate NOTIFY_HANDLER
+@enduml

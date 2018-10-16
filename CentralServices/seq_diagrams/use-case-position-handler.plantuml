@@ -1,0 +1,47 @@
+@startuml
+' declate title
+title uc Position Handler
+
+' declare actors
+actor :Position Handler: as POS_HANDLER << Handler >>
+
+' declare use cases
+usecase PREPARE as "Transfer Prepare
+
+--
+..Position-Topic-dfsp1..
+action == 'prepare'
+see sd {[[https://github.com/mojaloop/docs/blob/develop/CentralServices/seq_diagrams/seq-position-1.3.1-prepare.svg seq-position-1.3.1-prepare]]}"
+usecase FULFIL as "Transfer Fulfil Success
+
+--
+..Position-Topic-dfsp2..
+action == 'commit'
+see sd {[[https://github.com/mojaloop/docs/blob/develop/CentralServices/seq_diagrams/seq-position-1.3.2-fulfil.svg seq-position-1.3.2-fulfil]]}"
+usecase REJECT as "Transfer Fulfil Reject
+
+--
+..Position-Topic-dfsp1..
+action == 'reject'
+see sd {[[https://github.com/mojaloop/docs/blob/develop/CentralServices/seq_diagrams/seq-position-1.3.3-abort.svg seq-position-1.3.3-abort]]}"
+usecase TIMEOUT_RECEIVED as "Received Transfer Timeout
+
+--
+..Position-Topic-dfsp1..
+action == 'timeout-received'
+see sd {[[https://github.com/mojaloop/docs/blob/develop/CentralServices/seq_diagrams/seq-position-1.3.3-abort.svg seq-position-1.3.3-abort]]}"
+usecase TIMEOUT_RESERVED as "Reserved Transfer Timeout
+
+--
+..Position-Topic-dfsp1..
+action == 'timeout-reserved'
+see sd {[[https://github.com/mojaloop/docs/blob/develop/CentralServices/seq_diagrams/seq-position-1.3.3-abort.svg seq-position-1.3.3-abort]]}"
+
+' start use case
+(PREPARE) <---- :POS_HANDLER:
+(FULFIL) <--- :POS_HANDLER:
+(REJECT) <-- :POS_HANDLER:
+:POS_HANDLER: ---> (TIMEOUT_RECEIVED)
+:POS_HANDLER: ---> (TIMEOUT_RESERVED)
+
+@enduml

@@ -1,0 +1,70 @@
+@startuml
+' declate title
+title 9.1.0. Event Handler Placeholder
+
+autonumber
+
+' Actor Keys:
+'   boundary - APIs/Interfaces, etc
+'   collections - Kafka Topics
+'   control - Kafka Consumers
+'   entity - Database Access Objects
+'   database - Database Persistance Store
+
+' declare actors
+control "Event Handler Placeholder" as EVENT_HANDLER
+
+box "Event Handler Placeholder" #LightGray
+    participant EVENT_HANDLER
+end box
+
+collections "Event-Topic" as TOPIC_EVENTS
+
+' start flow
+activate EVENT_HANDLER
+
+group Event Handler Placeholder
+    EVENT_HANDLER -> TOPIC_EVENTS: Consume Event message \n <color #FF0000><b>Error code:</b> 2001 </color>
+    note right of EVENT_HANDLER #yellow
+        Message:
+        {
+            from: <transferHeaders.FSPIOP-Source>,
+            to: <transferHeaders.FSPIOP-Destination>,
+            type: application/json,
+            content: {
+                headers: <transferHeaders>,
+                payload: <transferMessage>
+            },
+            metadata: {
+                event: {
+                    id: <uuid>,
+                    type: INFO,
+                    action: AUDIT,
+                    createdAt: <timestamp>,
+                    state: {
+                        status: "success",
+                        code: 0
+                    }
+                }
+            }
+        }
+    end note
+    note right of EVENT_HANDLER #LightGray
+        The type would be an ENUM with values:
+            [INFO, DEBUG, ERROR, WARN, FATAL, TRACE]
+        Possible values for "action" would be
+            [AUDIT, EXCEPTION]
+        The event messages can be handled based on the values of these two variables
+        (when the placeholder is extended).
+    end note
+    EVENT_HANDLER -> EVENT_HANDLER: Auto-commit \n <color #FF0000><b>Error code:</b> 2001 </color>
+    note right of EVENT_HANDLER #lightBlue
+                Currently events to only be published as part of the placeholder.
+                This can be evolved to add relevant functionality.
+            end note
+    activate TOPIC_EVENTS
+    deactivate TOPIC_EVENTS
+end
+deactivate EVENT_HANDLER
+
+@enduml

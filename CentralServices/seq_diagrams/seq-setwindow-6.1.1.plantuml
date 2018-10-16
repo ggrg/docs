@@ -1,0 +1,75 @@
+@startuml
+' declate title
+title 6.1.1. Request Settlement Window By Id (getSettlementWindowById)
+
+autonumber
+
+' declare actors
+actor "Hub Employee" as OPERATOR
+boundary "Settlement Service API" as SSAPI
+entity "Settlement DAO" as SETTLE_DAO
+database "Central Store" as DB
+
+box "Central HUB" #lightpink
+    participant OPERATOR
+end box
+
+box "Settlement Service" #lightgreen
+    participant SSAPI
+    participant SETTLE_DAO
+end box
+
+box "Central Services" #lightyellow
+    participant DB
+end box
+
+' start flow
+group Request Settlement Window
+    activate OPERATOR
+    OPERATOR -> SSAPI: GET - /settlementWindows/{id}
+    activate SSAPI
+    SSAPI -> SETTLE_DAO: Request settlementWindow by id\n<color #FF0000><b>Error code:</b> 2001</color>
+    activate SETTLE_DAO
+    SETTLE_DAO -> DB: Select from DB
+    activate DB
+    hnote over DB #lightyellow
+        SELECT sw.settlementWindowId, swsc.settlementWindowStateId, 
+               swsc.reason, sw.createdDate, swsc.createdDate changedDate
+        FROM **settlementWindow** AS sw
+        JOIN **settlementWindowStateChange** AS swsc
+        ON swsc.settlementWindowStateChangeId = sw.currentStateChangeId
+        WHERE sw.settlementWindowId = {id}
+    end hnote
+    deactivate DB
+    SSAPI <-- SETTLE_DAO: Return **data**
+    deactivate SETTLE_DAO
+
+    alt settlementWindow found
+        note left of SSAPI #Yellow
+            {
+                "id": data.settlementWindowId,
+                "state": data.settlementWindowStateId,
+                "reason": data.reason,
+                "createdDate": data.createdDate,
+                "changedDate": data.changedDate
+            }
+        end note
+        OPERATOR <-- SSAPI: Respond HTTP - 200 (OK)
+    else
+        note right of SSAPI #lightgray
+            Log ERROR event
+        end note
+        note left of SSAPI #yellow
+            {
+                "errorInformation": {
+                    "errorCode": <integer>,
+                    "errorDescription": <string>
+                }
+            }
+        end note
+        OPERATOR <-- SSAPI: Respond HTTP - 4xx (Client error)
+        deactivate SSAPI
+        deactivate OPERATOR
+    end
+end
+@enduml

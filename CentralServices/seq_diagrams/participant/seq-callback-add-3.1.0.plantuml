@@ -1,0 +1,126 @@
+@startuml
+' declate title
+title 3.1.0 Add Participant Callback Details
+
+autonumber
+
+
+' Actor Keys:
+' boundary - APIs/Interfaces, etc
+' collections - Kafka Topics
+' control - Kafka Consumers
+' entity - Database Access Objects
+' database - Database Persistance Store
+
+' declare actors
+actor "HUB OPERATOR" as OPERATOR
+boundary "Central Service API" as CSAPI
+control "Participant Handler" as PARTICIPANT_HANDLER
+entity "Central Service API" as CSAPI
+entity "Participant DAO" as PARTICIPANT_DAO
+database "Central Store" as DB
+
+box "Central Services" #LightYellow
+participant CSAPI
+participant PARTICIPANT_HANDLER
+participant PARTICIPANT_DAO
+participant DB
+end box
+
+' start flow
+
+activate OPERATOR
+group Add Callback Details
+    OPERATOR -> CSAPI: Request to add callback details - POST - /paticipants/{name}/endpoints
+    note right of OPERATOR #yellow
+        Message:
+        {
+            payload: {
+                endpoint: {
+                    type: <typeValue>,
+                    value: <endpointValue>
+               }
+            }
+        }
+    end note
+
+    activate CSAPI
+    CSAPI -> PARTICIPANT_HANDLER: Add Callback details for Participant
+    activate PARTICIPANT_HANDLER
+    PARTICIPANT_HANDLER ->PARTICIPANT_DAO: Fetch Participant \n<color #FF0000><b>Error code:</b> 3200</color>
+
+    activate PARTICIPANT_DAO
+    PARTICIPANT_DAO -> DB: Fetch Participant
+    activate DB
+    hnote over DB #lightyellow
+        participant
+    end note
+    DB --> PARTICIPANT_DAO: Retrieved Participant
+    deactivate DB
+    PARTICIPANT_DAO --> PARTICIPANT_HANDLER: Return Participant
+    deactivate PARTICIPANT_DAO
+    PARTICIPANT_HANDLER ->PARTICIPANT_HANDLER: Validate DFSP
+    alt Validate participant (success)
+        PARTICIPANT_HANDLER ->PARTICIPANT_DAO: Add Callback details for Participant \n<color #FF0000><b>Error code:</b> 2003/<b>Msg:</b> Service unavailable </color> \n<color #FF0000><b>Error code:</b> 2001/<b>Msg:</b> Internal Server Error </color>
+        activate PARTICIPANT_DAO
+        PARTICIPANT_DAO -> DB: Persist Participant Endpoint
+        activate DB
+        hnote over DB #lightyellow
+            participantEndpoint
+        end note
+        deactivate DB
+        note right of PARTICIPANT_DAO #lightgrey
+            If (endpoint exists && isActive = 1)
+                oldEndpoint.isActive = 0
+                insert endpoint
+            Else
+                insert endpoint
+            End
+                
+        end note
+        PARTICIPANT_DAO --> PARTICIPANT_HANDLER: Return status
+        deactivate PARTICIPANT_DAO
+        PARTICIPANT_HANDLER -> PARTICIPANT_HANDLER: Validate status
+        alt Validate status (success)
+            PARTICIPANT_HANDLER -->CSAPI: Return Status Code 201
+            deactivate PARTICIPANT_HANDLER
+            CSAPI -->OPERATOR: Return Status Code 201
+        else Validate status (failure) / Error
+            note right of PARTICIPANT_HANDLER #red: Error!
+            activate PARTICIPANT_HANDLER
+            note right of PARTICIPANT_HANDLER #yellow
+            Message:
+                {
+                    "errorInformation": {
+                        "errorCode": <Error Code>,
+                        "errorDescription": <Msg>,
+                    }
+                }
+            end note
+            PARTICIPANT_HANDLER -->CSAPI: Return <color #FF0000><b>Error code</b></color>
+           ' deactivate PARTICIPANT_HANDLER
+            CSAPI -->OPERATOR: Return <color #FF0000><b>Error code</b></color>
+            
+        end
+
+    else Validate participant (failure)
+        note right of PARTICIPANT_HANDLER #red: Validation failure!
+        activate PARTICIPANT_HANDLER
+        note right of PARTICIPANT_HANDLER #yellow
+            Message:
+                {
+                    "errorInformation": {
+                        "errorCode": 3200,
+                        "errorDescription": "FSP id Not Found",
+                    }
+                }
+        end note
+        PARTICIPANT_HANDLER -->CSAPI: Return <color #FF0000><b>Error code:</b> 3200</color>
+        deactivate PARTICIPANT_HANDLER
+        CSAPI -->OPERATOR: Return <color #FF0000><b>Error code:</b> 3200</color>
+
+    end
+    deactivate CSAPI
+    deactivate OPERATOR
+end
+@enduml
