@@ -1,0 +1,117 @@
+@startuml
+' declate title
+title 6.3.1. Settlement Transfer Prepare
+autonumber
+
+' declare actors
+entity "Settlement DAO" as SETTLE_DAO
+database "Central Store" as DB
+
+box "Settlement Service" #lightgreen
+    participant SETTLE_DAO
+end box
+
+box "Central Services" #lightyellow
+    participant DB
+end box
+
+' start flow
+activate SETTLE_DAO
+group Settlement Transfer Prepare
+    note right of SETTLE_DAO #lightgray
+        **Inputs**: settlementId, transactionTimestamp, enums, trx; transferValiditySeconds (config)
+    end note
+    SETTLE_DAO -> DB: Retrieve the list of SETTLED, but not prepared
+    activate DB
+    hnote over DB #lightyellow
+        SELECT spc.*, pc.currencyId
+        FROM **settlementParticipantCurrency** spc
+        JOIN **participantCurrency** pc
+        ON pc.participantCurrencyId = spc.participantCurrencyId
+        LEFT JOIN **transferDuplicateCheck** tdc
+        ON tdc.transferId = spc.settlementTransferId
+        WHERE spc.settlementId = {settlementId}
+        AND spc.settlementTransferId IS NOT NULL
+        AND tdc.transferId IS NULL
+
+    end hnote
+    DB --> SETTLE_DAO: Return **settlementTransferList**
+    deactivate DB
+    loop t IN settlementTransferList
+        group <color #blue>DB TRANSACTION</color>
+            SETTLE_DAO -> DB: Insert transferDuplicateCheck
+            activate DB
+            hnote over DB #lightyellow
+                INSERT INTO **transferDuplicateCheck** (transferId, hash, createdDate)
+                VALUES (t.settlementTransferId, hashCode(t.settlementTransferId), {transactionTimestamp})
+            end hnote
+            deactivate DB
+            SETTLE_DAO -> DB: Insert transfer
+            activate DB
+            hnote over DB #lightyellow
+                INSERT INTO **transfer** (transferId, amount, currencyId, 
+                       ilpCondition, expirationDate, createdDate)
+                VALUES (t.settlementTransferId, ABS(t.netAmount), t.currencyId,
+                       0, new Date(+new Date()+1000*transferValiditySeconds), {transactionTimestamp})
+            end hnote
+            deactivate DB
+            SETTLE_DAO -> DB: Retrieve participant settlement account
+            activate DB
+            hnote over DB #lightyellow
+                SELECT pc2.participantCurrencyId AS settlementAccountId
+                FROM **participantCurrency** pc1
+                JOIN **participantCurrency** pc2
+                ON pc2.participantId = pc1.participantId
+                AND pc2.currencyId = pc1.currencyId
+                AND pc2.ledgerAccountTypeId = {SETTLEMENT}
+                AND pc2.isActive = 1
+                WHERE pc1.participantCurrencyId = t.participantCurrencyId
+            end hnote
+            DB --> SETTLE_DAO: Return **settlementAccountId**
+            deactivate DB
+            alt t.netAmount < 0
+                note right of SETTLE_DAO #lightgray
+                    **ledgerEntryTypeId** = {SETTLEMENT_NET_RECIPIENT}
+                end note
+            else t.netAmount > 0
+                note right of SETTLE_DAO #lightgray
+                    **ledgerEntryTypeId** = {SETTLEMENT_NET_SENDER}
+                end note
+            else t.netAmount == 0
+                note right of SETTLE_DAO #lightgray
+                    **ledgerEntryTypeId** = {SETTLEMENT_NET_ZERO}
+                end note
+            end
+            SETTLE_DAO -> DB: Insert transferParticipant records
+            activate DB
+            hnote over DB #lightyellow
+                INSERT INTO **transferParticipant** (transferId, participantCurrencyId, 
+                       transferParticipantRoleTypeId, ledgerEntryTypeId, amount, createdDate)
+                VALUES (t.settlementTransferId, {settlementAccountId},
+                       {DFSP_SETTLEMENT_ACCOUNT}, {ledgerEntryTypeId}, t.netAmount, {transactionTimestamp})
+                
+                INSERT INTO **transferParticipant** (transferId, participantCurrencyId, 
+                       transferParticipantRoleTypeId, ledgerEntryTypeId, amount, createdDate)
+                VALUES (t.settlementTransferId, t.participantCurrencyId,
+                       {DFSP_POSITION_ACCOUNT}, {ledgerEntryTypeId}, -t.netAmount, {transactionTimestamp})
+            end hnote
+            deactivate DB
+            SETTLE_DAO -> DB: Insert transferStateChange
+            activate DB
+            hnote over DB #lightyellow
+                INSERT INTO **transferStateChange** (transferId, transferStateId, reason, createdDate)
+                VALUES (t.settlementTransferId, {RESERVED}, 'Settlement transfer prepare', {transactionTimestamp})
+            end hnote
+            deactivate DB
+            |||
+            note right of SETTLE_DAO #lightgray
+                <color #red>TODO:</color> Store the external settlement transaction reference provided
+                by the API during updateSettlementById as a transferExtension.
+            end note
+            SETTLE_DAO --> SETTLE_DAO: Omit ilpPacket, participantPosition &\nparticipantPositionChange
+        end
+    end
+end
+deactivate SETTLE_DAO
+
+@enduml

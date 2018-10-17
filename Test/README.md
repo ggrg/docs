@@ -1,0 +1,2 @@
+These tests describe the expected behavior of the the services separate from the interfaces. Should the interfaces change, these behaviors would be expected to continue to work. Each test is described as a simple bulleted sentence that states the test conditions and expected behavior. This has the same information you might expect in a more formal format like Gherkin, but is easier to read and review.
+

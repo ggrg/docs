@@ -1,0 +1,105 @@
+@startuml
+' declate title
+title 1.3.0. Position Handler Consume (single message)
+
+autonumber
+
+' Actor Keys:
+'   boundary - APIs/Interfaces, etc
+'   collections - Kafka Topics
+'   control - Kafka Consumers
+'   entity - Database Access Objects
+'   database - Database Persistance Store
+
+' declare actors
+collections "topic-usd-dfsp1-position-prepare" as TOPIC_POSITION_PREPARE_DFSP1
+collections "topic-usd-dfsp2-position-fulfil" as TOPIC_POSITION_FULFIL_DFSP2
+collections "topic-usd-dfsp1-position-abort" as TOPIC_POSITION_ABORT_DFSP1
+control "Position Handler" as POS_HANDLER
+collections "Transfer-Topic" as TOPIC_TRANSFERS
+' entity "Position DAO" as POS_DAO
+collections "Event-Topic" as TOPIC_EVENTS
+collections "Notification-Topic" as TOPIC_NOTIFICATIONS
+' entity "Participant DAO" as PARTICIPANT_DAO
+' entity "Transfer DAO" as TRANS_DAO
+' database "Central Store" as DB
+
+box "Central Service" #LightYellow
+    participant TOPIC_POSITION_PREPARE_DFSP1
+    participant TOPIC_POSITION_FULFIL_DFSP2
+    participant TOPIC_POSITION_ABORT_DFSP1
+    participant POS_HANDLER
+    participant TOPIC_EVENTS
+    participant TOPIC_TRANSFERS
+    participant TOPIC_NOTIFICATIONS
+    ' participant POS_DAO
+    ' participant PARTICIPANT_DAO
+    ' participant TRANS_DAO
+    ' participant DB
+end box
+
+' start flow
+activate POS_HANDLER
+group Position Handler Consume
+    alt Consume Prepare message for Payer
+        TOPIC_POSITION_PREPARE_DFSP1 <- POS_HANDLER: Consume Position event message for Payer
+        activate TOPIC_POSITION_PREPARE_DFSP1
+        deactivate TOPIC_POSITION_PREPARE_DFSP1
+        break
+            group Validate Event
+                POS_HANDLER <-> POS_HANDLER: Validate event - Rule: type == 'position' && action == 'prepare'\n<color #FF0000><b>Error codes:</b> 2001</color>
+            end
+        end
+        group Persist Event Information
+            |||
+            POS_HANDLER -> TOPIC_EVENTS: Publish event information
+            ref over POS_HANDLER, TOPIC_EVENTS :  Event Handler Consume {[[https://github.com/mojaloop/docs/blob/develop/CentralServices/seq_diagrams/seq-event-9.1.0.svg 9.1.0.]]} \n
+            |||
+        end
+        |||
+        ref over POS_HANDLER: Prepare Position Handler Consume {[[https://github.com/mojaloop/docs/blob/develop/CentralServices/seq_diagrams/seq-position-1.3.1-prepare.svg 1.3.1-prepare]]} \n
+        POS_HANDLER -> TOPIC_TRANSFERS: Produce message
+        POS_HANDLER -> TOPIC_NOTIFICATIONS: Produce message
+    else Consume Fulfil message for Payee
+        TOPIC_POSITION_FULFIL_DFSP2 <- POS_HANDLER: Consume Position event message for Payee
+        activate TOPIC_POSITION_FULFIL_DFSP2
+        deactivate TOPIC_POSITION_FULFIL_DFSP2
+        break
+            group Validate Event
+                POS_HANDLER <-> POS_HANDLER: Validate event - Rule: type == 'position' && action == 'commit'\n<color #FF0000><b>Error codes:</b> 2001</color>
+            end
+        end
+        group Persist Event Information
+            |||
+            POS_HANDLER -> TOPIC_EVENTS: Publish event information
+            ref over POS_HANDLER, TOPIC_EVENTS :  Event Handler Consume {[[https://github.com/mojaloop/docs/blob/develop/CentralServices/seq_diagrams/seq-event-9.1.0.svg 9.1.0.]]} \n
+            |||
+        end
+        |||
+        ref over POS_HANDLER: Fulfil Position Handler Consume {[[https://github.com/mojaloop/docs/blob/develop/CentralServices/seq_diagrams/seq-position-1.3.2-fulfil.svg 1.3.2-fulfil]]} \n
+        POS_HANDLER -> TOPIC_TRANSFERS: Produce message
+        POS_HANDLER -> TOPIC_NOTIFICATIONS: Produce message
+    else Consume Abort message
+        TOPIC_POSITION_ABORT_DFSP1 <- POS_HANDLER: Consume Position event message
+        activate TOPIC_POSITION_ABORT_DFSP1
+        deactivate TOPIC_POSITION_ABORT_DFSP1
+        break
+            group Validate Event
+                POS_HANDLER <-> POS_HANDLER: Validate event - Rule: type == 'position' &&\naction IN ['timeout-reserved', 'reject', 'fail']\n<color #FF0000><b>Error codes:</b> 2001</color>
+            end
+        end
+        group Persist Event Information
+            |||
+            POS_HANDLER -> TOPIC_EVENTS: Publish event information
+            ref over POS_HANDLER, TOPIC_EVENTS :  Event Handler Consume {[[https://github.com/mojaloop/docs/blob/develop/CentralServices/seq_diagrams/seq-event-9.1.0.svg 9.1.0.]]} \n
+            |||
+        end
+        |||
+        ref over POS_HANDLER: Abort Position Handler Consume {[[https://github.com/mojaloop/docs/blob/develop/CentralServices/seq_diagrams/seq-position-1.3.3-abort.svg 1.3.3-abort]]} \n
+        POS_HANDLER -> TOPIC_TRANSFERS: Produce message
+        POS_HANDLER -> TOPIC_NOTIFICATIONS: Produce message
+    end
+
+end
+deactivate POS_HANDLER
+@enduml

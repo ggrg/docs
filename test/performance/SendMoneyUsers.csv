@@ -1,9 +1,0 @@
-senderDFSP,senderName,senderUserNumber,senderAccountId,senderRoleType,receiverDFSP,receiverName,receiverUserNumber,receiverAccountId,receiverRoleType
-dfsp1,bob170516-2-01,perftest-2-01,54347925,customer,dfsp2,bob170516-2-02,perftest-2-02,56446548,customer
-dfsp2,bob170516-2-02,perftest-2-02,56446548,customer,dfsp1,bob170516-2-01,perftest-2-01,54347925,customer
-dfsp1,bob170516-2-11,perftest-2-11,99584153,customer,dfsp2,bob170516-2-12,perftest-2-12,93680210,customer
-dfsp2,bob170516-2-12,perftest-2-12,93680210,customer,dfsp1,bob170516-2-11,perftest-2-11,99584153,customer
-dfsp1,bob170516-2-21,perftest-2-21,37593379,customer,dfsp2,bob170516-2-22,perftest-2-22,11236042,customer
-dfsp2,bob170516-2-22,perftest-2-22,11236042,customer,dfsp1,bob170516-2-21,perftest-2-21,37593379,customer
-dfsp1,bob170516-2-31,perftest-2-31,33870535,customer,dfsp2,bob170516-2-32,perftest-2-32,44659416,customer
-dfsp2,bob170516-2-32,perftest-2-32,44659416,customer,dfsp1,bob170516-2-31,perftest-2-31,33870535,customer

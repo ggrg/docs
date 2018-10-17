@@ -1,0 +1,120 @@
+@startuml
+' declate title
+title 1.1.2.b. Position Handler Consume (batch messages)
+
+autonumber
+
+' Actor Keys:
+'   boundary - APIs/Interfaces, etc
+'   collections - Kafka Topics
+'   control - Kafka Consumers
+'   entity - Database Access Objects
+'   database - Database Persistance Store
+
+' declare actors
+collections "Position-Topic-dfsp1" as TOPIC_POSITION_DFSP1
+control "Position Event Handler" as POS_HANDLER
+collections "Transfer-Topic" as TOPIC_TRANSFERS
+entity "Position DAO" as POS_DAO
+entity "Event-Topic" as TOPIC_EVENTS
+collections "Notification-Topic" as TOPIC_NOTIFICATIONS
+entity "Transfer DAO" as TRANS_DAO
+database "Central Store" as DB
+
+box "Central Service" #LightYellow
+    participant TOPIC_POSITION_DFSP1
+    participant POS_HANDLER
+    participant TOPIC_TRANSFERS
+    participant TOPIC_EVENTS
+    participant TOPIC_NOTIFICATIONS
+    participant POS_DAO
+    participant TRANS_DAO
+    participant DB
+end box
+
+' start flow
+activate POS_HANDLER
+group Position Handler Consume
+    TOPIC_POSITION_DFSP1 <- POS_HANDLER: Consume Position event batch of messages for Payer
+    activate TOPIC_POSITION_DFSP1
+    deactivate TOPIC_POSITION_DFSP1
+
+    group Persist Event Information
+        |||
+        POS_HANDLER -> TOPIC_EVENTS: Publish event information
+        ref over POS_HANDLER, TOPIC_EVENTS : Event Handler Consume {[[https://github.com/mojaloop/docs/blob/develop/CentralServices/seq_diagrams/seq-event-9.1.0.svg 9.1.0.]]} \n
+        |||
+    end
+
+    loop for each message in batch
+        group Calculate position and persist change
+            POS_HANDLER -> POS_DAO: Request latest position from DB for Payer
+            activate POS_DAO
+            POS_DAO -> DB: Retrieve latest position from DB for Payer
+            hnote over DB #lightyellow
+                transferPosition
+            end note
+            activate DB
+            deactivate DB
+            POS_DAO --> POS_HANDLER: Return latest position
+            deactivate POS_DAO
+
+            POS_HANDLER <-> POS_HANDLER: Calculate latest position (lpos) by incrementing transfer for prepare
+            POS_HANDLER <-> POS_HANDLER: Validate Calculated latest position against the net-debit cap (netcap) - Rule: lpos < netcap
+            
+            POS_HANDLER -> POS_DAO: Request to persist latest position for Payer
+            activate POS_DAO
+            POS_DAO -> DB: Persist latest position to DB for Payer
+            hnote over DB #lightyellow
+                transferPosition
+            end note
+            activate DB
+            deactivate DB
+            POS_DAO --> POS_HANDLER: Return success
+            deactivate POS_DAO
+        end
+        group Persist Transfer State (with transferState='RESERVED' on position check pass)
+            POS_HANDLER -> TRANS_DAO: Request to persist batch transfer
+            activate TRANS_DAO
+            TRANS_DAO -> DB: Persist batch transfer
+            hnote over DB #lightyellow
+                transferStateChange
+            end note
+            activate DB
+            deactivate DB
+            TRANS_DAO --> POS_HANDLER: Return success
+            deactivate TRANS_DAO
+        end
+        note right of POS_HANDLER #yellow
+            Message:
+            {
+                id: <transferMessage.transferId>
+                from: <transferMessage.payerFsp>,
+                to: <transferMessage.payeeFsp>,
+                type: application/json
+                content: {
+                    headers: <transferHeaders>,
+                    payload: <transferMessage>
+                },
+                metadata: {
+                    event: {
+                        id: <uuid>,
+                        responseTo: <previous.uuid>,
+                        type: transfer,
+                        action: prepare,
+                        createdAt: <timestamp>,
+                        state: {
+                            status: "success",
+                            code: 0
+                        }
+                    }
+                }
+            }
+        end note
+        POS_HANDLER -> TOPIC_TRANSFERS: Publish Transfer event
+        activate TOPIC_TRANSFERS
+        deactivate TOPIC_TRANSFERS
+    end
+end
+deactivate POS_HANDLER
+@enduml
