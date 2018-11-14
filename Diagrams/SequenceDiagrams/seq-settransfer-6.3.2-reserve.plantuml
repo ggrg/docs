@@ -1,6 +1,6 @@
 @startuml
 ' declate title
-title 6.3.2. Settlement Transfer Commit
+title 6.3.2. Settlement Transfer Reserve
 autonumber
 
 ' declare actors
@@ -17,24 +17,27 @@ end box
 
 ' start flow
 activate SETTLE_DAO
-group Settlement Transfer Commit
+group Settlement Transfer Reserve
     note right of SETTLE_DAO #lightgray
-        **Inputs**: settlementId that has just been SETTLED, transactionTimestamp, enums, trx
+        **Inputs**: settlementId that holds entries with PS_TRANSFERS_RESERVED, transactionTimestamp, enums, trx
     end note
-    SETTLE_DAO -> DB: Retrieve the list of RESERVED, but not COMMITTED
+    SETTLE_DAO -> DB: Retrieve list of PS_TRANSFERS_RESERVED, but not RESERVED
     activate DB
     hnote over DB #lightyellow
-        SELECT tp.transferId, tp.participantCurrencyId, tp.amount
+        SELECT tp.transferId, tp.participantCurrencyId, tp.transferParticipantRoleTypeId, tp.amount
         FROM **settlementParticipantCurrency** spc
+        JOIN **settlementParticipantCurrencyStateChange** spcsc
+        ON spcsc.settlementParticipantCurrencyId = spc.settlementParticipantCurrencyId
+        AND spcsc.settlementStateId = {PS_TRANSFERS_RESERVED}
         JOIN **transferStateChange** tsc1
         ON tsc1.transferId = spc.settlementTransferId
-        AND tsc1.transferStateId = {RESERVED}
+        AND tsc1.transferStateId = {RECEIVED_PREPARE}
         LEFT JOIN **transferStateChange** tsc2
         ON tsc2.transferId = spc.settlementTransferId
-        AND tsc2.transferStateId = {COMMITTED}
+        AND tsc2.transferStateId = {RESERVED}
         JOIN **transferParticipant** tp
         ON tp.transferId = spc.settlementTransferId
-        AND tp.participantCurrencyId = spc.participantCurrencyId
+        AND tp.amount > 0 <color #blue>-- get CR entries</color>
         WHERE spc.settlementId = {settlementId}
         AND tsc2.transferId IS NULL
     end hnote
@@ -52,20 +55,43 @@ group Settlement Transfer Commit
             end note
             DB --> SETTLE_DAO: Return **participantPositionId**, **positionValue** and **reservedValue**
             deactivate DB
-            SETTLE_DAO -> DB: Select participant NET_DEBIT_CAP limit
-            activate DB
-            hnote over DB #lightyellow
-                SELECT value AS netDebitCap
-                FROM **participantLimit**
-                WHERE participantCurrencyId = t.participantCurrencyId
-                AND participantLimitTypeId = {NET_DEBIT_CAP}
-            end note
-            DB --> SETTLE_DAO: Return **netDebitCap**
-            deactivate DB
+
+            opt t.transferParticipantRoleTypeId == {DFSP_POSITION}
+                SETTLE_DAO -> DB: Select participant NET_DEBIT_CAP limit
+                activate DB
+                hnote over DB #lightyellow
+                    SELECT value AS netDebitCap
+                    FROM **participantLimit**
+                    WHERE participantCurrencyId = t.participantCurrencyId
+                    AND participantLimitTypeId = {NET_DEBIT_CAP}
+                end note
+                DB --> SETTLE_DAO: Return **netDebitCap**
+                deactivate DB
+                note right of SETTLE_DAO #lightgray
+                    **isLimitExceeded** = netDebitCap - positionValue - reservedValue - t.amount < 0
+                end note
+
+                opt isLimitExceeded == true
+                    SETTLE_DAO -> DB: Select max participantPositionChangeId
+                    activate DB
+                    hnote over DB #lightyellow
+                        SELECT participantPositionChangeId
+                        FROM **participantPositionChange**
+                        WHERE participantPositionId = {participantPositionId}
+                        ORDER BY 1 DESC
+                        LIMIT 1
+                    end note
+                    DB --> SETTLE_DAO: Return **startAfterPositionChangeId**
+                    deactivate DB
+
+                    SETTLE_DAO->SETTLE_DAO: Increase NET_DEBIT_CAP with the value of t.amount\n//using ParticipantFacade.adjustLimits method//
+                end
+            end
+
             note right of SETTLE_DAO #lightgray
-                **isLimitExceeded** = netDebitCap - positionValue - reservedValue - t.amount < 0
-                **latestPosition** = positionValue + t.amount
+                **latestPosition** = positionValue + t.amount (increased)
             end note
+
             SETTLE_DAO->DB: Persist latestPosition
             activate DB
             hnote over DB #lightyellow
@@ -77,18 +103,12 @@ group Settlement Transfer Commit
             end note
             DB-->SETTLE_DAO: Return **participantPositionId**
             deactivate DB
-            opt isLimitExceeded == true
-                SETTLE_DAO->SETTLE_DAO: Increase NET_DEBIT_CAP with the value of t.amount\n<color #red>TODO:</color> Notify DFSP for NDC change
-            end
+
             deactivate DB
             SETTLE_DAO -> DB: Persist transfer state and participant position change
             hnote over DB #lightyellow
-                INSERT INTO **transferFulfilment** (transferId, ilpFulfilment, completedDate, 
-                       isValid, settlementWindowId, createdDate)
-                VALUES (t.transferId, 0, tTimestamp, 1, NULL, tTimestamp)
-
                 INSERT INTO **transferStateChange** (transferId, transferStateId, reason)
-                VALUES (t.transferId, {COMMITTED}, 'Settlement transfer commit')
+                VALUES (t.transferId, {RESERVED}, 'Settlement transfer commit')
 
                 INSERT INTO **participantPositionChange**
                        (participantPositionId, transferStateChangeId, value)

@@ -21,11 +21,14 @@ group Settlement Transfer Prepare
     note right of SETTLE_DAO #lightgray
         **Inputs**: settlementId, transactionTimestamp, enums, trx; transferValiditySeconds (config)
     end note
-    SETTLE_DAO -> DB: Retrieve the list of SETTLED, but not prepared
+    SETTLE_DAO -> DB: Retrieve list of PS_TRANSFERS_RECORDED, but not RECEIVED_PREPARE
     activate DB
     hnote over DB #lightyellow
         SELECT spc.*, pc.currencyId
         FROM **settlementParticipantCurrency** spc
+        JOIN **settlementParticipantCurrencyStateChange** spcsc
+        ON spcsc.settlementParticipantCurrencyId = spc.settlementParticipantCurrencyId
+        AND spcsc.settlementStateId = {PS_TRANSFERS_RECORDED}
         JOIN **participantCurrency** pc
         ON pc.participantCurrencyId = spc.participantCurrencyId
         LEFT JOIN **transferDuplicateCheck** tdc
@@ -55,19 +58,19 @@ group Settlement Transfer Prepare
                        0, new Date(+new Date()+1000*transferValiditySeconds), {transactionTimestamp})
             end hnote
             deactivate DB
-            SETTLE_DAO -> DB: Retrieve participant settlement account
+            SETTLE_DAO -> DB: Retrieve Hub MLNS account
             activate DB
             hnote over DB #lightyellow
-                SELECT pc2.participantCurrencyId AS settlementAccountId
+                SELECT pc2.participantCurrencyId AS mlnsAccountId
                 FROM **participantCurrency** pc1
                 JOIN **participantCurrency** pc2
-                ON pc2.participantId = pc1.participantId
+                ON pc2.participantId = 1
                 AND pc2.currencyId = pc1.currencyId
-                AND pc2.ledgerAccountTypeId = {SETTLEMENT}
+                AND pc2.ledgerAccountTypeId = {HUB_MULTILATERAL_SETTLEMENT}
                 AND pc2.isActive = 1
                 WHERE pc1.participantCurrencyId = t.participantCurrencyId
             end hnote
-            DB --> SETTLE_DAO: Return **settlementAccountId**
+            DB --> SETTLE_DAO: Return **mlnsAccountId**
             deactivate DB
             alt t.netAmount < 0
                 note right of SETTLE_DAO #lightgray
@@ -87,27 +90,22 @@ group Settlement Transfer Prepare
             hnote over DB #lightyellow
                 INSERT INTO **transferParticipant** (transferId, participantCurrencyId, 
                        transferParticipantRoleTypeId, ledgerEntryTypeId, amount, createdDate)
-                VALUES (t.settlementTransferId, {settlementAccountId},
-                       {DFSP_SETTLEMENT_ACCOUNT}, {ledgerEntryTypeId}, t.netAmount, {transactionTimestamp})
+                VALUES (t.settlementTransferId, {mlnsAccountId},
+                       {HUB}, {ledgerEntryTypeId}, t.netAmount, {transactionTimestamp})
                 
                 INSERT INTO **transferParticipant** (transferId, participantCurrencyId, 
                        transferParticipantRoleTypeId, ledgerEntryTypeId, amount, createdDate)
                 VALUES (t.settlementTransferId, t.participantCurrencyId,
-                       {DFSP_POSITION_ACCOUNT}, {ledgerEntryTypeId}, -t.netAmount, {transactionTimestamp})
+                       {DFSP_POSITION}, {ledgerEntryTypeId}, -t.netAmount, {transactionTimestamp})
             end hnote
             deactivate DB
             SETTLE_DAO -> DB: Insert transferStateChange
             activate DB
             hnote over DB #lightyellow
                 INSERT INTO **transferStateChange** (transferId, transferStateId, reason, createdDate)
-                VALUES (t.settlementTransferId, {RESERVED}, 'Settlement transfer prepare', {transactionTimestamp})
+                VALUES (t.settlementTransferId, {RECEIVED_PREPARE}, 'Settlement transfer prepare', {transactionTimestamp})
             end hnote
             deactivate DB
-            |||
-            note right of SETTLE_DAO #lightgray
-                <color #red>TODO:</color> Store the external settlement transaction reference provided
-                by the API during updateSettlementById as a transferExtension.
-            end note
             SETTLE_DAO --> SETTLE_DAO: Omit ilpPacket, participantPosition &\nparticipantPositionChange
         end
     end

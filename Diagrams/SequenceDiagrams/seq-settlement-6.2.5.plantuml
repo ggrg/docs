@@ -31,26 +31,17 @@ group Acknowledgement of Settlement Transfer
                 {
                     "id": 1
                     "accounts" : [
-                        {
-                            "id": 1,
-                            "state": "PENDING_SETTLEMENT",
-                            "reason": <string>
-                        },
-                        {
-                            "id": 2,
-                            "state": "SETTLED",
-                            "reason": <string>
-                        }
+                        { "id": 1, "state": "PENDING_SETTLEMENT", "reason": "abc" },
+                        { "id": 2, "state": "PS_TRANSFERS_RECORDED", "reason": "def" },
+                        { "id": 3, "state": "PS_TRANSFERS_RESERVED", "reason": "ghi" },
+                        { "id": 4, "state": "PS_TRANSFERS_COMMITTED", "reason": "jkl" },
+                        { "id": 5, "state": "SETTLED", "reason": "mno" }
                     ]
                 },
                 {
                     "id": 2
                     "accounts" : [
-                        {
-                            "id": 3,
-                            "state": "NOT_SETTLED",
-                            "reason": <string>
-                        }
+                        { "id": 6, "state": "NOT_SETTLED", "reason": "pqr" }
                     ]
                 }
             ]
@@ -138,27 +129,13 @@ group Acknowledgement of Settlement Transfer
             Local variables and objects:
             **settlementAccounts**: { // (derived from <color 0000FF>settlementAccountsList</color>)
                 pendingSettlementCount: <integer>, // count of accounts in PENDING_SETTLEMENT state
+                psTransfersRecordedCount: <integer>, // count of accounts in PS_TRANSFERS_RECORDED state
+                psTransfersReservedCount: <integer>, // count of accounts in PS_TRANSFERS_RESERVED state
+                psTransfersCommittedCount: <integer>, // count of accounts in PS_TRANSFERS_COMMITTED state
                 settledCount: <integer>, // count of accounts in SETTLED state
                 notSettledCount: <integer> // count of accounts in NOT_SETTLED state
             }
             **settlementAccountsInit** copy of previous object to be preserved for comparission at the end
-            ' **allParticipants**: { // same as participants response object with initial data & key (derived from <color 0000FF>settlementAccountsList</color>)
-            '     participantId_key: { // number used to access the object in map-like style
-            '         id: participantId,
-            '         accounts: {
-            '             participantCurrencyId_key: { // number used to access the object in map-like style
-            '                 id: participantCurrencyId,
-            '                 state: settlementStateId,
-            '                 reason: reason,
-            '                 createdDate: createdDate,
-            '                 netSettlementAmount: {
-            '                     amount: netAmount,
-            '                     currency: currencyId
-            '                 }
-            '             }
-            '         }
-            '     }
-            ' }
             **allAccounts**: { // same as previous but accessed by account id (derived from <color 0000FF>settlementAccountsList</color>)
                 participantCurrencyId_key: { // number used to access the object in map-like style
                     id: participantCurrencyId,
@@ -185,6 +162,9 @@ group Acknowledgement of Settlement Transfer
                 settlementWindowId_key: { // number used to access the object in map-like style
                     id: settlementWindowId // same as key value
                     pendingSettlementCount: <integer>, // count of accounts in PENDING_SETTLEMENT state
+                    psTransfersRecordedCount: <integer>, // count of accounts in PS_TRANSFERS_RECORDED state
+                    psTransfersReservedCount: <integer>, // count of accounts in PS_TRANSFERS_RESERVED state
+                    psTransfersCommittedCount: <integer>, // count of accounts in PS_TRANSFERS_COMMITTED state
                     settledCount: <integer>, // count of accounts in SETTLED state
                     notSettledCount: <integer> // count of accounts in NOT_SETTLED state
                 }
@@ -202,9 +182,12 @@ group Acknowledgement of Settlement Transfer
         SETTLE_DAO -> SETTLE_DAO: Declare and initialize variables
         note right of SETTLE_DAO #lightgray
             let settlementAccounts = {
-                pendingSettlementAccounts: 0,
-                settledAccounts: 0,
-                notSettledAccounts: 0,
+                pendingSettlementCount: 0,
+                psTransfersRecordedCount: 0,
+                psTransfersReservedCount: 0,
+                psTransfersCommittedCount: 0,
+                settledCount: 0,
+                notSettledCount: 0,
                 unknownCount: 0
             }
             ' let allParticipants = {} // declare map
@@ -242,6 +225,18 @@ group Acknowledgement of Settlement Transfer
             alt state === 'PENDING_SETTLEMENT'
                 note right of SETTLE_DAO #lightgray
                     settlementAccounts.pendingSettlementCount++
+                end note
+            else state === 'PS_TRANSFERS_RECORDED'
+                note right of SETTLE_DAO #lightgray
+                    settlementAccounts.psTransfersRecordedCount++
+                end note
+            else state === 'PS_TRANSFERS_RESERVED'
+                note right of SETTLE_DAO #lightgray
+                    settlementAccounts.psTransfersReservedCount++
+                end note
+            else state === 'PS_TRANSFERS_COMMITTED'
+                note right of SETTLE_DAO #lightgray
+                    settlementAccounts.psTransfersCommittedCount++
                 end note
             else state === 'SETTLED'
                 note right of SETTLE_DAO #lightgray
@@ -305,6 +300,18 @@ group Acknowledgement of Settlement Transfer
                 note right of SETTLE_DAO #lightgray
                     windowsAccounts[wid].pendingSettlementCount++
                 end note
+            else state === 'PS_TRANSFERS_RECORDED'
+                note right of SETTLE_DAO #lightgray
+                    windowsAccounts[wid].psTransfersRecordedCount++
+                end note
+            else state === 'PS_TRANSFERS_RESERVED'
+                note right of SETTLE_DAO #lightgray
+                    windowsAccounts[wid].psTransfersReservedCount++
+                end note
+            else state === 'PS_TRANSFERS_COMMITTED'
+                note right of SETTLE_DAO #lightgray
+                    windowsAccounts[wid].psTransfersCommittedCount++
+                end note
             else state === 'SETTLED'
                 note right of SETTLE_DAO #lightgray
                     windowsAccounts[wid].settledCount++
@@ -323,7 +330,6 @@ group Acknowledgement of Settlement Transfer
         note right of SETTLE_DAO #lightgray
             Available objects after the setup:
             **settlementAccounts** is used for tracing settlement state and state transition allowance
-            ' **allParticipants** is used for tracing participant/account state and state transition
             **allAccounts** is helper object, same as previous, providing direct access to account by id
             **allWindows** has window information for all windows in the settlement
             **windowsAccounts** is used for tracing settlement window state and state transition allowance
@@ -388,7 +394,7 @@ group Acknowledgement of Settlement Transfer
                         })
                     end note
                 else allAccounts[account.id].state === accountPayload.state // allowed
-                    SETTLE_DAO -> SETTLE_DAO: All same-state reason insert is allowed (state preserved)
+                    SETTLE_DAO -> SETTLE_DAO: Same-state reason amendment is always allowed
                     note right of SETTLE_DAO #lightgray
                         processedAccounts.push(accountPayload.id)
                         participant.accounts.push({
@@ -405,10 +411,11 @@ group Acknowledgement of Settlement Transfer
                         })
                         allAccounts[accountPayload.id].reason = accountPayload.reason
                         allAccounts[accountPayload.id].createdDate = currentTimestamp
-                        ' allParticipants[participantPayload.id].accounts[accountPayload.id].reason = accountPayload.reason
-                        ' allParticipants[participantPayload.id].accounts[accountPayload.id].createdDate = currentTimestamp
                     end note
-                else allAccounts[account.id].state === 'PENDING_SETTLEMENT' && accountPayload.state === 'SETTLED' // allowed
+                else settlementData.state === 'PENDING_SETTLEMENT' && accountPayload.state === 'PS_TRANSFERS_RECORDED'
+                else settlementData.state === 'PS_TRANSFERS_RECORDED' && accountPayload.state === 'PS_TRANSFERS_RESERVED'
+                else settlementData.state === 'PS_TRANSFERS_RESERVED' && accountPayload.state === 'PS_TRANSFERS_COMMITTED'
+                else settlementData.state === 'PS_TRANSFERS_COMMITTED' || settlementData.state === 'SETTLING' && accountPayload.state === 'SETTLED'
                     SETTLE_DAO -> SETTLE_DAO: True settlement acknowledgement
                     note right of SETTLE_DAO #lightgray
                         processedAccounts.push(accountPayload.id)
@@ -430,9 +437,6 @@ group Acknowledgement of Settlement Transfer
                         allAccounts[accountPayload.id].state = accountPayload.state
                         allAccounts[accountPayload.id].reason = accountPayload.reason
                         allAccounts[accountPayload.id].createdDate = currentTimestamp
-                        ' allParticipants[participantPayload.id].accounts[accountPayload.id].state = accountPayload.state
-                        ' allParticipants[participantPayload.id].accounts[accountPayload.id].reason = accountPayload.reason
-                        ' allParticipants[participantPayload.id].accounts[accountPayload.id].createdDate = currentTimestamp
                         let settlementWindowId
                     end note
                     loop let aw IN accountsWindows[accountPayload.id].windows
