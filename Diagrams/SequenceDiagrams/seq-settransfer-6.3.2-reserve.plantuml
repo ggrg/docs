@@ -108,7 +108,7 @@ group Settlement Transfer Reserve
             SETTLE_DAO -> DB: Persist transfer state and participant position change
             hnote over DB #lightyellow
                 INSERT INTO **transferStateChange** (transferId, transferStateId, reason)
-                VALUES (t.transferId, {RESERVED}, 'Settlement transfer commit')
+                VALUES (t.transferId, {RESERVED}, 'Settlement transfer reserve')
 
                 INSERT INTO **participantPositionChange**
                        (participantPositionId, transferStateChangeId, value)
