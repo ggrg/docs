@@ -608,7 +608,7 @@ group Acknowledgement of Settlement Transfer
                     settlementData.state = 'PS_TRANSFERS_COMMITTED'
                     settlementData.reason = 'All settlement accounts are PS_TRANSFERS_COMMITTED'
                 end note
-            else settlementData.state == 'PS_TRANSFERS_COMMITTED'\n&& settlementAccounts.psTransfersCommittedCount != 0\n&& settlementAccounts.settledCount > 0
+            else settlementData.state == 'PS_TRANSFERS_COMMITTED'\n&& settlementAccounts.psTransfersCommittedCount > 0\n&& settlementAccounts.settledCount > 0
                 note right of SETTLE_DAO #lightgray
                     settlementData.state = 'SETTLING'
                     settlementData.reason = 'Some settlement accounts are SETTLED'

@@ -24,7 +24,9 @@ group Settlement Transfer Reserve
     SETTLE_DAO -> DB: Retrieve list of PS_TRANSFERS_RESERVED, but not RESERVED
     activate DB
     hnote over DB #lightyellow
-        SELECT tp.transferId, tp.participantCurrencyId, tp.transferParticipantRoleTypeId, tp.amount
+        SELECT tp1.transferId, tp1.ledgerEntryTypeId,
+            tp1.participantCurrencyId AS dfspAccountId, tp1.amount AS dfspAmount,
+            tp2.participantCurrencyId AS hubAccountId, tp2.amount AS hubAmount
         FROM **settlementParticipantCurrency** spc
         JOIN **settlementParticipantCurrencyStateChange** spcsc
         ON spcsc.settlementParticipantCurrencyId = spc.settlementParticipantCurrencyId
@@ -35,9 +37,12 @@ group Settlement Transfer Reserve
         LEFT JOIN **transferStateChange** tsc2
         ON tsc2.transferId = spc.settlementTransferId
         AND tsc2.transferStateId = {RESERVED}
-        JOIN **transferParticipant** tp
-        ON tp.transferId = spc.settlementTransferId
-        AND tp.amount > 0 <color #blue>-- get CR entries</color>
+        JOIN **transferParticipant** tp1
+        ON tp1.transferId = spc.settlementTransferId
+        AND tp1.transferParticipantRoleTypeId = {DFSP_POSITION}
+        JOIN **transferParticipant** tp2
+        ON tp2.transferId = spc.settlementTransferId
+        AND tp2.transferParticipantRoleTypeId = {HUB}
         WHERE spc.settlementId = {settlementId}
         AND tsc2.transferId IS NULL
     end hnote
@@ -45,30 +50,41 @@ group Settlement Transfer Reserve
     deactivate DB
     group <color #blue>DB TRANSACTION</color>
         loop t IN settlementTransferList
-            SETTLE_DAO -> DB: Select participantPosition FOR UPDATE
+            SETTLE_DAO -> DB: Persist transfer state
             activate DB
             hnote over DB #lightyellow
-                SELECT participantPositionId, value positionValue, reservedValue
-                FROM **participantPosition**
-                WHERE participantCurrencyId = t.participantCurrencyId
-                FOR UPDATE
+                INSERT INTO **transferStateChange** (transferId, transferStateId, reason)
+                VALUES (t.transferId, {RESERVED}, 'Settlement transfer reserve')
             end note
-            DB --> SETTLE_DAO: Return **participantPositionId**, **positionValue** and **reservedValue**
+            DB --> SETTLE_DAO: Return **transferStateChangeId**
             deactivate DB
 
-            opt t.transferParticipantRoleTypeId == {DFSP_POSITION}
+            opt t.ledgerEntryTypeId == {SETTLEMENT_NET_RECIPIENT}
+                SETTLE_DAO -> DB: Select dfsp position FOR UPDATE
+                activate DB
+                hnote over DB #lightyellow
+                    SELECT participantPositionId AS dfspPositionId,
+                        value AS dfspPositionValue,
+                        reservedValue AS dfspReservedValue
+                    FROM **participantPosition**
+                    WHERE participantCurrencyId = t.dfspAccountId
+                    FOR UPDATE
+                end note
+                DB --> SETTLE_DAO: Return **dfspPositionId**, **dfspPositionValue** and **dfspReservedValue**
+                deactivate DB
+
                 SETTLE_DAO -> DB: Select participant NET_DEBIT_CAP limit
                 activate DB
                 hnote over DB #lightyellow
                     SELECT value AS netDebitCap
                     FROM **participantLimit**
-                    WHERE participantCurrencyId = t.participantCurrencyId
+                    WHERE participantCurrencyId = t.dfspAccountId
                     AND participantLimitTypeId = {NET_DEBIT_CAP}
                 end note
                 DB --> SETTLE_DAO: Return **netDebitCap**
                 deactivate DB
                 note right of SETTLE_DAO #lightgray
-                    **isLimitExceeded** = netDebitCap - positionValue - reservedValue - t.amount < 0
+                    **isLimitExceeded** = netDebitCap - dfspPositionValue - dfspReservedValue - t.dfspAmount < 0
                 end note
 
                 opt isLimitExceeded == true
@@ -77,7 +93,7 @@ group Settlement Transfer Reserve
                     hnote over DB #lightyellow
                         SELECT participantPositionChangeId
                         FROM **participantPositionChange**
-                        WHERE participantPositionId = {participantPositionId}
+                        WHERE participantPositionId = {dfspPositionId}
                         ORDER BY 1 DESC
                         LIMIT 1
                     end note
@@ -86,36 +102,48 @@ group Settlement Transfer Reserve
 
                     SETTLE_DAO->SETTLE_DAO: Increase NET_DEBIT_CAP with the value of t.amount\n//using ParticipantFacade.adjustLimits method//
                 end
+
+                SETTLE_DAO->DB: Persist latest dfsp position & dfsp position change
+                hnote over DB #lightyellow
+                    UPDATE **participantPosition**
+                    SET value = {dfspPositionValue + t.dfspAmount}
+                    WHERE participantPositionId = {dfspPositionId}
+
+                    INSERT INTO **participantPositionChange**
+                           (participantPositionId, transferStateChangeId, value, reservedValue)
+                    VALUES ({dfspPositionId}, {transferStateChangeId},
+                        {dfspPositionValue + t.dfspAmount}, {dfspReservedValue})
+                end note
+                activate DB
+                deactivate DB
+
+                SETTLE_DAO -> DB: Select hub position FOR UPDATE
+                activate DB
+                hnote over DB #lightyellow
+                    SELECT participantPositionId AS hubPositionId,
+                        value AS hubPositionValue
+                    FROM **participantPosition**
+                    WHERE participantCurrencyId = t.hubAccountId
+                    FOR UPDATE
+                end note
+                DB --> SETTLE_DAO: Return **hubPositionId** and **hubPositionValue**
+                deactivate DB
+
+                SETTLE_DAO->DB: Persist latest hub position & hub position change
+                hnote over DB #lightyellow
+                    UPDATE **participantPosition**
+                    SET value = {hubPositionValue + t.hubAmount}
+                    WHERE participantPositionId = {hubPositionId}
+
+                    INSERT INTO **participantPositionChange**
+                        (participantPositionId, transferStateChangeId,
+                        value, reservedValue)
+                    VALUES ({hubPositionId}, {transferStateChangeId},
+                        {hubPositionValue + t.hubAmount}, 0)
+                end note
+                activate DB
+                deactivate DB
             end
-
-            note right of SETTLE_DAO #lightgray
-                **latestPosition** = positionValue + t.amount (increased)
-            end note
-
-            SETTLE_DAO->DB: Persist latestPosition
-            activate DB
-            hnote over DB #lightyellow
-                UPDATE **participantPosition**
-                SET value = {latestPosition}
-                WHERE participantPositionId = participantPositionId
-
-                SELECT LAST_INSERT_ID() AS participantPositionId
-            end note
-            DB-->SETTLE_DAO: Return **participantPositionId**
-            deactivate DB
-
-            deactivate DB
-            SETTLE_DAO -> DB: Persist transfer state and participant position change
-            hnote over DB #lightyellow
-                INSERT INTO **transferStateChange** (transferId, transferStateId, reason)
-                VALUES (t.transferId, {RESERVED}, 'Settlement transfer reserve')
-
-                INSERT INTO **participantPositionChange**
-                       (participantPositionId, transferStateChangeId, value)
-                VALUES ({participantPositionId}, {transferStateChangeId}, {latestPosition})
-            end note
-            activate DB
-            deactivate DB
         end
     end
 end
