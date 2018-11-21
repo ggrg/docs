@@ -57,23 +57,23 @@ activate OPERATOR
     SSAPI <-- SETTLE_DAO: Return **windowsData**
     deactivate SETTLE_DAO
 
-    group Validate all requested windows are found and closed
+    group Validate all requested windows are found and applicable
         note right of SSAPI #lightgray
             let allSettlementWindowsFound = payload.settlementWindows.length == windowsData.length
-            let allSettlementWindowsClosed = true
+            let allSettlementWindowsApplicable = true
             let settlementWindow
         end note
         loop w IN windowsData
             note right of SSAPI #lightgray
                 settlementWindow = windowsData[w]
-                if (settlementWindow.state != 'CLOSED') {
-                    allSettlementWindowsClosed = false
+                if (settlementWindow.state != 'CLOSED' && settlementWindow.state != 'NOT_SETTLED') {
+                    allSettlementWindowsApplicable = false
                 }
             end note
         end loop
     end
 
-    alt allSettlementWindowsFound && allSettlementWindowsClosed
+    alt allSettlementWindowsFound && allSettlementWindowsApplicable
         SSAPI ->SETTLE_DAO: Create settlement\n<color #FF0000><b>Error code:</b> 2001</color>
         activate SETTLE_DAO
         group <color #blue>DB TRANSACTION</color>

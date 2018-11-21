@@ -1,0 +1,131 @@
+@startuml
+' declate title
+title 6.3.2. Settlement Transfer Commit
+autonumber
+
+' declare actors
+entity "Settlement DAO" as SETTLE_DAO
+database "Central Store" as DB
+
+box "Settlement Service" #lightgreen
+    participant SETTLE_DAO
+end box
+
+box "Central Services" #lightyellow
+    participant DB
+end box
+
+' start flow
+activate SETTLE_DAO
+group Settlement Transfer Commit
+    note right of SETTLE_DAO #lightgray
+        **Inputs**: settlementId that holds entries with PS_TRANSFERS_COMMITTED, transactionTimestamp, enums, trx
+    end note
+    SETTLE_DAO -> DB: Retrieve list of PS_TRANSFERS_COMMITTED, but not COMMITTED
+    activate DB
+    hnote over DB #lightyellow
+        SELECT tp1.transferId, tp1.ledgerEntryTypeId,
+            tp1.participantCurrencyId AS dfspAccountId, tp1.amount AS dfspAmount,
+            tp2.participantCurrencyId AS hubAccountId, tp2.amount AS hubAmount
+        FROM **settlementParticipantCurrency** spc
+        JOIN **settlementParticipantCurrencyStateChange** spcsc
+        ON spcsc.settlementParticipantCurrencyId = spc.settlementParticipantCurrencyId
+        AND spcsc.settlementStateId = {PS_TRANSFERS_COMMITTED}
+        JOIN **transferStateChange** tsc1
+        ON tsc1.transferId = spc.settlementTransferId
+        AND tsc1.transferStateId = {RESERVED}
+        LEFT JOIN **transferStateChange** tsc2
+        ON tsc2.transferId = spc.settlementTransferId
+        AND tsc2.transferStateId = {COMMITTED}
+        JOIN **transferParticipant** tp1
+        ON tp1.transferId = spc.settlementTransferId
+        AND tp1.transferParticipantRoleTypeId = {DFSP_POSITION}
+        JOIN **transferParticipant** tp2
+        ON tp2.transferId = spc.settlementTransferId
+        AND tp2.transferParticipantRoleTypeId = {HUB}
+        WHERE spc.settlementId = {settlementId}
+        AND tsc2.transferId IS NULL
+    end hnote
+    DB --> SETTLE_DAO: Return **settlementTransferList**
+    deactivate DB
+    group <color #blue>DB TRANSACTION</color>
+        loop t IN settlementTransferList
+            SETTLE_DAO -> DB: Persist transfer fulfilment
+            hnote over DB #lightyellow
+                INSERT INTO **transferFulfilment** (transferFulfilmentId, transferId,
+                    ilpFulfilment, completedDate, isValid, settlementWindowId, createdDate)
+                VALUES (Uuid(), t.transferId, 0, tTimestamp, 1, NULL, tTimestamp)
+            end note
+            activate DB
+            deactivate DB
+
+            SETTLE_DAO -> DB: Persist transfer state
+            activate DB
+            hnote over DB #lightyellow
+                INSERT INTO **transferStateChange** (transferId, transferStateId, reason)
+                VALUES (t.transferId, {COMMITTED}, 'Settlement transfer commit')
+            end note
+            DB --> SETTLE_DAO: Return **transferStateChangeId**
+            deactivate DB
+
+            opt t.ledgerEntryTypeId == {SETTLEMENT_NET_SENDER}
+                SETTLE_DAO -> DB: Select dfsp position FOR UPDATE
+                activate DB
+                hnote over DB #lightyellow
+                    SELECT participantPositionId AS dfspPositionId,
+                        value AS dfspPositionValue,
+                        reservedValue AS dfspReservedValue
+                    FROM **participantPosition**
+                    WHERE participantCurrencyId = t.dfspAccountId
+                    FOR UPDATE
+                end note
+                DB --> SETTLE_DAO: Return **dfspPositionId**, **dfspPositionValue** and **dfspReservedValue**
+                deactivate DB
+
+                SETTLE_DAO->DB: Persist latest dfsp position & dfsp position change
+                hnote over DB #lightyellow
+                    UPDATE **participantPosition**
+                    SET value = {dfspPositionValue + t.dfspAmount}
+                    WHERE participantPositionId = {dfspPositionId}
+
+                    INSERT INTO **participantPositionChange**
+                        (participantPositionId, transferStateChangeId, value, reservedValue)
+                    VALUES ({dfspPositionId}, {transferStateChangeId},
+                        {dfspPositionValue + t.dfspAmount}, {dfspReservedValue})
+                end note
+                activate DB
+                deactivate DB
+
+                SETTLE_DAO -> DB: Select hub position FOR UPDATE
+                activate DB
+                hnote over DB #lightyellow
+                    SELECT participantPositionId AS hubPositionId,
+                        value AS hubPositionValue
+                    FROM **participantPosition**
+                    WHERE participantCurrencyId = t.hubAccountId
+                    FOR UPDATE
+                end note
+                DB --> SETTLE_DAO: Return **hubPositionId** and **hubPositionValue**
+                deactivate DB
+
+                SETTLE_DAO->DB: Persist latest hub position & hub position change
+                hnote over DB #lightyellow
+                    UPDATE **participantPosition**
+                    SET value = {hubPositionValue + t.hubAmount}
+                    WHERE participantPositionId = {hubPositionId}
+
+                    INSERT INTO **participantPositionChange**
+                        (participantPositionId, transferStateChangeId,
+                        value, reservedValue)
+                    VALUES ({hubPositionId}, {transferStateChangeId},
+                        {hubPositionValue + t.hubAmount}, 0)
+                end note
+                activate DB
+                deactivate DB
+            end
+        end
+    end
+end
+deactivate SETTLE_DAO
+
+@enduml
