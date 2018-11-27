@@ -41,7 +41,7 @@ group Acknowledgement of Settlement Transfer
                 {
                     "id": 2
                     "accounts" : [
-                        { "id": 6, "state": "NOT_SETTLED", "reason": <string> }
+                        { "id": 6, "state": "SETTLED", "reason": <string> }
                     ]
                 }
             ]
@@ -50,7 +50,7 @@ group Acknowledgement of Settlement Transfer
 
     OPERATOR -> SSAPI: PUT - /settlement/{id}
     activate SSAPI
-    SSAPI -> SETTLE_DAO: updateSettlementById command\n<color #FF0000><b>Error code:</b> 2001</color>
+    SSAPI -> SETTLE_DAO: updateSettlementById routine\n<color #FF0000><b>Error code:</b> 2001</color>
     activate SETTLE_DAO
     group <color #blue>DB TRANSACTION</color>
         SETTLE_DAO -> DB: Retrieve settlement information

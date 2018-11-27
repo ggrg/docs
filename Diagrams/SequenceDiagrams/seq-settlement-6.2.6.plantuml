@@ -1,0 +1,226 @@
+@startuml
+' declate title
+title 6.2.6. Settlement Abort (abortSettlementById)
+autonumber
+
+' declare actors
+actor "Hub Employee" as OPERATOR
+boundary "Settlement Service API" as SSAPI
+entity "Settlement DAO" as SETTLE_DAO
+database "Central Store" as DB
+
+box "Central HUB" #lightpink
+    participant OPERATOR
+end box
+
+box "Settlement Service" #lightgreen
+    participant SSAPI
+    participant SETTLE_DAO
+end box
+
+box "Central Services" #lightyellow
+    participant DB
+end box
+
+' start flow
+group Settlement Abort
+    activate OPERATOR
+    note right of OPERATOR #yellow
+        {
+            "state": "NOT_SETTLED",
+            "reason": {abortReasonString}
+        }
+    end note
+
+    OPERATOR -> SSAPI: PUT - /settlement/{id}/abort
+    activate SSAPI
+    SSAPI -> SETTLE_DAO: abortSettlementById routine\n<color #FF0000><b>Error code:</b> 2001</color>
+    activate SETTLE_DAO
+
+    SETTLE_DAO -> DB: Retrieve settlement information
+    activate DB
+    hnote over DB #lightyellow
+        SELECT s.settlementId, ssc.settlementStateId,
+            ssc.reason, ssc.createdDate
+        FROM **settlement** s
+        JOIN **settlementStateChange** ssc
+        ON ssc.settlementStateChangeId = s.currentStateChangeId
+        WHERE s.settlementId = {id}
+    end hnote
+    SETTLE_DAO <-- DB: Return **settlementData**
+    deactivate DB
+
+    alt settlementData.settlementStateId == 'PS_TRANSFERS_COMMITTED'||\nsettlementData.settlementStateId == 'SETTLING'||\nsettlementData.settlementStateId == 'SETTLED'
+    break
+        note right of SETTLE_DAO #yellow
+            {
+                errorInformation: {
+                    "errorCode": <integer>,
+                    "errorDescription": "State change is not allowed"
+                }
+            }
+        end note
+    end
+    else settlementData.settlementStateId == 'NOT_SETTLED'
+    break
+        note right of SETTLE_DAO #yellow
+            {
+                errorInformation: {
+                    "errorCode": <integer>,
+                    "errorDescription": "Already aborted"
+                }
+            }
+        end note
+    end
+    else settlementData.settlementStateId == 'PS_TRANSFERS_RESERVED'
+        SETTLE_DAO -> DB: Find account in PS_TRANSFERS_COMMITTED
+        activate DB
+        hnote over DB #lightyellow
+            SELECT spc.participantCurrencyId
+            FROM **settlementParticipantCurrency** spc
+            JOIN **settlementParticipantCurrencyStateChange** spcsc
+            ON spcsc.settlementParticipantCurrencyStateChangeId = spc.currentStateChangeId
+            WHERE spc.settlementId = {id}
+            AND spcsc.settlementStateId = 'PS_TRANSFERS_COMMITTED'
+            LIMIT 1
+        end hnote
+        SETTLE_DAO <-- DB: Return **transferCommittedAccount**
+        deactivate DB
+        break transferCommittedAccount != undefined
+            note right of SETTLE_DAO #yellow
+                {
+                    errorInformation: {
+                        "errorCode": <integer>,
+                        "errorDescription": "At least one settlement transfer is committed"
+                    }
+                }
+            end note
+        end
+    end
+
+    group <color #blue>DB TRANSACTION</color>
+        SETTLE_DAO -> DB: Retrive settlement accounts information
+        activate DB
+        hnote over DB #lightyellow
+            SELECT pc.participantId, spc.participantCurrencyId,
+                spcsc.settlementStateId, spcsc.reason,
+                spcsc.createdDate, spc.netAmount, pc.currencyId,
+                spc.settlementParticipantCurrencyId AS <color #0000FF>key</color>
+            FROM **settlementParticipantCurrency** spc
+            JOIN **settlementParticipantCurrencyStateChange** spcsc
+            ON spcsc.settlementParticipantCurrencyStateChangeId =
+            spc.currentStateChangeId
+            JOIN **participantCurrency** pc
+            ON pc.participantCurrencyId = spc.participantCurrencyId
+            WHERE spc.settlementId = {id}
+            FOR UPDATE
+        end hnote
+        SETTLE_DAO <-- DB: Return **settlementAccountsList**
+        deactivate DB
+
+        SETTLE_DAO -> DB: Retrive settlement windows information
+        activate DB
+        hnote over DB #lightyellow
+            SELECT ssw.settlementWindowId, swsc.settlementWindowStateId,
+                swsc.reason, swsc.createdDate
+            FROM **settlementSettlementWindow** ssw
+            JOIN **settlementWindow** sw
+            ON sw.settlementWindow = ssw.settlementWindowId
+            JOIN **settlementWindowStateChange** swsc
+            ON swsc.settlementWindowStateChangeId = sw.currentStateChangeId
+            WHERE ssw.settlementId = {id}
+            FOR UPDATE
+        end hnote
+        SETTLE_DAO <-- DB: Return **windowsList**
+        deactivate DB
+
+        group Bulk insert settlementParticipantCurrencyStateChange
+            SETTLE_DAO -> DB: Insert settlementParticipantCurrencyStateChange
+            activate DB
+            hnote over DB #lightyellow
+                settlementParticipantCurrencyStateChange
+            end hnote
+            SETTLE_DAO <-- DB: Return **spcscIdList**
+            deactivate DB
+
+            SETTLE_DAO -> SETTLE_DAO: Merge spcscIdList into settlementAccountsList
+
+            SETTLE_DAO -> DB: Update all pointers to current state change ids
+            activate DB
+            hnote over DB #lightyellow
+                UPDATE **settlementParticipantCurrency**.currentStateChangeIds
+            end hnote
+            deactivate DB
+        end
+
+        ref over SETTLE_DAO, DB: Settlement Transfer Abort {[[https://github.com/mojaloop/docs/blob/develop/Diagrams/SequenceDiagrams/seq-settransfer-abort-6.3.4.svg 6.3.4]]}\n\n**Inputs**: settlementId, transactionTimestamp, enums, trx\n
+
+        group Bulk insert settlementWindowStateChange
+            SETTLE_DAO -> DB: Insert settlementWindowStateChange
+            activate DB
+            hnote over DB #lightyellow
+                settlementWindowStateChange
+            end hnote
+            SETTLE_DAO <-- DB: Return **swscIdList**
+            deactivate DB
+
+            SETTLE_DAO -> SETTLE_DAO: Merge swscIdList into windowList
+
+            SETTLE_DAO -> DB: Update all pointers to current state change ids
+            activate DB
+            hnote over DB #lightyellow
+                UPDATE **settlementWindow**.currentStateChangeIds
+            end hnote
+            deactivate DB
+        end
+
+        group Insert settlementStateChange
+            SETTLE_DAO -> DB: Insert settlementStateChange
+            activate DB
+            hnote over DB #lightyellow
+                INSERT INTO **settlementStateChange**
+                    (settlementId, settlementStateId, reason)
+                VALUES ({id}, 'NOT_SETTLED', {abortReasonString})
+            end hnote
+            SETTLE_DAO <-- DB: Return **settlementStateChangeId**
+            deactivate DB
+
+            SETTLE_DAO -> DB: Update pointer to current state change id
+            activate DB
+            hnote over DB #lightyellow
+                UPDATE **settlement**.currentStateChangeId
+            end hnote
+            deactivate DB
+        end
+    end
+    SSAPI <-- SETTLE_DAO: Return transaction result
+    deactivate SETTLE_DAO
+
+    alt success
+        note left of SSAPI #yellow
+            {
+                "id": {id},
+                "state": 'NOT_SETTLED',
+                "createdDate": {abortReasonString}
+            }
+        end note
+
+        SSAPI --> OPERATOR: Respond HTTP - 200 (OK)
+      else
+        note right of SSAPI #lightgray
+            Log ERROR event
+        end note
+        note left of SSAPI #yellow
+            {
+                errorInformation: {
+                    "errorCode": <integer>,
+                    "errorDescription": "Client error description"
+                }
+            }
+        end note
+        OPERATOR <-- SSAPI: Respond HTTP - 4xx (Client error)
+        deactivate SSAPI
+    end
+end
+deactivate OPERATOR
+@enduml
