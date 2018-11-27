@@ -153,7 +153,7 @@ group Settlement Abort
             deactivate DB
         end
 
-        ref over SETTLE_DAO, DB: Settlement Transfer Abort {[[https://github.com/mojaloop/docs/blob/develop/Diagrams/SequenceDiagrams/seq-settransfer-abort-6.3.4.svg 6.3.4]]}\n\n**Inputs**: settlementId, transactionTimestamp, enums, trx\n
+        ref over SETTLE_DAO, DB: Settlement Transfer Abort {[[https://github.com/mojaloop/docs/blob/develop/Diagrams/SequenceDiagrams/seq-settransfer-6.3.4-abort.svg 6.3.4]]}\n\n**Inputs**: settlementId, transactionTimestamp, enums, trx\n
 
         group Bulk insert settlementWindowStateChange
             SETTLE_DAO -> DB: Insert settlementWindowStateChange
@@ -214,11 +214,11 @@ group Settlement Abort
             {
                 errorInformation: {
                     "errorCode": <integer>,
-                    "errorDescription": "Client error description"
+                    "errorDescription": "<color #red>Client</color> error description"
                 }
             }
         end note
-        OPERATOR <-- SSAPI: Respond HTTP - 4xx (Client error)
+        OPERATOR <-- SSAPI: Respond HTTP - <color #red>4xx (Client error)</color>
         deactivate SSAPI
     end
 end
