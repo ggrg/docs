@@ -51,14 +51,14 @@ group Settlement Abort
     activate OPERATOR
     note right of OPERATOR #yellow
         {
-            "state": "NOT_SETTLED",
+            "state": "ABORTED",
             "reason": {abortReasonString}
         }
     end note
 
-    OPERATOR -> SSAPI: PUT - /settlement/{id}/abort
+    OPERATOR -> SSAPI: PUT - /settlement/{id}
     activate SSAPI
-    SSAPI -> SETTLE_DAO: abortSettlementById routine\n<color #FF0000><b>Error code:</b> 2001</color>
+    SSAPI -> SETTLE_DAO: abortSettlementById facade method\n<color #FF0000><b>Error code:</b> 2001</color>
     activate SETTLE_DAO
 
     SETTLE_DAO -> DB: Retrieve settlement information
@@ -85,14 +85,22 @@ group Settlement Abort
             }
         end note
     end
-    else settlementData.settlementStateId == 'NOT_SETTLED'
+    else settlementData.settlementStateId == 'ABORTED'
     break
+        SETTLE_DAO -> DB: Append additional info at settlement level
+        activate DB
+        deactivate DB
+        hnote over DB #lightyellow
+            INSERT INTO **settlementStateChange**
+                (settlementId, settlementStateId, reason)
+            VALUES ({id}, 'ABORTED', {abortReasonString})
+        end hnote
+
         note right of SETTLE_DAO #yellow
             {
-                errorInformation: {
-                    "errorCode": <integer>,
-                    "errorDescription": "Already aborted"
-                }
+                "id": {id},
+                "state": 'ABORTED',
+                "reason": {abortReasonString}
             }
         end note
     end
@@ -204,7 +212,7 @@ group Settlement Abort
             hnote over DB #lightyellow
                 INSERT INTO **settlementStateChange**
                     (settlementId, settlementStateId, reason)
-                VALUES ({id}, 'NOT_SETTLED', {abortReasonString})
+                VALUES ({id}, 'ABORTED', {abortReasonString})
             end hnote
             SETTLE_DAO <-- DB: Return **settlementStateChangeId**
             deactivate DB
@@ -217,15 +225,15 @@ group Settlement Abort
             deactivate DB
         end
     end
-    SSAPI <-- SETTLE_DAO: Return transaction result
+    SSAPI <-- SETTLE_DAO: Return facade method result
     deactivate SETTLE_DAO
 
     alt success
         note left of SSAPI #yellow
             {
                 "id": {id},
-                "state": 'NOT_SETTLED',
-                "createdDate": {abortReasonString}
+                "state": 'ABORTED',
+                "reason": {abortReasonString}
             }
         end note
 
@@ -238,11 +246,11 @@ group Settlement Abort
             {
                 errorInformation: {
                     "errorCode": <integer>,
-                    "errorDescription": "<color #red>Client</color> error description"
+                    "errorDescription": "Client/Server error description"
                 }
             }
         end note
-        OPERATOR <-- SSAPI: Respond HTTP - <color #red>4xx (Client error)</color>
+        OPERATOR <-- SSAPI: Respond HTTP 4xx or 5xx\n(Client/Server error)
         deactivate SSAPI
     end
 end

@@ -90,7 +90,7 @@ activate OPERATOR
         loop w IN windowsData
             note right of SSAPI #lightgray
                 settlementWindow = windowsData[w]
-                if (settlementWindow.state != 'CLOSED' && settlementWindow.state != 'NOT_SETTLED') {
+                if (settlementWindow.state != 'CLOSED' && settlementWindow.state != 'ABORTED') {
                     allSettlementWindowsApplicable = false
                 }
             end note

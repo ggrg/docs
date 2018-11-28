@@ -157,7 +157,7 @@ group Acknowledgement of Settlement Transfer
                 psTransfersReservedCount: <integer>, // count of accounts in PS_TRANSFERS_RESERVED state
                 psTransfersCommittedCount: <integer>, // count of accounts in PS_TRANSFERS_COMMITTED state
                 settledCount: <integer>, // count of accounts in SETTLED state
-                notSettledCount: <integer> // count of accounts in NOT_SETTLED state
+                abortedCount: <integer> // count of accounts in ABORTED state
             }
             **settlementAccountsInit** copy of previous object to be preserved for comparission at the end
             **allAccounts**: { // same as previous but accessed by account id (derived from <color 0000FF>settlementAccountsList</color>)
@@ -190,7 +190,7 @@ group Acknowledgement of Settlement Transfer
                     psTransfersReservedCount: <integer>, // count of accounts in PS_TRANSFERS_RESERVED state
                     psTransfersCommittedCount: <integer>, // count of accounts in PS_TRANSFERS_COMMITTED state
                     settledCount: <integer>, // count of accounts in SETTLED state
-                    notSettledCount: <integer> // count of accounts in NOT_SETTLED state
+                    abortedCount: <integer> // count of accounts in ABORTED state
                 }
             }
             **windowsAccountsInit** copy of previous object to be preserved for comparission at the end
@@ -211,7 +211,7 @@ group Acknowledgement of Settlement Transfer
                 psTransfersReservedCount: 0,
                 psTransfersCommittedCount: 0,
                 settledCount: 0,
-                notSettledCount: 0,
+                abortedCount: 0,
                 unknownCount: 0
             }
             ' let allParticipants = {} // declare map
@@ -266,9 +266,9 @@ group Acknowledgement of Settlement Transfer
                 note right of SETTLE_DAO #lightgray
                     settlementAccounts.settledCount++
                 end note
-            else state == 'NOT_SETTLED'
+            else state == 'ABORTED'
                 note right of SETTLE_DAO #lightgray
-                    settlementAccounts.notSettledCount++
+                    settlementAccounts.abortedCount++
                 end note
             else default
                 note right of SETTLE_DAO #lightgray
@@ -317,7 +317,7 @@ group Acknowledgement of Settlement Transfer
                     id: wid,
                     pendingSettlementCount: 0,
                     settledCount: 0,
-                    notSettledCount: 0
+                    abortedCount: 0
                 }
             end note
             alt state == 'PENDING_SETTLEMENT'
@@ -340,9 +340,9 @@ group Acknowledgement of Settlement Transfer
                 note right of SETTLE_DAO #lightgray
                     windowsAccounts[wid].settledCount++
                 end note
-            else state == 'NOT_SETTLED'
+            else state == 'ABORTED'
                 note right of SETTLE_DAO #lightgray
-                    windowsAccounts[wid].notSettledCount++
+                    windowsAccounts[wid].abortedCount++
                 end note
             end
         end
@@ -584,7 +584,7 @@ group Acknowledgement of Settlement Transfer
                         settlementWindows.push(allWindows[affectedWindows[aw]])
                     end note
 
-                    opt windowAccounts.psTransfersCommittedCount == 0\n&& windowAccounts.notSettledCount == 0\n&& windowAccounts.settledCound > 0
+                    opt windowAccounts.psTransfersCommittedCount == 0\n&& windowAccounts.abortedCount == 0\n&& windowAccounts.settledCound > 0
                         note right of SETTLE_DAO #lightgray
                             allWindows[affectedWindows[aw]].state = 'SETTLED'
                             allWindows[affectedWindows[aw]].reason = 'All window settlement accounts are settled'

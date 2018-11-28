@@ -43,20 +43,20 @@ end box
 activate SETTLE_DAO
 group Settlement Transfer Abort
     note right of SETTLE_DAO #lightgray
-        **Inputs**: settlementId that holds entries with NOT_SETTLED, transactionTimestamp, enums, trx
+        **Inputs**: settlementId that holds entries with ABORTED, transactionTimestamp, enums, trx
     end note
-    SETTLE_DAO -> DB: Retrieve list of NOT_SETTLED, but not ABORTED
+    SETTLE_DAO -> DB: Retrieve list of ABORTED, but not ABORTED yet
     activate DB
     hnote over DB #lightyellow
         SELECT tp1.transferId, tp1.ledgerEntryTypeId,
             tp1.participantCurrencyId AS dfspAccountId, tp1.amount AS dfspAmount,
             tp2.participantCurrencyId AS hubAccountId, tp2.amount AS hubAmount,
-            tsc1.transferId isReserved, <color #red>spcsc.reason</color>
+            tsc1.transferId isReserved
         FROM **settlementParticipantCurrency** spc
         JOIN **settlementParticipantCurrencyStateChange** spcsc
         ON spcsc.settlementParticipantCurrencyId = spc.settlementParticipantCurrencyId
-        AND spcsc.settlementStateId = {NOT_SETTLED}
-        JOIN **transferStateChange** tsc1
+        AND spcsc.settlementStateId = {ABORTED}
+        LEFT JOIN **transferStateChange** tsc1
         ON tsc1.transferId = spc.settlementTransferId
         AND tsc1.transferStateId = {RESERVED}
         LEFT JOIN **transferStateChange** tsc2
@@ -79,7 +79,7 @@ group Settlement Transfer Abort
             activate DB
             hnote over DB #lightyellow
                 INSERT INTO **transferStateChange** (transferId, transferStateId, reason)
-                VALUES (t.transferId, {ABORTED}, <color #red>'Settlement transfer abort'</color>)
+                VALUES (t.transferId, {ABORTED}, 'Settlement transfer abort')
             end note
             DB --> SETTLE_DAO: Return **transferStateChangeId**
             deactivate DB
@@ -99,7 +99,8 @@ group Settlement Transfer Abort
                 deactivate DB
 
                 note right of SETTLE_DAO #lightgray
-                    <color #red>DA to confirm: NET_DEBIT_CAP is not corrected back</color>
+                    <color #red>To confirm if NDC reversal is required after review of Settlement reservation and commit.</color>
+                    <color #red>(It is possible that NDC should be completed in commit flow, and not in reservation flow.)</color>
                 end note
 
                 SETTLE_DAO->DB: Persist latest dfsp position & dfsp position change
