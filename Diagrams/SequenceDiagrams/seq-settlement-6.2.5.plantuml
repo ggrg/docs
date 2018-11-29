@@ -1,3 +1,27 @@
+/'*****
+ License
+ --------------
+ Copyright © 2017 Bill & Melinda Gates Foundation
+ The Mojaloop files are made available by the Bill & Melinda Gates Foundation under the Apache License, Version 2.0 (the "License") and you may not use these files except in compliance with the License. You may obtain a copy of the License at
+ http://www.apache.org/licenses/LICENSE-2.0
+ Unless required by applicable law or agreed to in writing, the Mojaloop files are distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+ Contributors
+ --------------
+ This is the official list of the Mojaloop project contributors for this file.
+ Names of the original copyright holders (individuals or organizations)
+ should be listed with a '*' in the first column. People who have
+ contributed from an organization can be listed under the organization
+ that actually holds the copyright for their contributions (see the
+ Gates Foundation organization for an example). Those individuals should have
+ their names indented and be marked with a '-'. Email address can be added
+ optionally within square brackets <email>.
+ * Gates Foundation
+ - Name Surname <name.surname@gatesfoundation.com>
+
+ * Georgi Georgiev <georgi.georgiev@modusbox.com>
+ --------------
+ ******'/
+
 @startuml
 ' declate title
 title 6.2.5. Acknowledgement of Settlement Transfer (updateSettlementById)
@@ -41,7 +65,7 @@ group Acknowledgement of Settlement Transfer
                 {
                     "id": 2
                     "accounts" : [
-                        { "id": 6, "state": "NOT_SETTLED", "reason": <string> }
+                        { "id": 6, "state": "SETTLED", "reason": <string> }
                     ]
                 }
             ]
@@ -50,7 +74,7 @@ group Acknowledgement of Settlement Transfer
 
     OPERATOR -> SSAPI: PUT - /settlement/{id}
     activate SSAPI
-    SSAPI -> SETTLE_DAO: updateSettlementById command\n<color #FF0000><b>Error code:</b> 2001</color>
+    SSAPI -> SETTLE_DAO: updateSettlementById routine\n<color #FF0000><b>Error code:</b> 2001</color>
     activate SETTLE_DAO
     group <color #blue>DB TRANSACTION</color>
         SETTLE_DAO -> DB: Retrieve settlement information
@@ -133,7 +157,7 @@ group Acknowledgement of Settlement Transfer
                 psTransfersReservedCount: <integer>, // count of accounts in PS_TRANSFERS_RESERVED state
                 psTransfersCommittedCount: <integer>, // count of accounts in PS_TRANSFERS_COMMITTED state
                 settledCount: <integer>, // count of accounts in SETTLED state
-                notSettledCount: <integer> // count of accounts in NOT_SETTLED state
+                abortedCount: <integer> // count of accounts in ABORTED state
             }
             **settlementAccountsInit** copy of previous object to be preserved for comparission at the end
             **allAccounts**: { // same as previous but accessed by account id (derived from <color 0000FF>settlementAccountsList</color>)
@@ -166,7 +190,7 @@ group Acknowledgement of Settlement Transfer
                     psTransfersReservedCount: <integer>, // count of accounts in PS_TRANSFERS_RESERVED state
                     psTransfersCommittedCount: <integer>, // count of accounts in PS_TRANSFERS_COMMITTED state
                     settledCount: <integer>, // count of accounts in SETTLED state
-                    notSettledCount: <integer> // count of accounts in NOT_SETTLED state
+                    abortedCount: <integer> // count of accounts in ABORTED state
                 }
             }
             **windowsAccountsInit** copy of previous object to be preserved for comparission at the end
@@ -187,7 +211,7 @@ group Acknowledgement of Settlement Transfer
                 psTransfersReservedCount: 0,
                 psTransfersCommittedCount: 0,
                 settledCount: 0,
-                notSettledCount: 0,
+                abortedCount: 0,
                 unknownCount: 0
             }
             ' let allParticipants = {} // declare map
@@ -242,9 +266,9 @@ group Acknowledgement of Settlement Transfer
                 note right of SETTLE_DAO #lightgray
                     settlementAccounts.settledCount++
                 end note
-            else state == 'NOT_SETTLED'
+            else state == 'ABORTED'
                 note right of SETTLE_DAO #lightgray
-                    settlementAccounts.notSettledCount++
+                    settlementAccounts.abortedCount++
                 end note
             else default
                 note right of SETTLE_DAO #lightgray
@@ -293,7 +317,7 @@ group Acknowledgement of Settlement Transfer
                     id: wid,
                     pendingSettlementCount: 0,
                     settledCount: 0,
-                    notSettledCount: 0
+                    abortedCount: 0
                 }
             end note
             alt state == 'PENDING_SETTLEMENT'
@@ -316,9 +340,9 @@ group Acknowledgement of Settlement Transfer
                 note right of SETTLE_DAO #lightgray
                     windowsAccounts[wid].settledCount++
                 end note
-            else state == 'NOT_SETTLED'
+            else state == 'ABORTED'
                 note right of SETTLE_DAO #lightgray
-                    windowsAccounts[wid].notSettledCount++
+                    windowsAccounts[wid].abortedCount++
                 end note
             end
         end
@@ -529,15 +553,15 @@ group Acknowledgement of Settlement Transfer
 
         alt settlementData.state == 'PENDING_SETTLEMENT'
             |||
-            ref over SETTLE_DAO, DB: Settlement Transfer Prepare {[[https://github.com/mojaloop/docs/blob/develop/Diagrams/SequenceDiagrams/seq-settransfer-prepare-6.3.1.svg 6.3.1]]}\n\n**Inputs**: settlementId, transactionTimestamp, enums, trx\n
+            ref over SETTLE_DAO, DB: Settlement Transfer Prepare {[[https://github.com/mojaloop/docs/blob/develop/Diagrams/SequenceDiagrams/seq-settransfer-6.3.1-prepare.svg 6.3.1]]}\n\n**Inputs**: settlementId, transactionTimestamp, enums, trx\n
             |||
         else settlementData.state == 'PS_TRANSFERS_RECORDED'
             |||
-            ref over SETTLE_DAO, DB: Settlement Transfer Reserve {[[https://github.com/mojaloop/docs/blob/develop/Diagrams/SequenceDiagrams/seq-settransfer-reserve-6.3.2.svg 6.3.2]]}\n\n**Inputs**: settlementId, transactionTimestamp, enums, trx\n
+            ref over SETTLE_DAO, DB: Settlement Transfer Reserve {[[https://github.com/mojaloop/docs/blob/develop/Diagrams/SequenceDiagrams/seq-settransfer-6.3.2-reserve.svg 6.3.2]]}\n\n**Inputs**: settlementId, transactionTimestamp, enums, trx\n
             |||
         else settlementData.state == 'PS_TRANSFERS_RESERVED'
             |||
-            ref over SETTLE_DAO, DB: Settlement Transfer Commit {[[https://github.com/mojaloop/docs/blob/develop/Diagrams/SequenceDiagrams/seq-settransfer-commit-6.3.3.svg 6.3.3]]}\n\n**Inputs**: settlementId, transactionTimestamp, enums, trx\n
+            ref over SETTLE_DAO, DB: Settlement Transfer Commit {[[https://github.com/mojaloop/docs/blob/develop/Diagrams/SequenceDiagrams/seq-settransfer-6.3.3-commit.svg 6.3.3]]}\n\n**Inputs**: settlementId, transactionTimestamp, enums, trx\n
             |||
         end
 
@@ -560,7 +584,7 @@ group Acknowledgement of Settlement Transfer
                         settlementWindows.push(allWindows[affectedWindows[aw]])
                     end note
 
-                    opt windowAccounts.psTransfersCommittedCount == 0\n&& windowAccounts.notSettledCount == 0\n&& windowAccounts.settledCound > 0
+                    opt windowAccounts.psTransfersCommittedCount == 0\n&& windowAccounts.abortedCount == 0\n&& windowAccounts.settledCound > 0
                         note right of SETTLE_DAO #lightgray
                             allWindows[affectedWindows[aw]].state = 'SETTLED'
                             allWindows[affectedWindows[aw]].reason = 'All window settlement accounts are settled'

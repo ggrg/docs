@@ -24,7 +24,7 @@
 
 @startuml
 ' declate title
-title 6.3.2. Settlement Transfer Reserve
+title 6.3.4. Settlement Transfer Abort
 autonumber
 
 ' declare actors
@@ -41,26 +41,27 @@ end box
 
 ' start flow
 activate SETTLE_DAO
-group Settlement Transfer Reserve
+group Settlement Transfer Abort
     note right of SETTLE_DAO #lightgray
-        **Inputs**: settlementId that holds entries with PS_TRANSFERS_RESERVED, transactionTimestamp, enums, trx
+        **Inputs**: settlementId that holds entries with ABORTED, transactionTimestamp, enums, trx
     end note
-    SETTLE_DAO -> DB: Retrieve list of PS_TRANSFERS_RESERVED, but not RESERVED
+    SETTLE_DAO -> DB: Retrieve list of ABORTED, but not ABORTED yet
     activate DB
     hnote over DB #lightyellow
         SELECT tp1.transferId, tp1.ledgerEntryTypeId,
             tp1.participantCurrencyId AS dfspAccountId, tp1.amount AS dfspAmount,
-            tp2.participantCurrencyId AS hubAccountId, tp2.amount AS hubAmount
+            tp2.participantCurrencyId AS hubAccountId, tp2.amount AS hubAmount,
+            tsc1.transferId isReserved
         FROM **settlementParticipantCurrency** spc
         JOIN **settlementParticipantCurrencyStateChange** spcsc
         ON spcsc.settlementParticipantCurrencyId = spc.settlementParticipantCurrencyId
-        AND spcsc.settlementStateId = {PS_TRANSFERS_RESERVED}
-        JOIN **transferStateChange** tsc1
+        AND spcsc.settlementStateId = {ABORTED}
+        LEFT JOIN **transferStateChange** tsc1
         ON tsc1.transferId = spc.settlementTransferId
-        AND tsc1.transferStateId = {RECEIVED_PREPARE}
+        AND tsc1.transferStateId = {RESERVED}
         LEFT JOIN **transferStateChange** tsc2
         ON tsc2.transferId = spc.settlementTransferId
-        AND tsc2.transferStateId = {RESERVED}
+        AND tsc2.transferStateId = {ABORTED}
         JOIN **transferParticipant** tp1
         ON tp1.transferId = spc.settlementTransferId
         AND tp1.transferParticipantRoleTypeId = {DFSP_POSITION}
@@ -78,12 +79,12 @@ group Settlement Transfer Reserve
             activate DB
             hnote over DB #lightyellow
                 INSERT INTO **transferStateChange** (transferId, transferStateId, reason)
-                VALUES (t.transferId, {RESERVED}, 'Settlement transfer reserve')
+                VALUES (t.transferId, {ABORTED}, 'Settlement transfer abort')
             end note
             DB --> SETTLE_DAO: Return **transferStateChangeId**
             deactivate DB
 
-            opt t.ledgerEntryTypeId == {SETTLEMENT_NET_RECIPIENT}
+            opt t.isReserved != undefined && t.ledgerEntryTypeId == {SETTLEMENT_NET_RECIPIENT}
                 SETTLE_DAO -> DB: Select dfsp position FOR UPDATE
                 activate DB
                 hnote over DB #lightyellow
@@ -97,46 +98,21 @@ group Settlement Transfer Reserve
                 DB --> SETTLE_DAO: Return **dfspPositionId**, **dfspPositionValue** and **dfspReservedValue**
                 deactivate DB
 
-                SETTLE_DAO -> DB: Select participant NET_DEBIT_CAP limit
-                activate DB
-                hnote over DB #lightyellow
-                    SELECT value AS netDebitCap
-                    FROM **participantLimit**
-                    WHERE participantCurrencyId = t.dfspAccountId
-                    AND participantLimitTypeId = {NET_DEBIT_CAP}
-                end note
-                DB --> SETTLE_DAO: Return **netDebitCap**
-                deactivate DB
                 note right of SETTLE_DAO #lightgray
-                    **isLimitExceeded** = netDebitCap - dfspPositionValue - dfspReservedValue - t.dfspAmount < 0
+                    <color #red>To confirm if NDC reversal is required after review of Settlement reservation and commit.</color>
+                    <color #red>(It is possible that NDC should be completed in commit flow, and not in reservation flow.)</color>
                 end note
-
-                opt isLimitExceeded == true
-                    SETTLE_DAO -> DB: Select max participantPositionChangeId
-                    activate DB
-                    hnote over DB #lightyellow
-                        SELECT participantPositionChangeId
-                        FROM **participantPositionChange**
-                        WHERE participantPositionId = {dfspPositionId}
-                        ORDER BY 1 DESC
-                        LIMIT 1
-                    end note
-                    DB --> SETTLE_DAO: Return **startAfterPositionChangeId**
-                    deactivate DB
-
-                    SETTLE_DAO->SETTLE_DAO: Increase NET_DEBIT_CAP with the value of t.amount\n//using ParticipantFacade.adjustLimits method//
-                end
 
                 SETTLE_DAO->DB: Persist latest dfsp position & dfsp position change
                 hnote over DB #lightyellow
                     UPDATE **participantPosition**
-                    SET value = {dfspPositionValue + t.dfspAmount}
+                    SET value = {dfspPositionValue - t.dfspAmount}
                     WHERE participantPositionId = {dfspPositionId}
 
                     INSERT INTO **participantPositionChange**
                            (participantPositionId, transferStateChangeId, value, reservedValue)
                     VALUES ({dfspPositionId}, {transferStateChangeId},
-                        {dfspPositionValue + t.dfspAmount}, {dfspReservedValue})
+                        {dfspPositionValue - t.dfspAmount}, {dfspReservedValue})
                 end note
                 activate DB
                 deactivate DB
@@ -156,14 +132,14 @@ group Settlement Transfer Reserve
                 SETTLE_DAO->DB: Persist latest hub position & hub position change
                 hnote over DB #lightyellow
                     UPDATE **participantPosition**
-                    SET value = {hubPositionValue + t.hubAmount}
+                    SET value = {hubPositionValue - t.hubAmount}
                     WHERE participantPositionId = {hubPositionId}
 
                     INSERT INTO **participantPositionChange**
                         (participantPositionId, transferStateChangeId,
                         value, reservedValue)
                     VALUES ({hubPositionId}, {transferStateChangeId},
-                        {hubPositionValue + t.hubAmount}, 0)
+                        {hubPositionValue - t.hubAmount}, 0)
                 end note
                 activate DB
                 deactivate DB
