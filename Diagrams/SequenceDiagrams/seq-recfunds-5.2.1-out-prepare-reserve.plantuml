@@ -62,7 +62,7 @@ group Record Funds Out - Prepare & Reserve
         {
             "transferId": <uuid>,
             "externalReference": "string",
-            "action": "recordFundsOutPrepare",
+            "action": "recordFundsOutPrepareReserve",
             "amount": {
                 "amount": <decimal>,
                 "currency": "string"
@@ -98,7 +98,7 @@ group Record Funds Out - Prepare & Reserve
                     id: <uuid>,
                     responseTo: "",
                     type: "transfer",
-                    action: "recordFundsOutPrepare",
+                    action: "recordFundsOutPrepareReserve",
                     createdAt: <timestamp>,
                     state: ""
                 }
@@ -119,160 +119,35 @@ group Record Funds Out - Prepare & Reserve
     activate TRANSFER_DAO
     group <color #blue>DB TRANSACTION</color>
         group Reconciliation Transfer Prepare
-            TRANSFER_DAO -> DB: Insert transfer
-            activate DB
-            deactivate DB
-            hnote over DB #lightyellow
-                INSERT INTO **transfer** (transferId, amount, currencyId,
-                    ilpCondition, expirationDate, createdDate)
-                VALUES ({payload.transferId}, {payload.amount.amount},
-                    {payload.amount.curency}, 0,
-                    {new Date()+Config.INTERNAL_TRANSFER_VALIDITY_SECONDS},
-                    {transactionTimestamp})
-            end hnote
-
-            TRANSFER_DAO -> DB: Retrieve hub reconciliation account
-            activate DB
-            hnote over DB #lightyellow
-                SELECT participantCurrencyId AS reconciliationAccountId
-                FROM **participantCurrency**
-                WHERE participantId = 1
-                AND currencyId = {payload.amount.currency}
-                LIMIT 1
-            end hnote
-            deactivate DB
-            TRANSFER_DAO <-- DB: Return **reconciliationAccountId**
-
-            note right of TRANSFER_DAO #lightgray
-                let ledgerEntryTypeId, amount
-                if (payload.action === 'RECORD_FUNDS_OUT_PREPARE') {
-                    **ledgerEntryTypeId** = 'RECORD_FUNDS_OUT'
-                    **amount** = <color #red>-payload.amount.amount</color>
-                }
-            end note
-
-            TRANSFER_DAO -> DB: Insert transferParticipant records
-            activate DB
-            deactivate DB
-            hnote over DB #lightyellow
-                INSERT INTO **transferParticipant**
-                    (transferId, participantCurrencyId, transferParticipantRoleTypeId,
-                    ledgerEntryTypeId, amount, createdDate)
-                VALUES (payload.transferId, reconciliationAccountId, 'HUB',
-                    {ledgerEntryTypeId}, {amount}, {transactionTimestamp})
-
-                INSERT INTO **transferParticipant**
-                    (transferId, participantCurrencyId, transferParticipantRoleTypeId,
-                    ledgerEntryTypeId, amount, createdDate)
-                VALUES ({payload.transferId}, {payload.participantCurrencyId},
-                    'DFSP_SETTLEMENT', {ledgerEntryTypeId}, {-amount}, {transactionTimestamp})
-            end hnote
-
-            TRANSFER_DAO -> DB: Insert transferStateChange record
-            activate DB
-            deactivate DB
-            hnote over DB #lightyellow
-                INSERT INTO **transferStateChange**
-                    (transferId, transferStateId, reason, createdDate)
-                VALUES ({payload.transferId}, 'RECEIVED_PREPARE',
-                    {payload.reason}, {transactionTimestamp})
-            end hnote
-
-            TRANSFER_DAO -> DB: Save externalReference and extensions
-            activate DB
-            deactivate DB
-            hnote over DB #lightyellow
-                transferExtension
-            end hnote
+            |||
+            ref over TRANSFER_DAO, DB:**reconciliationTransferPrepare** {[[https://github.com/mojaloop/docs/blob/develop/Diagrams/SequenceDiagrams/seq-recfunds-5.1.0.a-reconciliationTransferPrepare.svg 5.1.0.a]]}\n(payload, trx)\n
         end
+
+        group Reconciliation Transfer Reserve
+            |||
+            ref over TRANSFER_DAO, DB:**transferStateAndPositionUpdate** {[[https://github.com/mojaloop/docs/blob/develop/Diagrams/SequenceDiagrams/seq-recfunds-5.1.0.b-transferStateAndPositionUpdate.svg 5.1.0.b]]} \n({\n    transferId: {payload.transferId},\n    transferStateId: "RESERVED",\n    reason: {payload.reason},\n    createdDate: {transactionTimestamp},\n    drUpdated: true,\n    crUpdated: false\n}, trx)\n
+        end
+
         |||
-        group Reconciliation Position Change
-            TRANSFER_DAO -> DB: Retrieve hub reconciliation account
-            activate DB
-            hnote over DB #lightyellow
-                SELECT participantCurrencyId AS reconciliationAccountId
-                FROM **participantCurrency**
-                WHERE participantId = 1
-                AND currencyId = {payload.amount.currency}
-                LIMIT 1
-            end hnote
-            TRANSFER_DAO <-- DB: Return **reconciliationAccountId**
-            deactivate DB
-
-            TRANSFER_DAO -> DB: Select hub reconciliation account position
-            activate DB
-            hnote over DB #lightyellow
-                SELECT participantPositionId AS reconciliationPositionId,
-                    value AS reconciliationPositionValue
-                FROM **participantPosition**
-                WHERE participantCurrencyId = {reconciliationAccountId}
-                LIMIT 1
-            end hnote
-            TRANSFER_DAO <-- DB: Return **reconciliationPositionId**,\n**reconciliationPositionValue**
-            deactivate DB
-
-            TRANSFER_DAO -> DB: Select participant settlement account position
-            activate DB
-            hnote over DB #lightyellow
-                SELECT participantPositionId AS settlementPositionId,
-                    value AS settlementPositionValue
-                FROM **participantPosition**
-                WHERE participantCurrencyId = {payload.participantCurrencyId}
-                LIMIT 1
-            end hnote
-            TRANSFER_DAO <-- DB: Return **settlementPositionId**,\n**settlementPositionValue**
-            deactivate DB
-
-            note right of TRANSFER_DAO #lightgray
-                let **latestReconciliationPosition** = reconciliationPositionValue + amount
-                let **latestSettlementPosition** = settlementPositionValue - amount
-            end note
-
-            TRANSFER_DAO -> DB: Persist participant position
-            activate DB
-            deactivate DB
-            hnote over DB #lightyellow
-                UPDATE **participantPosition**
-                SET value = {latestReconciliationPosition}
-                WHERE participantPositionId = {reconciliationPositionId}
-
-                UPDATE **participantPosition**
-                SET value = {latestSettlementPosition}
-                WHERE participantPositionId = {settlementPositionId}
-            end hnote
-
-            TRANSFER_DAO -> DB: Change transfer state
-            activate DB
-            hnote over DB #lightyellow
-                INSERT INTO **transferStateChange** (transferId, transferStateId, reason, createdDate)
-                VALUES ({payload.transferId, 'RESERVED', {payload.reason}, {transactionTimestamp})
-            end hnote
-            TRANSFER_DAO <-- DB: Return **transferStateChangeId**
-            deactivate DB
-
-            TRANSFER_DAO -> DB: Persist participant position change
-            activate DB
-            hnote over DB #lightyellow
-                INSERT INTO **participantPositionChange** (participantPositionId,
-                    transferStateChangeId, value, reservedValue, createdDate)
-                VALUES ({reconciliationPositionId}, 'RESERVED',
-                    {latestReconciliationPosition}, 0, {transactionTimestamp})
-
-                INSERT INTO **participantPositionChange** (participantPositionId,
-                    transferStateChangeId, value, reservedValue, createdDate)
-                VALUES ({settlementPositionId}, 'RESERVED',
-                    {latestSettlementPosition}, 0, {transactionTimestamp})
-            end hnote
-            TRANSFER_DAO <-- DB: Return **position.participantSettlementAccountPosition**
-            deactivate DB
-        end
-
-        opt position.participantSettlementAccountPosition > 0
+        opt transferStateAndPositionUpdate.drPositionValue > 0
             note right of TRANSFER_DAO #lightgray
                 payload.reason = 'Aborted due to insufficient funds'
-                payload.action = 'RECORD_FUNDS_OUT_ABORT'
             end note
-            ref over TRANSFER_DAO, DB: Reconciliation Transfer Abort {[[https://github.com/mojaloop/docs/blob/develop/Diagrams/SequenceDiagrams/seq-recfunds-5.2.3-out-abort.svg 5.2.3]]}\n
+
+            group Reconciliation Transfer Abort
+                TRANSFER_DAO -> DB: Insert transferFulfilment record
+                activate DB
+                deactivate DB
+                hnote over DB #lightyellow
+                    INSERT INTO **transferFulfilment**
+                        (transferFulfilmentId, transferId, ilpFulfilment,
+                        completedDate, isValid, settlementWindowId, createdDate)
+                    VALUES ({Uuid()}, {payload.transferId}, 0, {transactionTimestamp},
+                        1, NULL, {transactionTimestamp})
+                end hnote
+                |||
+                ref over TRANSFER_DAO, DB:**transferStateAndPositionUpdate** {[[https://github.com/mojaloop/docs/blob/develop/Diagrams/SequenceDiagrams/seq-recfunds-5.1.0.b-transferStateAndPositionUpdate.svg 5.1.0.b]]} \n({\n    transferId: {payload.transferId},\n    transferStateId: "ABORTED",\n    reason: {payload.reason},\n    createdDate: {transactionTimestamp},\n    drUpdated: true,\n    crUpdated: false\n}, trx)\n
+            end
         end
     end
     ADMIN_HANDLER <-- TRANSFER_DAO: Finished await

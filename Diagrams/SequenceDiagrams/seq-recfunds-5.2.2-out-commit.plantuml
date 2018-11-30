@@ -114,16 +114,9 @@ group Record Funds Out Commit
                 VALUES ({Uuid()}, {payload.transferId}, 0, {transactionTimestamp},
                     1, NULL, {transactionTimestamp})
             end hnote
+            |||
+            ref over TRANSFER_DAO, DB:**transferStateAndPositionUpdate** {[[https://github.com/mojaloop/docs/blob/develop/Diagrams/SequenceDiagrams/seq-recfunds-5.1.0.b-transferStateAndPositionUpdate.svg 5.1.0.b]]} \n({\n    transferId: {payload.transferId},\n    transferStateId: "COMMITTED",\n    reason: {payload.reason},\n    createdDate: {transactionTimestamp},\n    drUpdated: false,\n    crUpdated: true\n}, trx)\n
         end
-
-        TRANSFER_DAO -> DB: Change transfer state
-        activate DB
-        deactivate DB
-        hnote over DB #lightyellow
-            INSERT INTO **transferStateChange** (transferId, transferStateId, reason, createdDate)
-            VALUES ({payload.transferId, 'COMMITTED', {payload.reason}, {transactionTimestamp})
-        end hnote
-
     end
     ADMIN_HANDLER <-- TRANSFER_DAO: Finished await
     deactivate TRANSFER_DAO
