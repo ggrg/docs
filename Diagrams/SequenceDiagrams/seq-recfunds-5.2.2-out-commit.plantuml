@@ -71,7 +71,7 @@ group Record Funds Out Commit
         Message:
         {
             id: <payload.transferId>
-            from: "hub",
+            from: "Hub",
             to: "dfspName",
             type: "application/json"
             content: {
@@ -104,6 +104,20 @@ group Record Funds Out Commit
     activate TRANSFER_DAO
     group <color #blue>DB TRANSACTION</color>
         group Reconciliation Transfer Commit
+            note right of TRANSFER_DAO #lightgray
+                let **transferFulfilmentId** = Uuid()
+            end note
+
+            TRANSFER_DAO -> DB: Insert transferFulfilmentDuplicateCheck record
+            activate DB
+            deactivate DB
+            hnote over DB #lightyellow
+                INSERT INTO **transferFulfilmentDuplicateCheck**
+                    (transferFulfilmentId, transferId, hash, createdDate)
+                VALUES ({transferFulfilmentId}, {payload.transferId},
+                    hashCode({payload.transferId}), {transactionTimestamp})
+            end hnote
+
             TRANSFER_DAO -> DB: Insert transferFulfilment record
             activate DB
             deactivate DB
@@ -111,7 +125,7 @@ group Record Funds Out Commit
                 INSERT INTO **transferFulfilment**
                     (transferFulfilmentId, transferId, ilpFulfilment,
                     completedDate, isValid, settlementWindowId, createdDate)
-                VALUES ({Uuid()}, {payload.transferId}, 0, {transactionTimestamp},
+                VALUES ({transferFulfilmentId}, {payload.transferId}, 0, {transactionTimestamp},
                     1, NULL, {transactionTimestamp})
             end hnote
             |||

@@ -87,7 +87,7 @@ group Record Funds In
         {
             id: <payload.transferId>
             from: "dfspName",
-            to: "hub",
+            to: "Hub",
             type: "application/json"
             content: {
                 headers: <payloadHeaders>,

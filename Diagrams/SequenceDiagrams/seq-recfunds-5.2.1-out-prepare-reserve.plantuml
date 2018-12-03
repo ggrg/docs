@@ -86,7 +86,7 @@ group Record Funds Out - Prepare & Reserve
         Message:
         {
             id: <payload.transferId>
-            from: "hub",
+            from: "Hub",
             to: "dfspName",
             type: "application/json"
             content: {

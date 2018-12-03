@@ -46,6 +46,14 @@ end box
 
 ' start flow
 group reconciliationTransferPrepare (payload, trx)
+    TRANSFER_DAO -> DB: Insert transferDuplicateCheck
+    activate DB
+    deactivate DB
+    hnote over DB #lightyellow
+        INSERT INTO **transferDuplicateCheck** (transferId, hash, createdDate)
+        VALUES ({payload.transferId}, hashCode({payload.transferId}), {transactionTimestamp})
+    end hnote
+
     TRANSFER_DAO -> DB: Insert transfer
     activate DB
     deactivate DB
