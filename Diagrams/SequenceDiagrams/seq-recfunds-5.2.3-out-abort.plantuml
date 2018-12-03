@@ -24,7 +24,7 @@
 
 @startuml
 ' declate title
-title 5.2.2. Record Funds Out Abort (recordFundsOutAbort)
+title 5.2.3. Record Funds Out Abort (recordFundsOutAbort)
 
 autonumber
 
