@@ -164,8 +164,8 @@ group Record Funds In
                 INSERT INTO **transferParticipant**
                     (transferId, participantCurrencyId, transferParticipantRoleTypeId,
                     ledgerEntryTypeId, amount, createdDate)
-                VALUES ({payload.transferId}, {payload.participantCurrencyId},
-                    'DFSP_SETTLEMENT', {ledgerEntryTypeId}, {-amount}, {transactionTimestamp})
+                VALUES ({payload.transferId}, {payload.participantCurrencyId}, 'DFSP_SETTLEMENT',
+                    {ledgerEntryTypeId}, {-amount}, {transactionTimestamp})
             end hnote
 
             TRANSFER_DAO -> DB: Insert transferStateChange record
@@ -281,12 +281,12 @@ group Record Funds In
             hnote over DB #lightyellow
                 INSERT INTO **participantPositionChange** (participantPositionId,
                     transferStateChangeId, value, reservedValue, createdDate)
-                VALUES ({reconciliationPositionId}, 'COMMITTED',
+                VALUES ({reconciliationPositionId}, {transferStateChangeId},
                     {latestReconciliationPosition}, 0, {transactionTimestamp})
 
                 INSERT INTO **participantPositionChange** (participantPositionId,
                     transferStateChangeId, value, reservedValue, createdDate)
-                VALUES ({settlementPositionId}, 'COMMITTED',
+                VALUES ({settlementPositionId}, {transferStateChangeId},
                     {latestSettlementPosition}, 0, {transactionTimestamp})
             end hnote
         end

@@ -164,8 +164,8 @@ group Record Funds Out - Prepare & Reserve
                 INSERT INTO **transferParticipant**
                     (transferId, participantCurrencyId, transferParticipantRoleTypeId,
                     ledgerEntryTypeId, amount, createdDate)
-                VALUES ({payload.transferId}, {payload.participantCurrencyId},
-                    'DFSP_SETTLEMENT', {ledgerEntryTypeId}, {-amount}, {transactionTimestamp})
+                VALUES ({payload.transferId}, {payload.participantCurrencyId}, 'DFSP_SETTLEMENT',
+                    {ledgerEntryTypeId}, {-amount}, {transactionTimestamp})
             end hnote
 
             TRANSFER_DAO -> DB: Insert transferStateChange record
@@ -255,12 +255,12 @@ group Record Funds Out - Prepare & Reserve
             hnote over DB #lightyellow
                 INSERT INTO **participantPositionChange** (participantPositionId,
                     transferStateChangeId, value, reservedValue, createdDate)
-                VALUES ({reconciliationPositionId}, 'RESERVED',
+                VALUES ({reconciliationPositionId}, {transferStateChangeId},
                     {latestReconciliationPosition}, 0, {transactionTimestamp})
 
                 INSERT INTO **participantPositionChange** (participantPositionId,
                     transferStateChangeId, value, reservedValue, createdDate)
-                VALUES ({settlementPositionId}, 'RESERVED',
+                VALUES ({settlementPositionId}, {transferStateChangeId},
                     {latestSettlementPosition}, 0, {transactionTimestamp})
             end hnote
             TRANSFER_DAO <-- DB: Return **position.participantSettlementAccountPosition**
