@@ -20,6 +20,7 @@
 
  * Georgi Georgiev <georgi.georgiev@modusbox.com>
  * Miguel de Barros <miguel.debarros@modusbox.com>
+ * Shashikant Hirugade <shashikant.hirugade@modusbox.com>
  --------------
  ******'/
 
@@ -42,7 +43,7 @@ control "ML API Notification Event Handler" as NOTIFY_HANDLER
 boundary "Central Service API" as CSAPI
 collections "Notification-Topic" as TOPIC_NOTIFICATIONS
 collections "Event-Topic" as TOPIC_EVENTS
-entity "Notification DAO" as NOTIFY_DAO
+entity "Participant DAO" as PARTICIPANT_DAO
 database "Central Store" as DB
 
 box "Financial Service Provider" #lightGray
@@ -57,7 +58,7 @@ box "Central Service" #LightYellow
 participant TOPIC_NOTIFICATIONS
     participant CSAPI
     participant TOPIC_EVENTS
-    participant NOTIFY_DAO
+    participant PARTICIPANT_DAO
     participant DB
 end box
 
@@ -81,22 +82,27 @@ group Send notification to Participant
         CSAPI --> NOTIFY_HANDLER: Return success
         deactivate CSAPI
     end
-    NOTIFY_HANDLER -> CSAPI: Request Notification details for Participant - GET - /notifications/DFSP(n)\n<color #FF0000><b>Error code:</b> 2003</color>
+    note right of NOTIFY_HANDLER #lightgray
+        The endpoint details are cached, when the cache
+        expires, the details are fetched again
+    end note
+    NOTIFY_HANDLER -> CSAPI: Request Endpoint details for Participant - GET - /participants/{{fsp}}/endpoints\n<color #FF0000><b>Error code:</b> 2003</color>
+
     activate CSAPI
-    CSAPI -> NOTIFY_DAO: Fetch Notification details for Participant\n<color #FF0000><b>Error code:</b> 2003</color>
-    activate NOTIFY_DAO
-    NOTIFY_DAO -> DB: Fetch Notification details for Participant
+    CSAPI -> PARTICIPANT_DAO: Fetch Endpoint details for Participant\n<color #FF0000><b>Error code:</b> 2003</color>
+    activate PARTICIPANT_DAO
+    PARTICIPANT_DAO -> DB: Fetch Endpoint details for Participant
     activate DB
     hnote over DB #lightyellow
-        transferPosition
+        participantEndpoint
     end note
-    DB -> NOTIFY_DAO: Retrieved Notification details for Participant
+    DB -> PARTICIPANT_DAO: Retrieved Endpoint details for Participant
     deactivate DB
-    NOTIFY_DAO --> CSAPI: Return Notification details for Participant
-    deactivate NOTIFY_DAO
-    CSAPI --> NOTIFY_HANDLER: Return Notification details for Participant\n<color #FF0000><b>Error codes:</b> 3202, 3203</color>
+    PARTICIPANT_DAO --> CSAPI: Return Endpoint details for Participant
+    deactivate PARTICIPANT_DAO
+    CSAPI --> NOTIFY_HANDLER: Return Endpoint details for Participant\n<color #FF0000><b>Error codes:</b> 3202, 3203</color>
     deactivate CSAPI
-    NOTIFY_HANDLER -> DFSP: Callback with Prepare result to Participant to specified URL - PUT - /<dfsp-host>>/transfers\n<color #FF0000><b>Error code:</b> 1001</color>
+    NOTIFY_HANDLER -> DFSP: Callback with Prepare/fulfil result/error to Participant to specified Endpoint - POST/PUT \n<color #FF0000><b>Error code:</b> 1001</color>
     NOTIFY_HANDLER <-- DFSP: HTTP 200 OK 
 end
 deactivate NOTIFY_HANDLER
