@@ -70,28 +70,48 @@ group transferStateAndPositionUpdate (param1, trx)
         FROM **transfer** t
         JOIN **transferParticipant** dr
         ON dr.transferId = t.transferId
-        AND dr.amount < 0
+        AND dr.amount > 0
         JOIN **participantCurrency** drpc
         ON drpc.participantCurrencyId = dr.participantCurrencyId
-        AND drpc.ledgerAccountTypeId IN('POSITION', 'SETTLEMENT',
-            'HUB_RECONCILIATION', 'HUB_MULTILATERAL_SETTLEMENT')
+        JOIN **participantPosition** drp
         ON drp.participantCurrencyId = dr.participantCurrencyId
         JOIN **transferParticipant** cr
         ON cr.transferId = t.transferId
-        AND cr.amount > 0
+        AND cr.amount < 0
         JOIN **participantCurrency** crpc
         ON crpc.participantCurrencyId = dr.participantCurrencyId
-        AND crpc.ledgerAccountTypeId IN('POSITION', 'SETTLEMENT',
-            'HUB_RECONCILIATION', 'HUB_MULTILATERAL_SETTLEMENT')
         JOIN **participantPosition** crp
-        ON crp.participantCurrencyId = dr.participantCurrencyId
+        ON crp.participantCurrencyId = cr.participantCurrencyId
         JOIN **transferStateChange** tsc
-        ON tsc.transferId = param1.transferId
+        ON tsc.transferId = t.transferId
+        WHERE t.transferId = param1.tranferId
+        AND drpc.ledgerAccountTypeId IN('POSITION', 'SETTLEMENT', '
+            HUB_RECONCILIATION', 'HUB_MULTILATERAL_SETTLEMENT')
+        AND crpc.ledgerAccountTypeId IN('POSITION', 'SETTLEMENT', '
+            HUB_RECONCILIATION', 'HUB_MULTILATERAL_SETTLEMENT')
         ORDER BY transferStateChangeId DESC
         LIMIT 1
     end hnote
     TRANSFER_DAO <-- DB: Return **info**
     deactivate DB
+
+    opt param1.transferStateId == 'COMMITTED'
+        TRANSFER_DAO -> DB: Change transfer state
+        activate DB
+        deactivate DB
+        hnote over DB #lightyellow
+            INSERT INTO **transferStateChange** (transferId, transferStateId, reason, createdDate)
+            VALUES ({param1.transferId, 'RECEIVED_FULFIL', {param1.reason}, {param1.createdDate})
+        end hnote
+    else param1.transferStateId == 'ABORTED'
+        TRANSFER_DAO -> DB: Change transfer state
+        activate DB
+        deactivate DB
+        hnote over DB #lightyellow
+            INSERT INTO **transferStateChange** (transferId, transferStateId, reason, createdDate)
+            VALUES ({param1.transferId, 'REJECTED', {param1.reason}, {param1.createdDate})
+        end hnote
+    end
 
     TRANSFER_DAO -> DB: Change transfer state
     activate DB

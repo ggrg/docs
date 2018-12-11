@@ -129,7 +129,7 @@ group Record Funds Out - Prepare & Reserve
         end
 
         |||
-        opt transferStateAndPositionUpdate.drPositionValue > 0
+        opt transferStateAndPositionUpdate.crPositionValue > 0
             note right of TRANSFER_DAO #lightgray
                 payload.reason = 'Aborted due to insufficient funds'
             end note
