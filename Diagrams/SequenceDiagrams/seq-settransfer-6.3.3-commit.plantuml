@@ -83,6 +83,14 @@ group Settlement Transfer Commit
             activate DB
             deactivate DB
 
+            SETTLE_DAO -> DB: Persist RECEIVED_FULFIL state
+            activate DB
+            deactivate DB
+            hnote over DB #lightyellow
+                INSERT INTO **transferStateChange** (transferId, transferStateId, reason)
+                VALUES (t.transferId, {RECEIVED_FULFIL}, 'Settlement transfer commit initiated')
+            end note
+
             SETTLE_DAO -> DB: Persist transfer state
             activate DB
             hnote over DB #lightyellow
