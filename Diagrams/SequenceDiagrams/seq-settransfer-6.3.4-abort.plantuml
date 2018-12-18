@@ -87,7 +87,7 @@ group Settlement Transfer Abort
             DB --> SETTLE_DAO: Return **transferStateChangeId**
             deactivate DB
 
-            opt t.isReserved != undefined && t.ledgerEntryTypeId == {SETTLEMENT_NET_RECIPIENT}
+            opt t.isReserved != null && t.ledgerEntryTypeId == {SETTLEMENT_NET_RECIPIENT}
                 SETTLE_DAO -> DB: Select dfsp position FOR UPDATE
                 activate DB
                 hnote over DB #lightyellow
