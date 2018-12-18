@@ -79,6 +79,9 @@ group Settlement Transfer Abort
             activate DB
             hnote over DB #lightyellow
                 INSERT INTO **transferStateChange** (transferId, transferStateId, reason)
+                VALUES (t.transferId, {REJECTED}, 'Settlement transfer reject')
+
+                INSERT INTO **transferStateChange** (transferId, transferStateId, reason)
                 VALUES (t.transferId, {ABORTED}, 'Settlement transfer abort')
             end note
             DB --> SETTLE_DAO: Return **transferStateChangeId**
