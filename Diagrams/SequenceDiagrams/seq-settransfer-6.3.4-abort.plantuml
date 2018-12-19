@@ -79,12 +79,15 @@ group Settlement Transfer Abort
             activate DB
             hnote over DB #lightyellow
                 INSERT INTO **transferStateChange** (transferId, transferStateId, reason)
+                VALUES (t.transferId, {REJECTED}, 'Settlement transfer reject')
+
+                INSERT INTO **transferStateChange** (transferId, transferStateId, reason)
                 VALUES (t.transferId, {ABORTED}, 'Settlement transfer abort')
             end note
             DB --> SETTLE_DAO: Return **transferStateChangeId**
             deactivate DB
 
-            opt t.isReserved != undefined && t.ledgerEntryTypeId == {SETTLEMENT_NET_RECIPIENT}
+            opt t.isReserved != null && t.ledgerEntryTypeId == {SETTLEMENT_NET_RECIPIENT}
                 SETTLE_DAO -> DB: Select dfsp position FOR UPDATE
                 activate DB
                 hnote over DB #lightyellow
