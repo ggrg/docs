@@ -40,7 +40,7 @@ autonumber
 '   database - Database Persistance Store
 
 ' declare actors
-collections "Prepare-Topic-dfsp1" as TOPIC_PREPARE_DFSP1
+collections "Prepare-Topic" as TOPIC_PREPARE
 control "Prepare Event Handler" as PREP_HANDLER
 collections "Position-Topic-dfsp1" as TOPIC_POSITION_DFSP1
 collections "Event-Topic" as TOPIC_EVENTS
@@ -50,7 +50,7 @@ entity "Participant DAO" as PARTICIPANT_DAO
 database "Central Store" as DB
 
 box "Central Service" #LightYellow
-    participant TOPIC_PREPARE_DFSP1
+    participant TOPIC_PREPARE
     participant PREP_HANDLER
     participant TOPIC_POSITION_DFSP1
     participant TOPIC_EVENTS
@@ -63,9 +63,9 @@ end box
 ' start flow
 activate PREP_HANDLER
 group Prepare Handler Consume
-    TOPIC_PREPARE_DFSP1 <- PREP_HANDLER: Consume Prepare event message for Payer
-    activate TOPIC_PREPARE_DFSP1
-    deactivate TOPIC_PREPARE_DFSP1
+    TOPIC_PREPARE <- PREP_HANDLER: Consume Prepare event message
+    activate TOPIC_PREPARE
+    deactivate TOPIC_PREPARE
 
     break
         group Validate Event
