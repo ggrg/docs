@@ -37,7 +37,7 @@ autonumber
 collections "Fulfil-Topic" as TOPIC_FULFIL
 control "Fulfil Event Handler" as FULF_HANDLER
 collections "Event-Topic" as TOPIC_EVENT
-collections "Position-Topic-dfsp2" as TOPIC_POSITION_DFSP2
+collections "topic-transfer-position" as TOPIC_TRANSFER_POSITION
 collections "Notification-Topic" as TOPIC_NOTIFICATIONS
 'entity "Transfer Duplicate Facade" as DUP_FACADE
 entity "Transfer DAO" as TRANS_DAO
@@ -45,7 +45,7 @@ database "Central Store" as DB
 box "Central Service" #LightYellow
     participant TOPIC_FULFIL
     participant FULF_HANDLER
-    participant TOPIC_POSITION_DFSP2
+    participant TOPIC_TRANSFER_POSITION
     participant TOPIC_EVENT
     participant TOPIC_NOTIFICATIONS
     participant TRANS_DAO
@@ -218,9 +218,9 @@ group Fulfil Handler Consume (Success)
                         }
                     }
                 end note
-                FULF_HANDLER -> TOPIC_POSITION_DFSP2: Route & Publish Position event for Payee
-                activate TOPIC_POSITION_DFSP2
-                deactivate TOPIC_POSITION_DFSP2
+                FULF_HANDLER -> TOPIC_TRANSFER_POSITION: Route & Publish Position event for Payee
+                activate TOPIC_TRANSFER_POSITION
+                deactivate TOPIC_TRANSFER_POSITION
             else Validate Fulfil Transfer not successful
                 break
                     FULF_HANDLER -> TOPIC_NOTIFICATIONS: Route & Publish Notification event for Payee

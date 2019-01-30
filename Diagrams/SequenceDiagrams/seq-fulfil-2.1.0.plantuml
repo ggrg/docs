@@ -43,7 +43,7 @@ control "ML API Notification Event Handler" as NOTIFY_HANDLER
 boundary "Central Service API" as CSAPI
 collections "Fulfil-Topic" as TOPIC_FULFIL
 control "Fulfil Event Handler" as FULF_HANDLER
-collections "Position-Topic-dfsp2" as TOPIC_POSITION_DFSP2
+collections "topic-transfer-position" as TOPIC_TRANSFER_POSITION
 control "Position Event Handler" as POS_HANDLER
 collections "Transfer-Topic" as TOPIC_TRANSFERS
 collections "Event-Topic" as TOPIC_EVENTS
@@ -64,7 +64,7 @@ box "Central Service" #LightYellow
     participant CSAPI
 	participant TOPIC_FULFIL
     participant FULF_HANDLER
-    participant TOPIC_POSITION_DFSP2
+    participant TOPIC_TRANSFER_POSITION
     participant TOPIC_EVENTS
     participant POS_HANDLER
     participant TOPIC_TRANSFERS
@@ -145,10 +145,10 @@ group DFSP2 sends a Fulfil Success Transfer request
     deactivate MLAPI
     TOPIC_FULFIL <- FULF_HANDLER: Consume message
     ref over TOPIC_FULFIL, TOPIC_EVENTS: Fulfil Handler Consume (Success) {[[https://github.com/mojaloop/docs/blob/develop/CentralServices/seq_diagrams/seq-fulfil-2.1.1.svg 2.1.1.]]} \n
-    FULF_HANDLER -> TOPIC_POSITION_DFSP2: Produce message
+    FULF_HANDLER -> TOPIC_TRANSFER_POSITION: Produce message
     |||
-    TOPIC_POSITION_DFSP2 <- POS_HANDLER: Consume message
-    ref over TOPIC_POSITION_DFSP2, TOPIC_TRANSFERS:  Position Handler Consume (Success) {[[https://github.com/mojaloop/docs/blob/develop/CentralServices/seq_diagrams/seq-position-1.3.2-fulfil.svg seq-position-1.3.2-fulfil]]} \n
+    TOPIC_TRANSFER_POSITION <- POS_HANDLER: Consume message
+    ref over TOPIC_TRANSFER_POSITION, TOPIC_TRANSFERS:  Position Handler Consume (Success) {[[https://github.com/mojaloop/docs/blob/develop/CentralServices/seq_diagrams/seq-position-1.3.2-fulfil.svg seq-position-1.3.2-fulfil]]} \n
     POS_HANDLER -> TOPIC_TRANSFERS: Produce message
     |||
     TOPIC_TRANSFERS <- TRANS_HANDLER: Consume message

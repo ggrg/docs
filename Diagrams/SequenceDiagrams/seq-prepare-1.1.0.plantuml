@@ -42,9 +42,9 @@ actor "DFSP2\nPayee" as DFSP2
 boundary "ML API Adapter" as MLAPI
 control "ML API Notification Event Handler" as NOTIFY_HANDLER
 boundary "Central Service API" as CSAPI
-collections "Prepare-Topic-dfsp1" as TOPIC_PREPARE_DFSP1
+collections "topic-transfer-prepare" as TOPIC_TRANSFER_PREPARE
 control "Prepare Event Handler" as PREP_HANDLER
-collections "Position-Topic-dfsp1" as TOPIC_POSITION_DFSP1
+collections "topic-transfer-position" as TOPIC_TRANSFER_POSITION
 control "Position Event Handler" as POS_HANDLER
 collections "Transfer-Topic" as TOPIC_TRANSFERS
 control "Transfer Event Handler" as TRANS_HANDLER
@@ -62,9 +62,9 @@ end box
 
 box "Central Service" #LightYellow
     participant CSAPI
-	participant TOPIC_PREPARE_DFSP1
+	participant TOPIC_TRANSFER_PREPARE
     participant PREP_HANDLER
-    participant TOPIC_POSITION_DFSP1
+    participant TOPIC_TRANSFER_POSITION
     participant POS_HANDLER
     participant TOPIC_TRANSFERS
     participant TRANS_HANDLER
@@ -141,20 +141,20 @@ group DFSP1 sends a Prepare Transfer request to DFSP2
             }
         }
     end note
-    MLAPI -> TOPIC_PREPARE_DFSP1: Route & Publish Prepare event for Payer\n<color #FF0000><b>Error code:</b> 2003</color>
-    activate TOPIC_PREPARE_DFSP1
-    TOPIC_PREPARE_DFSP1 <-> TOPIC_PREPARE_DFSP1: Ensure event is replicated as configured (ACKS=all)\n<color #FF0000><b>Error code:</b> 2003</color>
-    TOPIC_PREPARE_DFSP1 --> MLAPI: Respond replication acknowledgements have been received
-    deactivate TOPIC_PREPARE_DFSP1
+    MLAPI -> TOPIC_TRANSFER_PREPARE: Route & Publish Prepare event for Payer\n<color #FF0000><b>Error code:</b> 2003</color>
+    activate TOPIC_TRANSFER_PREPARE
+    TOPIC_TRANSFER_PREPARE <-> TOPIC_TRANSFER_PREPARE: Ensure event is replicated as configured (ACKS=all)\n<color #FF0000><b>Error code:</b> 2003</color>
+    TOPIC_TRANSFER_PREPARE --> MLAPI: Respond replication acknowledgements have been received
+    deactivate TOPIC_TRANSFER_PREPARE
     MLAPI ---> DFSP1: Respond HTTP - 202 (Accepted)
     deactivate MLAPI
     |||
-    TOPIC_PREPARE_DFSP1 <- PREP_HANDLER: Consume message
-    ref over TOPIC_PREPARE_DFSP1, PREP_HANDLER, TOPIC_POSITION_DFSP1 :  Prepare Handler Consume {[[https://github.com/mojaloop/docs/blob/develop/CentralServices/seq_diagrams/seq-prepare-1.1.1.a.svg 1.1.1.a]], [[https://github.com/mojaloop/docs/blob/develop/CentralServices/seq_diagrams/seq-prepare-1.1.1.b.svg 1.1.1.b]]} \n
-    PREP_HANDLER -> TOPIC_POSITION_DFSP1: Produce message
+    TOPIC_TRANSFER_PREPARE <- PREP_HANDLER: Consume message
+    ref over TOPIC_TRANSFER_PREPARE, PREP_HANDLER, TOPIC_TRANSFER_POSITION :  Prepare Handler Consume {[[https://github.com/mojaloop/docs/blob/develop/CentralServices/seq_diagrams/seq-prepare-1.1.1.a.svg 1.1.1.a]], [[https://github.com/mojaloop/docs/blob/develop/CentralServices/seq_diagrams/seq-prepare-1.1.1.b.svg 1.1.1.b]]} \n
+    PREP_HANDLER -> TOPIC_TRANSFER_POSITION: Produce message
     |||
-    TOPIC_POSITION_DFSP1 <- POS_HANDLER: Consume message
-    ref over TOPIC_POSITION_DFSP1, POS_HANDLER, TOPIC_TRANSFERS : Position Handler Consume {[[https://github.com/mojaloop/docs/blob/develop/CentralServices/seq_diagrams/seq-prepare-1.1.2.a.svg 1.1.2.a]], [[https://github.com/mojaloop/docs/blob/develop/CentralServices/seq_diagrams/seq-prepare-1.1.2.b.svg 1.1.2.b]]} \n
+    TOPIC_TRANSFER_POSITION <- POS_HANDLER: Consume message
+    ref over TOPIC_TRANSFER_POSITION, POS_HANDLER, TOPIC_TRANSFERS : Position Handler Consume {[[https://github.com/mojaloop/docs/blob/develop/CentralServices/seq_diagrams/seq-prepare-1.1.2.a.svg 1.1.2.a]], [[https://github.com/mojaloop/docs/blob/develop/CentralServices/seq_diagrams/seq-prepare-1.1.2.b.svg 1.1.2.b]]} \n
     POS_HANDLER -> TOPIC_TRANSFERS: Produce message
     |||
     TOPIC_TRANSFERS <- TRANS_HANDLER: Consume message

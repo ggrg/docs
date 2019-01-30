@@ -38,9 +38,7 @@ autonumber
 '   database - Database Persistance Store
 
 ' declare actors
-collections "topic-usd-dfsp1-position-prepare" as TOPIC_POSITION_PREPARE_DFSP1
-collections "topic-usd-dfsp2-position-fulfil" as TOPIC_POSITION_FULFIL_DFSP2
-collections "topic-usd-dfsp1-position-abort" as TOPIC_POSITION_ABORT_DFSP1
+collections "topic-transfer-position" as TOPIC_TRANSFER_POSITION
 control "Position Handler" as POS_HANDLER
 collections "Transfer-Topic" as TOPIC_TRANSFERS
 ' entity "Position DAO" as POS_DAO
@@ -51,9 +49,7 @@ collections "Notification-Topic" as TOPIC_NOTIFICATIONS
 ' database "Central Store" as DB
 
 box "Central Service" #LightYellow
-    participant TOPIC_POSITION_PREPARE_DFSP1
-    participant TOPIC_POSITION_FULFIL_DFSP2
-    participant TOPIC_POSITION_ABORT_DFSP1
+    participant TOPIC_TRANSFER_POSITION
     participant POS_HANDLER
     participant TOPIC_EVENTS
     participant TOPIC_TRANSFERS
@@ -68,9 +64,9 @@ end box
 activate POS_HANDLER
 group Position Handler Consume
     alt Consume Prepare message for Payer
-        TOPIC_POSITION_PREPARE_DFSP1 <- POS_HANDLER: Consume Position event message for Payer
-        activate TOPIC_POSITION_PREPARE_DFSP1
-        deactivate TOPIC_POSITION_PREPARE_DFSP1
+        TOPIC_TRANSFER_POSITION <- POS_HANDLER: Consume Position event message for Payer
+        activate TOPIC_TRANSFER_POSITION
+        deactivate TOPIC_TRANSFER_POSITION
         break
             group Validate Event
                 POS_HANDLER <-> POS_HANDLER: Validate event - Rule: type == 'position' && action == 'prepare'\n<color #FF0000><b>Error codes:</b> 2001</color>
@@ -87,9 +83,9 @@ group Position Handler Consume
         POS_HANDLER -> TOPIC_TRANSFERS: Produce message
         POS_HANDLER -> TOPIC_NOTIFICATIONS: Produce message
     else Consume Fulfil message for Payee
-        TOPIC_POSITION_FULFIL_DFSP2 <- POS_HANDLER: Consume Position event message for Payee
-        activate TOPIC_POSITION_FULFIL_DFSP2
-        deactivate TOPIC_POSITION_FULFIL_DFSP2
+        TOPIC_TRANSFER_POSITION <- POS_HANDLER: Consume Position event message for Payee
+        activate TOPIC_TRANSFER_POSITION
+        deactivate TOPIC_TRANSFER_POSITION
         break
             group Validate Event
                 POS_HANDLER <-> POS_HANDLER: Validate event - Rule: type == 'position' && action == 'commit'\n<color #FF0000><b>Error codes:</b> 2001</color>
@@ -106,9 +102,9 @@ group Position Handler Consume
         POS_HANDLER -> TOPIC_TRANSFERS: Produce message
         POS_HANDLER -> TOPIC_NOTIFICATIONS: Produce message
     else Consume Abort message
-        TOPIC_POSITION_ABORT_DFSP1 <- POS_HANDLER: Consume Position event message
-        activate TOPIC_POSITION_ABORT_DFSP1
-        deactivate TOPIC_POSITION_ABORT_DFSP1
+        TOPIC_TRANSFER_POSITION <- POS_HANDLER: Consume Position event message
+        activate TOPIC_TRANSFER_POSITION
+        deactivate TOPIC_TRANSFER_POSITION
         break
             group Validate Event
                 POS_HANDLER <-> POS_HANDLER: Validate event - Rule: type == 'position' &&\naction IN ['timeout-reserved', 'reject', 'fail']\n<color #FF0000><b>Error codes:</b> 2001</color>

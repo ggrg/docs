@@ -41,7 +41,7 @@ actor "DFSP2\nPayee" as DFSP2
 boundary "ML API Adapter" as MLAPI
 control "ML API Notification Event Handler" as NOTIFY_HANDLER
 control "Transfer Timeout Handler" as EXP_HANDLER
-collections "Topic-{currency}-DFSPn-Position-Abort" as TOPIC_POSITION_DFSP
+collections "topic-transfer-position" as TOPIC_TRANSFER_POSITION
 control "Position Event Handler" as POS_HANDLER
 collections "Transfer-Topic" as TOPIC_TRANSFERS
 control "Transfer Event Handler" as TRANS_HANDLER
@@ -60,7 +60,7 @@ end box
 
 box "Central Service" #LightYellow
     participant EXP_HANDLER
-    participant TOPIC_POSITION_DFSP
+    participant TOPIC_TRANSFER_POSITION
     participant TOPIC_EVENT
     participant POS_HANDLER
     participant TOPIC_TRANSFERS
@@ -79,9 +79,9 @@ group Transfer Expiry
     alt transferStateId == 'RECEIVED_PREPARE'
         EXP_HANDLER -> TOPIC_NOTIFICATIONS: Produce message
     else transferStateId == 'RESERVED'
-        EXP_HANDLER -> TOPIC_POSITION_DFSP: Produce message
-        TOPIC_POSITION_DFSP <- POS_HANDLER: Consume message
-        ref over TOPIC_POSITION_DFSP, TOPIC_TRANSFERS :  Position Hander Consume (Timeout) {[[https://github.com/mojaloop/docs/blob/develop/CentralServices/seq_diagrams/seq-position-1.3.3-abort.svg seq-position-1.3.3-abort.svg]]} \n
+        EXP_HANDLER -> TOPIC_TRANSFER_POSITION: Produce message
+        TOPIC_TRANSFER_POSITION <- POS_HANDLER: Consume message
+        ref over TOPIC_TRANSFER_POSITION, TOPIC_TRANSFERS :  Position Hander Consume (Timeout) {[[https://github.com/mojaloop/docs/blob/develop/CentralServices/seq_diagrams/seq-position-1.3.3-abort.svg seq-position-1.3.3-abort.svg]]} \n
         POS_HANDLER -> TOPIC_TRANSFERS: Produce message
         |||
         TOPIC_TRANSFERS <- TRANS_HANDLER: Consume message

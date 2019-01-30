@@ -40,9 +40,9 @@ autonumber
 '   database - Database Persistance Store
 
 ' declare actors
-collections "Prepare-Topic" as TOPIC_PREPARE
+collections "topic-transfer-prepare" as TOPIC_TRANSFER_PREPARE
 control "Prepare Event Handler" as PREP_HANDLER
-collections "Position-Topic-dfsp1" as TOPIC_POSITION_DFSP1
+collections "topic-transfer-position" as TOPIC_TRANSFER_POSITION
 collections "Event-Topic" as TOPIC_EVENTS
 collections "Notification-Topic" as TOPIC_NOTIFICATIONS
 entity "Transfer DAO" as TRANS_DAO
@@ -50,9 +50,9 @@ entity "Participant DAO" as PARTICIPANT_DAO
 database "Central Store" as DB
 
 box "Central Service" #LightYellow
-    participant TOPIC_PREPARE
+    participant TOPIC_TRANSFER_PREPARE
     participant PREP_HANDLER
-    participant TOPIC_POSITION_DFSP1
+    participant TOPIC_TRANSFER_POSITION
     participant TOPIC_EVENTS
     participant TOPIC_NOTIFICATIONS
     participant TRANS_DAO
@@ -63,9 +63,9 @@ end box
 ' start flow
 activate PREP_HANDLER
 group Prepare Handler Consume
-    TOPIC_PREPARE <- PREP_HANDLER: Consume Prepare event message
-    activate TOPIC_PREPARE
-    deactivate TOPIC_PREPARE
+    TOPIC_TRANSFER_PREPARE <- PREP_HANDLER: Consume Prepare event message
+    activate TOPIC_TRANSFER_PREPARE
+    deactivate TOPIC_TRANSFER_PREPARE
 
     break
         group Validate Event
@@ -290,9 +290,9 @@ group Prepare Handler Consume
                 }
             }
         end note
-        PREP_HANDLER -> TOPIC_POSITION_DFSP1: Route & Publish Position event for Payer\n<color #FF0000><b>Error codes:</b> 2003</color>
-        activate TOPIC_POSITION_DFSP1
-        deactivate TOPIC_POSITION_DFSP1
+        PREP_HANDLER -> TOPIC_TRANSFER_POSITION: Route & Publish Position event for Payer\n<color #FF0000><b>Error codes:</b> 2003</color>
+        activate TOPIC_TRANSFER_POSITION
+        deactivate TOPIC_TRANSFER_POSITION
     else Validate Prepare Transfer (failure)
         note right of PREP_HANDLER #yellow
             Message:

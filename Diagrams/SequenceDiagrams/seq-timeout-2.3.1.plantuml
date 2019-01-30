@@ -38,7 +38,7 @@ autonumber
 
 ' declare actors
 control "Transfer Timeout Handler" as TIMEOUT_HANDLER
-collections "Topic-{currency}-DFSPn-Position-Abort" as TOPIC_POSITION_DFSP
+collections "topic-transfer-position" as TOPIC_TRANSFER_POSITION
 collections "Notification-Topic" as NOTIFICATIONS_TOPIC
 collections "Event-Topic" as EVENT_TOPIC
 entity "Segment DAO" as SEGMENT_DAO
@@ -47,7 +47,7 @@ database "Central Store" as DB
 
 box "Central Service" #LightYellow
     participant TIMEOUT_HANDLER
-    participant TOPIC_POSITION_DFSP
+    participant TOPIC_TRANSFER_POSITION
     participant NOTIFICATIONS_TOPIC
     participant EVENT_TOPIC
     participant TRANSFER_DAO
@@ -332,9 +332,9 @@ group Timeout Handler Consume
                     }
                 }
             end note
-            TIMEOUT_HANDLER -> TOPIC_POSITION_DFSP: Route & Publish Position event
-            activate TOPIC_POSITION_DFSP
-            deactivate TOPIC_POSITION_DFSP
+            TIMEOUT_HANDLER -> TOPIC_TRANSFER_POSITION: Route & Publish Position event
+            activate TOPIC_TRANSFER_POSITION
+            deactivate TOPIC_TRANSFER_POSITION
         end
 
     end

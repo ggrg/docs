@@ -36,7 +36,7 @@ autonumber
 '   database - Database Persistance Store
 
 ' declare actors
-collections "Position-Topic-dfsp1" as TOPIC_POSITION_DFSP1
+collections "topic-transfer-position" as TOPIC_TRANSFER_POSITION
 control "Position Event Handler" as POS_HANDLER
 collections "Transfer-Topic" as TOPIC_TRANSFERS
 collections "Event-Topic" as TOPIC_EVENT
@@ -45,7 +45,7 @@ entity "Position DAO" as POS_DAO
 database "Central Store" as DB
 
 box "Central Service" #LightYellow
-    participant TOPIC_POSITION_DFSP1
+    participant TOPIC_TRANSFER_POSITION
     participant TOPIC_EVENT
     participant POS_HANDLER
     participant TOPIC_TRANSFERS
@@ -58,9 +58,9 @@ end box
 activate POS_HANDLER
 group Position Handler Consume (Reject)
     alt Consume Single Message
-        TOPIC_POSITION_DFSP1 <- POS_HANDLER: Consume Position event message for Payer
-        activate TOPIC_POSITION_DFSP1
-        deactivate TOPIC_POSITION_DFSP1
+        TOPIC_TRANSFER_POSITION <- POS_HANDLER: Consume Position event message for Payer
+        activate TOPIC_TRANSFER_POSITION
+        deactivate TOPIC_TRANSFER_POSITION
 
         break
             group Validate Event
