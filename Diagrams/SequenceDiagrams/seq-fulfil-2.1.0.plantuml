@@ -27,7 +27,6 @@
 title 2.1.0. DFSP2 sends a Fulfil Success Transfer request
 
 autonumber
-
 ' Actor Keys:
 '   boundary - APIs/Interfaces, etc
 '   collections - Kafka Topics

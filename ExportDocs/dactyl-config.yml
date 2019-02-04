@@ -30,6 +30,7 @@ targets:
         image_subs:
             ./interconnectivity-animation.gif: images/interconnectivity-animation.gif
             https://github.com/mojaloop/docs/blob/master/Wiki/Basic%20Overview.png: images/Basic%20Overview.png
+            https://github.com/mojaloop/docs/blob/master/Wiki/Mojaloop%20Services%20Overview.png: images/Mojaloop%20Services%20Overview.png
         image_re_subs:
             "[./\\w]*/([\\w%.-]+[.](jpg|JPG|png|PNG))": "images/\\1"
         link_subs:
@@ -57,6 +58,7 @@ targets:
        image_subs:
             ./interconnectivity-animation.gif: images/interconnectivity-animation.gif
             https://github.com/mojaloop/Docs/blob/master/Wiki/Basic%20Overview.png": images/Basic%20Overview.png
+            https://github.com/mojaloop/docs/blob/master/Wiki/Mojaloop%20Services%20Overview.png: images/Mojaloop%20Services%20Overview.png
        image_re_subs:
             "[./\\w]*/([\\w%.-]+[.](jpg|JPG|png|PNG))": "images/\\1"
        link_subs:
@@ -268,6 +270,12 @@ pages:
         targets:
             - all
 
+    -   name: 'Running Central Ledger on Kubernetes'
+        html: central_ledger_On_Kubernetes.html
+        category: 'Central Ledger'
+        md: central-ledger/KUBERNETES.md
+        targets:
+            - all
 
 #docs/CentralRules
 # README.md central_rules_endpoints.md
@@ -415,92 +423,6 @@ pages:
         targets:
             - all
             - stakeholder
-
-#/docs/DFSP
-    -   name: 'DFSP'
-        html: DFSP.html
-        section_header: true
-        category: DFSP
-        md: docs/DFSP/README.md
-        targets:
-            - all
-            - stakeholder
-
-    -   name: 'Quotes'
-        html: dfspquotes.html
-        md: docs/DFSP/README.md
-        targets:
-            - all
-
-    -   name: 'Directory'
-        html: directory.html
-        category: DFSP
-        md: docs/DFSP/directory.md
-        targets:
-            - all
-
-    -   name: 'Identity'
-        html: identity.html
-        category: DFSP
-        md: docs/DFSP/identity.md
-        targets:
-            - all
-
-    -   name: 'Notifications'
-        html: notification.html
-        category: DFSP
-        md: docs/DFSP/notification.md
-        targets:
-            - all
-
-    -   name: 'Rules'
-        html: rule.html
-        category: DFSP
-        md: docs/DFSP/rule.md
-        targets:
-            - all
-
-    -   name: 'Subscriptions'
-        html: subscription.html
-        category: DFSP
-        md: docs/DFSP/subscription.md
-        targets:
-            - all
-
-    -   name: 'Transfer'
-        html: transfer.html
-        category: DFSP
-        md: docs/DFSP/transfer.md
-        targets:
-            - all
-
-    -   name: 'Account'
-        html: account.html
-        category: DFSP
-        md: docs/DFSP/account.md
-        targets:
-            - all
-
-    -   name: 'Manage Account Holders'
-        html: ManageAccoutHolders.html
-        category: DFSP
-        md: docs/DFSP/ManageAcccoutHolders/ReadMe.md
-        targets:
-            - all
-
-# -   name: 'Setting up the Development Environment'
-#     html: development.html
-#     category: DFSP
-#     md: docs/DFSP/development.md
-#     targets:
-#         - all
-
-    -   name: 'USSD'
-        html: USSD.html
-        category: DFSP
-        md: docs/DFSP/USSD/README.md
-        targets:
-            - all
 
 # --- security/threat modeling
     -   name: 'PKI Guide'

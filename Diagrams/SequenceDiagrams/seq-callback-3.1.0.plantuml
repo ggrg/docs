@@ -27,7 +27,6 @@
 title 3.1.0 Get Participant Callback Details
 
 autonumber
-
 ' Actor Keys:
 ' boundary - APIs/Interfaces, etc
 ' collections - Kafka Topics

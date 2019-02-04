@@ -35,7 +35,7 @@ targets:
             https://github.com/mojaloop/docs/blob/master/Wiki/PuttyConnection.png: images/PuttyConnection.png
             https://github.com/mojaloop/docs/blob/master/Wiki/PuttyConfig.png: images/PuttyConfig.png
             https://github.com/mojaloop/docs/blob/master/Wiki/Tracking%20requirements%20to%20results.png: images/Tracking%20requirements%20to%20results.png
-            https://github.com/mojaloop/docs/blob/master/Wiki/Glory%20of%20Rest.png: images/Glory%20of%20Rest.png
+            https://github.com/Mojaloop/docs/blob/master/Wiki/Glory%20of%20Rest.png: images/Glory%20of%20Rest.png
             https://github.com/mojaloop/docs/blob/master/Wiki/mergebtn.png: images/mergebtn.png
             https://github.com/mojaloop/docs/blob/master/Wiki/CreateBranch.png: images/CreateBranch.png
             https://github.com/mojaloop/docs/blob/master/Wiki/CompareNPull.png: images/CompareNPull.png
@@ -68,13 +68,6 @@ pages:
         category: Onboarding
         md: mojaloop/contribute.md
         section_header: true
-        targets:
-            - all
-
-    -   name: 'Onboarding Developers'
-        md: mojaloop/contribute/Onboarding-Developers.md
-        html: Onboarding-Developers.html
-        category: Onboarding
         targets:
             - all
 
@@ -112,15 +105,6 @@ pages:
         html: README-Template.html
         category: 'Structure of the Documentation'
         md: mojaloop/contribute/README-Template.md
-        targets:
-            - all
-
-# USSD
-    -   name: 'USSD Simulator User Guide'
-        html: USSD.html
-        category: Testing
-        md: docs/DFSP/USSD/README.md
-        section_header: true
         targets:
             - all
 
@@ -296,8 +280,15 @@ pages:
         targets:
             - all
 
+    -   name: 'Design Decisions'
+        html: Design-Decisions.html
+        category: Appendix
+        md: mojaloop/contribute/Decision-Items.md
+        targets:
+            - all
+
     -   name: 'Tools and Process Decisions'
-        html: Decisions.html
+        html: Tools-Decisions.html
         category: Appendix
         md: docs/decisions.md
         targets:
@@ -307,6 +298,13 @@ pages:
         html: FAQ.html
         category: Appendix
         md: mojaloop/FAQ.md
+        targets:
+            - all
+
+    -   name: 'User Story Workflow'
+        html: user-story-workflow.html
+        category: Appendix
+        md: mojaloop/contribute/Pipeline.md
         targets:
             - all
 
