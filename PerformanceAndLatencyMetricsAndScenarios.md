@@ -17,11 +17,11 @@ Percona XtraDB high availability cluster with MySQL database.
 As part of the Program Increment - 1 (PI-1) of the Mojaloop Productionisation project, two major Proof of Concept(PoC) items were done; one a PoC for High Availability/Scalability for Transactional DB and another PoC for durable Message Stream Processing. This document gives a brief account of the approach taken to do performance, scalability and resiliency testing and the scenarios involved. There are also charts and numbers provided based on the results of these tests done towards the end of PI-1. The metrics recorded during this exercise could serve as a baseline for comparison during future performance tests.
 
 ## Getting Started
-- Please follow the instructions in the [README.md](https://github.com/mojaloop/central-ledger/blob/develop-baseline/README.md) for setting up a local environment.
+- Please follow the instructions in the [README.md](https://github.com/mojaloop/central-ledger/blob/master/README.md) for setting up a local environment.
 - Download and install JMeter.
 - Setup JMeter with test scripts as required. For this exercise, scripts used are from the [test-scripts repo](https://github.com/mojaloop/test-scripts).
-- Additional setup required is detailed here: [KUBERNETES.md](https://github.com/mojaloop/central-ledger/blob/develop-baseline/KUBERNETES.md).
-- Review the Transfers process: [TransferGuide](https://github.com/mojaloop/central-ledger/blob/develop-baseline/TransferGuide.md).
+- Additional setup required is detailed here: [KUBERNETES.md](https://github.com/mojaloop/central-ledger/blob/master/KUBERNETES.md).
+- Review the Transfers process: [TransferGuide](https://github.com/mojaloop/central-ledger/blob/master/TransferGuide.md).
 - The baseline performance for the **'Prepare step'** with postgres database and pre-PI 1 code-base was established at **202** transactions (TPS) per second. Point of note here is that this system was not scalable and as can be seen in the charts below, the comparison is provided for the scenario with only one central-ledger component as that is the only applicable case for the base code.
 
 ## Target Metrics
@@ -64,7 +64,7 @@ A baseline was established for 200 DFSP users (threads in this case) achieving a
 - With four central-ledger instances, an average throughput of **725.3** TPS was observed.
 - With five central-ledger instances, an average throughput of **732** TPS was observed.
 
-A linear increase with the increase in central-ledger instances on Kubernetes and the throughput (TPS) was observed. With five central-ledger instances the graph was starting to "flatten". More investigation is needed to identify the root case of this, whether that is system resources or JMeter limitations or something else. Below is a chart that shows the performance metrics charted with TPS against number of central-services instances.  
+A linear increase with the increase in central-ledger instances on Kubernetes and the throughput (TPS) was observed. With five central-ledger instances the graph was starting to "flatten". More investigation is needed to identify the root case of this, whether that is system resources or JMeter limitations or something else. Below is a chart that shows the performance metrics charted with TPS against number of central-services instances. 
 ![Here is a chart that shows the performance metrics](/metrics-images/PoC_DB_Performance_HA_Scalability.jpg)
 
 ## Scenario-2

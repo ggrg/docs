@@ -8,7 +8,7 @@ Before diving into the resolution of the problem, let's first describe what was 
 
 ### Random Transfers Dataset
 
-A Node.js program was created for generating N count of transfers together with their corresponding states. M count of those transfers are such to be processed by the TimeoutHandler. The program can be found in the **central-ledger** repo [here](https://github.com/mojaloop/central-ledger/tree/develop-PI3/testPI2/util/randomTransfers). Following is the example configuration which may be used as input parameter to the main **insert** function of this module:
+A Node.js program was created for generating N count of transfers together with their corresponding states. M count of those transfers are such to be processed by the TimeoutHandler. The program can be found in the **central-ledger** repo [here](https://github.com/mojaloop/central-ledger/blob/master/test/util/randomTransfers.js). Following is the example configuration which may be used as input parameter to the main **insert** function of this module:
 ```js
 const config = {
   debug: 5000, // how often to output progress
