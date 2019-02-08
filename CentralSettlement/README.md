@@ -8,13 +8,13 @@
 
 1. Collect transfers into currently OPEN settlement window(s)
 1. Closing a window results in a new window being open
-1. Trigger settlement event including CLOSED and/or ABORTED window(s) [A]
-1. PENDING_SETTLEMENT state initiated upon creating a settlement [B, C]
-1. Perform settlement transfer(s) [C]:
+1. Trigger settlement event including CLOSED and/or ABORTED window(s) [**A**]
+1. PENDING_SETTLEMENT state initiated upon creating a settlement [**B**, **C**]
+1. Perform settlement transfer(s) [**C**]:
    1. PS_TRANSFERS_RECORDED creates the settlement transfer and places it in RECEIVED_PREPARE state
-   1. PS_TRANSFERS_RESERVED changes state to RESERVED [D, E]
+   1. PS_TRANSFERS_RESERVED changes state to RESERVED [**D**, **E**]
    1. _ABORTED state for settlement is allowed to here_
-   1. PS_TRANSFERS_COMMITTED shifts state to RECEIVED_FULFIL followed by COMMITTED [D, E]
+   1. PS_TRANSFERS_COMMITTED shifts state to RECEIVED_FULFIL followed by COMMITTED [**D**, **E**]
 1. Finilise settlement to SETTLED
 1. Repeat 1-6
 
