@@ -29,7 +29,7 @@ Any part or the entire process described above may be automated via timed cron j
       * transferId - find window related to specified transfer UUID
       * participant - query windows by participant name
       * accountId - query windows by account
-      * state=CLOSED|ABORTED - OR operator
+      * state=CLOSED|ABORTED - introduce OR operator maybe?
       ```
    1. getSettlementWindowById :: GET /settlementWindows/{id}
 
@@ -38,7 +38,7 @@ Any part or the entire process described above may be automated via timed cron j
    ```
    Possible improvements:
    * HTTP method to be changed from POST to PUT as it is related to closing the provided window id
-   * Response body may be omitted as next window may be presumed upon successful PUT
+   * Response body may be omitted as next window may be presumed on success
    ```
 
 1. Create a settlement and set all included windows to PENDING_SETTLEMENT
@@ -73,8 +73,11 @@ Any part or the entire process described above may be automated via timed cron j
      * abortSettlementById :: PUT /settlements/{id}
      ```
      Possible improvements:
-     * Switch to asyncronous settlements api workflow
-     * Design different endpoint for settlement abort operation to avoid programatic payload validation in favor of swagger validation
+     * abortSettlementById might be problematic. Consider usage of a different endpoint 
+     for settlement abort operation to avoid programatic payload validation in favor
+     of swagger validation
+     * Switch to asynchronous settlements api workflow
+     * Settlement transfer process to be processed by central-ledger microservice
      ```
 
 ## Non-Functional Requirements
