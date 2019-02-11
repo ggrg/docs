@@ -1,8 +1,17 @@
 # Central Settlement
 
+## Introduction
+This document is aimed to provide an overview of the settlements process and the settlements API. It also outlines the possible improvements and consists of the following sections:
+
+* [Architecture Diagram](#architecture-diagram)
+* [Settlements Operational Flow](#settlements-operational-flow)
+* [Resulting Functional Requirements](#resulting-functional-requirements)
+* [Non-Functional Requirements](#non-functional-requirements)
+* [OSS Settlement API Swagger Definition](#oss-settlement-api-swagger-definition)
+
 ## Architecture Diagram
 
-![Architecture Diagram](https://raw.githubusercontent.com/ggrg/docs/feature/pi4-updated-arch-diagrams/Diagrams/ArchitectureDiagrams/Arch-Flows-CS-Settlements-PI3.5b.png)
+![Architecture Diagram](https://raw.githubusercontent.com/mojaloop/docs/master/Diagrams/ArchitectureDiagrams/Arch-Flows-CS-Settlements.png)
 
 ## Settlements Operational Flow
 
