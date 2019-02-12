@@ -1,4 +1,4 @@
-## Creating new Features ##
+## Creating new Features ## 
 
 ### Fork ###
 
@@ -28,13 +28,23 @@ Refer to the following documentation for more information: https://help.github.c
 
 5. Push the changes back to your remote fork: `git push origin <current_branch>`
 
-### Feature Branch ###
+### Creating a Branch ###
 
-Create a new feature branch from the `master` branch with the following format:
-<issue#><issueDescription> where `issue#` can be attained from the Github issue, and the `issueDescription` is the formatted in CamelCase.
+Create a new branch from the `master` branch with the following format:
+`<branchType>/<issue#><issueDescription>` where `issue#` can be attained from the Github issue, and the `issueDescription` is the formatted in CamelCase.
 
-1. Create and checkout the branch: `git checkout -b [name_of_your_new_branch]` 
-2. Push the branch to your remote: `git push origin [name_of_your_new_branch]`
+1. Create and checkout the branch: `git checkout -b <branchType>/<issue#><issueDescription>` 
+2. Push the branch to your remote: `git push origin <branchType>/<issue#><issueDescription>`
+
+Where `<branchType>` can be one of the following:
+
+| branchType                | Description  |
+| -------------             | ------------- | 
+| feature | Any new or maintenance features that are in active development. |
+| hotfix | A hotfix branch is for any urgent fixes. |
+| release | A release branch containing a snapshot of a release. |
+| backup | A temporary backup branch. Used normally during repo maintenance. | 
+ 
 
 ### Merge into Mojaloop Repo ###
 
