@@ -3,7 +3,7 @@
 ### Fork ###
 
 Fork the Mojaloop repository into your own personal space.
-Ensure that you keep the `develop` and `master` branches in sync.
+Ensure that you keep the `master` branch in sync.
 
 Refer to the following documentation for more information: https://help.github.com/articles/fork-a-repo/
 
@@ -30,7 +30,7 @@ Refer to the following documentation for more information: https://help.github.c
 
 ### Feature Branch ###
 
-Create a new feature branch from the `develop` branch with the following format:
+Create a new feature branch from the `master` branch with the following format:
 <issue#><issueDescription> where `issue#` can be attained from the Github issue, and the `issueDescription` is the formatted in CamelCase.
 
 1. Create and checkout the branch: `git checkout -b [name_of_your_new_branch]` 
@@ -38,4 +38,4 @@ Create a new feature branch from the `develop` branch with the following format:
 
 ### Merge into Mojaloop Repo ###
 
-Once the feature is completed create a PR from your Feature Branch into the `develop` branch on the Mojaloop repository (not your personal repo) for approval, and check validations (e.g. unit tests, code coverage, etc executed via CircieCI).
+Once the feature is completed create a PR from your Feature Branch into the `master` branch on the Mojaloop repository (not your personal repo) for approval, and check validations (e.g. unit tests, code coverage, etc executed via CircieCI).
