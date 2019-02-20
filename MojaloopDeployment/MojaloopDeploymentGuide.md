@@ -51,10 +51,10 @@ The tool set to be deployed as part of the deployment process.
 |Tool|Required/Optional|Description|Install Info|
 |---|---|---|---|
 |Docker|Required|<ul><li>Docker Engine and CLI Client</li><li>Local Kubernetes single node cluster</li></ul>|<ul><li>[https://docs.docker.com/install](https://docs.docker.com/install)</li></ul>|
-|Kubectl|Required|<ul><li>Kubernetes CLI for Kubernetes Management</li><li>Note Docker installs this part of Kubernetes install</li></ul>|<ul><li>[https://kubernetes.io/doc/tasks/tools/install-kuberctl](https://kubernetes.io/doc/tasks/tools/install-kuberctl)</li><li>Docker Kubernetes Install (as per this guide)</li><li>Mac: brew install kubernetes-cli</li></ul>|
-|Kubectx|Optional(useful tool)|<ul><li>Kubernetes CLI for Kubernetes Context Management Helper</li><li>Note Docker insgtalls this as part of Kubernetes install</li></ul>|<ul><li>[https://github.com/ahmetb/kubectx](https://github.com/ahmetb/kubectx)</li><li>Mac: brew install kubectx</li></ul>|
+|Kubectl|Required|<ul><li>Kubernetes CLI for Kubernetes Management</li><li>Note Docker installs this part of Kubernetes install</li></ul>|<ul><li>[https://kubernetes.io/doc/tasks/tools/install-kuberctl](https://kubernetes.io/docs/tasks/tools/install-kubectl)</li><li>Docker Kubernetes Install (as per this guide)</li><li><b>Mac:</b> `brew install kubernetes-cli`</li><li><b>Ubuntu:</b> `sudo snap install kubectl --classic`</li></ul>|
+|Kubectx|Optional(useful tool)|<ul><li>Kubernetes CLI for Kubernetes Context Management Helper</li><li>Note Docker installs this as part of Kubernetes install</li></ul>|<ul><li>[https://github.com/ahmetb/kubectx](https://github.com/ahmetb/kubectx)</li><li><b>Mac:</b> `brew install kubectx`</li><li><b>Ubuntu:</b> `sudo apt install kubectx`</li></ul>|
 |Kubetail|Optional(useful tool)|<ul><li>Bash script that enables you to aggregate (tail/follow) logs from multiple pods into one stream. This is the same as running `kubectl logs -f` but for multiple pods.</li><li>Example usage `kubetail moja.* -n demo`</li></ul>|<ul><li>https://github.com/johanhaleby/kubetail</li></ul>|
-|Helm|Required|<ul><li>Helm helps you manage Kubernetes applications</li><li>Helm charts help you define, install and upgrade even the most complex Kubernetes application</li></ul>|<ul><li>[https://docs.helm.sh/using_helm/#installing-helm](https://docs.helm.sh/using_helm/#installing-helm)</li><li>Mac: brew install kubernetes-helm</li></ul>|
+|Helm|Required|<ul><li>Helm helps you manage Kubernetes applications</li><li>Helm charts help you define, install and upgrade even the most complex Kubernetes application</li></ul>|<ul><li>[https://docs.helm.sh/using_helm/#installing-helm](https://docs.helm.sh/using_helm/#installing-helm)</li><li><b>Mac:</b> `brew install kubernetes-helm`</li><li><b>Ubuntu:</b> `sudo snap install helm --classic`</li></ul>|
 |Postman|Required|<ul><li>Postman is a Google Chrome application for the interacting with HTTP API's. It presents you with a friendly GUI for the construction requests and reading responces.</li></ul>|<ul><li>[https://www.getpostman.com/apps](https://www.getpostman.com/apps)</li></ul>|
 
 ## 2 Deployment
@@ -76,6 +76,55 @@ The following are Kubernetes concepts used within the project. An understanding 
 - Secret
 
 #### 2.1.1 Kubernetes Installation with Docker
+**Ubuntu**
+
+Note - Kubernetes with Docker is currently **not** available on Linux(Ubuntu) - please refer to; [https://forums.docker.com/](https://forums.docker.com/t/is-there-a-built-in-kubernetes-in-docker-ce-for-linux/54374)
+
+We recommend installing a minikube local environment by follow the steps below;
+
+With reference to [https://kubernetes.io/docs/tasks/tools/install-minikube/](https://kubernetes.io/docs/tasks/tools/install-minikube/)
+ - VT-x or AMD-v virtualization must be enabled in your computer’s BIOS. To check this on Linux run the following and verify the output is **non-empty**:
+   ```bash
+   egrep --color 'vmx|svm' /proc/cpuinfo
+   ```
+ - Install a Hypervisor:
+   - [KVM](http://www.linux-kvm.org/) - Recommended Linux driver
+
+   or
+   
+   - [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
+
+ - **kubectl** should already be installed. To verify, check the version;
+  ```bash
+   kubectl version
+   ``` 
+   If an error is returned, please refer to [Local Deployment and Testing Tools](#12-local-deployment-and-testing-tools).
+  
+- **minikube** installation
+  ```bash
+  curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 && sudo install minikube-linux-amd64 /usr/local/bin/minikube
+  ```
+
+- Start a cluster by running:
+  
+  **Note** - if you have install KVM as the Hypervisor, you might need to include `--vm-driver=KVM` in the startup command. The default is to startup with VirtualBox. 
+  ```bash
+  minikube start
+  ```
+  
+  Once successfully started, you can interact with your cluster using kubectl, just like any other Kubernetes cluster.
+  
+- Lunching the Minikube Dashboard
+  
+  The minikube dashboard can be opened and access via your default browser. 
+  ```bash
+  minikube dashboard
+  ```
+  
+  Continue from the **Config Helm CLI and install Helm Tiller...** section below.
+  
+**Mac**
+
 To install Kubernetes with Docker, follow the steps below;
  - Click on the Docker icon on the status barr
    - Select **Preferences**
@@ -99,7 +148,7 @@ To install Kubernetes with Docker, follow the steps below;
 [Kubernetes Install with Docker 2](../Wiki/KubernetesInstallWithDocker-2.png)
 
 #### 2.1.2 Kubernetes environment setup:
-The following are all command line executables specifically for Mac. 
+The following are all command line executables specifically for **Mac**. 
 1. List the current Kubernetes context;
    ```bash
    kubectl config get-contexts
@@ -151,7 +200,9 @@ The following are all command line executables specifically for Mac.
 
    [kubernetes-dashboard](../Wiki/kubernetesDashboard.png)
 
+   **Ubuntu** continue from here
 1. Config Helm CLI and install Helm Tiller on K8s cluster
+
    ```bash
    helm init
    ```
@@ -210,12 +261,14 @@ This section will provide guidelines to delete, list, install and upgrade of the
    __Note:__ for demo purposes we are using __moja__ as the chart __name__. Please verify and use the correct chart name from the listing above.
 		
 1. To **install** Mojaloop chart(s)
+
+   **Ubuntu** - It might be required to execute `helm install` and `helm upgrade` under `sudo`.
    
    To install the full mojaloop project
    ```bash
    helm install --namespace=demo --name=moja mojaloop/mojaloop
    ```
-   Alternative directly from the repository: 
+   Alternative directly from the repository:
    ```bash
    helm install --namespace=demo --name=moja --repo=http://mojaloop.io/helm/repo mojaloop
    ```
