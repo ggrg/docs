@@ -77,9 +77,9 @@ group Get Participant's FSP Details
     deactivate DB
     PARTICIPANT_DAO --> PARTICIPANT_HANDLER: Return Participant Endpoint
     deactivate PARTICIPANT_DAO
-    PARTICIPANT_HANDLER -> PATHFINDER_SERVICE: Query Participant ID
+    PARTICIPANT_HANDLER -> PATHFINDER_SERVICE: Query Party ID
     activate PATHFINDER_SERVICE
-    PATHFINDER_SERVICE -> PATHFINDER: Query Participant
+    PATHFINDER_SERVICE -> PATHFINDER: Query Party ID
     activate PATHFINDER
     PATHFINDER -> PATHFINDER_SERVICE: Return Mobile Country Code and Network Code
     deactivate PATHFINDER

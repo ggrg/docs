@@ -84,29 +84,29 @@ group Get Party's Details
     deactivate PATHFINDER
     PATHFINDER_SERVICE -> PARTIES_HANDLER: Return MCC & MNC
     deactivate PATHFINDER_SERVICE
-    PARTIES_HANDLER ->PARTICIPANT_DAO: Fetch Party Name\n<color #FF0000><b>Error code:</b> 3200</color>
+    PARTIES_HANDLER ->PARTICIPANT_DAO: Fetch Participant Name\n<color #FF0000><b>Error code:</b> 3200</color>
     activate PARTICIPANT_DAO
-    PARTICIPANT_DAO -> DB: Fetch Party Name \n(getParticipantNameFromMccMnc)
+    PARTICIPANT_DAO -> DB: Fetch Participant Name \n(getParticipantNameFromMccMnc)
     activate DB
     hnote over DB #lightyellow
         participantMno
     end note
-    DB --> PARTICIPANT_DAO: Return Party Name
+    DB --> PARTICIPANT_DAO: Return Participant Name
     deactivate DB
-    PARTICIPANT_DAO --> PARTIES_HANDLER: Return Party Name
+    PARTICIPANT_DAO --> PARTIES_HANDLER: Return Participant Name
     deactivate PARTICIPANT_DAO
-    PARTIES_HANDLER ->PARTICIPANT_DAO: Fetch Target Party's details \n(handleMSISDNPartyRequest)\n<color #FF0000><b>Error code:</b> 3200</color>
+    PARTIES_HANDLER ->PARTICIPANT_DAO: Fetch Target Participant's details \n(handleMSISDNPartyRequest)\n<color #FF0000><b>Error code:</b> 3200</color>
     activate PARTICIPANT_DAO
-    PARTICIPANT_DAO -> DB: Fetch Target Party Endpoint \n(getParticipantEndpointByName)
+    PARTICIPANT_DAO -> DB: Fetch Target Participant Endpoint \n(getParticipantEndpointByName)
     activate DB
     hnote over DB #lightyellow
         participantEndpoint
     end note
-    DB --> PARTICIPANT_DAO: Return Target Party Endpoint
+    DB --> PARTICIPANT_DAO: Return Target Participant Endpoint
     deactivate DB
-    PARTICIPANT_DAO --> PARTIES_HANDLER: Return Target Party Endpoint
+    PARTICIPANT_DAO --> PARTIES_HANDLER: Return Target Participant Endpoint
     deactivate PARTICIPANT_DAO
-    PARTIES_HANDLER -> ALS: Return Target Party Name
+    PARTIES_HANDLER -> ALS: Return Target Participant Name
     deactivate PARTIES_HANDLER
     ALS -->FSP: Return Result to Target Party Endpoint
     deactivate ALS

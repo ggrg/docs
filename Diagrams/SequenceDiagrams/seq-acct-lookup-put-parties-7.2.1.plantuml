@@ -52,23 +52,44 @@ end box
 
 activate FSP
 group Put Party's Details
-    FSP -> ALS: Request to get party's details \nPUT - /parties/{Type}/{ID}
+    FSP -> ALS: Callback for the Get Party's request   \nPUT - /parties/{Type}/{ID}
+    note right of FSP #yellow
+        Message:
+        party: {
+            partyIdInfo: {
+                “partyIdType”: “PERSONAL_ID”,
+                “partyIdentifier”: “1551212”,
+                “partySubIdOrType”: “License”,
+                “fspId”: “1234”
+            },
+            merchantClassificationCode: 4321,
+            “name”: “Justin Trudeau”,
+            “personalInfo”: {
+                “complexName”: {
+                    “firstName”: “Justin”,
+                    “middleName”: “Pierre”,
+                    “lastName”: “Trudeau”
+                },
+                “dateOfBirth”: “1971-12-25”
+            }
+        }
+    end note
     activate ALS
     ALS -> PARTIES_HANDLER: Put Party by ID and Type \n(PartiesByTypeAndID2)
     activate PARTIES_HANDLER
     PARTIES_HANDLER ->PARTIES_HANDLER: Validate MSISDN
-    PARTIES_HANDLER ->PARTICIPANT_DAO: Fetch Target Party's details \n(handleMSISDNPartyRequest)\n<color #FF0000><b>Error code:</b> 3200</color>
+    PARTIES_HANDLER ->PARTICIPANT_DAO: Fetch Target Participant's details \n(handleMSISDNPartyRequest)\n<color #FF0000><b>Error code:</b> 3200</color>
     activate PARTICIPANT_DAO
-    PARTICIPANT_DAO -> DB: Fetch Target Party Endpoint \n(getParticipantEndpointByName)
+    PARTICIPANT_DAO -> DB: Fetch Target Participant Endpoint \n(getParticipantEndpointByName)
     activate DB
     hnote over DB #lightyellow
         participantEndpoint
     end note
-    DB --> PARTICIPANT_DAO: Return Target Party Endpoint
+    DB --> PARTICIPANT_DAO: Return Target Participant Endpoint
     deactivate DB
-    PARTICIPANT_DAO --> PARTIES_HANDLER: Return Target Party Endpoint
+    PARTICIPANT_DAO --> PARTIES_HANDLER: Return Target Participant Endpoint
     deactivate PARTICIPANT_DAO
-    PARTIES_HANDLER -> ALS: Return Target Party Name
+    PARTIES_HANDLER -> ALS: Return Target Participant Name
     deactivate PARTIES_HANDLER
     ALS -->FSP: Return Result to Target Party Endpoint
     deactivate ALS
