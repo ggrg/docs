@@ -39,15 +39,15 @@ autonumber
 
 ' declare actors
 control "Position Handler" as POS_HANDLER
-collections "Transfer-Topic" as TOPIC_TRANSFERS
+collections "Notifications-Topic" as TOPIC_NOTIFICATIONS
 entity "Position Facade" as POS_FACADE
-entity "Transfer DAO" as TRANS_DAO
+entity "Position DAO" as POS_DAO
 database "Central Store" as DB
 
 box "Central Service" #LightYellow
     participant POS_HANDLER
-    participant TOPIC_TRANSFERS
-    participant TRANS_DAO
+    participant TOPIC_NOTIFICATIONS
+    participant POS_DAO
     participant POS_FACADE
     participant DB
 end box
@@ -55,18 +55,18 @@ end box
 ' start flow
 activate POS_HANDLER
 group Fulfil Position Handler Consume
-    POS_HANDLER -> TRANS_DAO: Request current state of transfer from DB \n<color #FF0000><b>Error code:</b> 2003</color>
-    activate TRANS_DAO
-    TRANS_DAO -> DB: Retrieve current state of transfer from DB
+    POS_HANDLER -> POS_DAO: Request current state of transfer from DB \n<color #FF0000><b>Error code:</b> 2003</color>
+    activate POS_DAO
+    POS_DAO -> DB: Retrieve current state of transfer from DB
     activate DB
     hnote over DB #lightyellow
         transferStateChange
         transferParticipant
     end note
-    DB --> TRANS_DAO: Return current state of transfer from DB
+    DB --> POS_DAO: Return current state of transfer from DB
     deactivate DB
-    TRANS_DAO --> POS_HANDLER: Return current state of transfer from DB
-    deactivate TRANS_DAO
+    POS_DAO --> POS_HANDLER: Return current state of transfer from DB
+    deactivate POS_DAO
     POS_HANDLER <-> POS_HANDLER: Validate current state (transferState is 'RECEIVED-FULFIL')\n<color #FF0000><b>Error code:</b> 2001</color>
     group Persist Position change and Transfer State (with transferState='COMMITTED' on position check pass)
         POS_HANDLER -> POS_FACADE: Request to persist latest position and state to DB\n<color #FF0000><b>Error code:</b> 2003</color>
@@ -100,7 +100,7 @@ group Fulfil Position Handler Consume
             end note
             activate DB
             deactivate DB
-            deactivate TRANS_DAO
+            deactivate POS_DAO
         end
         POS_FACADE --> POS_HANDLER: Return success
         deactivate POS_FACADE
@@ -132,9 +132,9 @@ group Fulfil Position Handler Consume
             }
         }
     end note
-    POS_HANDLER -> TOPIC_TRANSFERS: Publish Transfer event\n<color #FF0000><b>Error code:</b> 2003</color>
-    activate TOPIC_TRANSFERS
-    deactivate TOPIC_TRANSFERS
+    POS_HANDLER -> TOPIC_NOTIFICATIONS: Publish Transfer event\n<color #FF0000><b>Error code:</b> 2003</color>
+    activate TOPIC_NOTIFICATIONS
+    deactivate TOPIC_NOTIFICATIONS
 end
 deactivate POS_HANDLER
 @enduml

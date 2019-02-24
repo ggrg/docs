@@ -55,7 +55,7 @@ end box
 activate FULF_HANDLER
 group Fulfil Handler Consume (Success)
     alt Consume Single Message
-        TOPIC_FULFIL <- FULF_HANDLER: Consume Prepare event message for Payer
+        TOPIC_FULFIL <- FULF_HANDLER: Consume Fulfil event message for Payer
         activate TOPIC_FULFIL
         deactivate TOPIC_FULFIL
         break

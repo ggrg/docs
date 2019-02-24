@@ -42,7 +42,7 @@ collections "topic-transfer-position" as TOPIC_TRANSFER_POSITION
 collections "Notification-Topic" as NOTIFICATIONS_TOPIC
 collections "Event-Topic" as EVENT_TOPIC
 entity "Segment DAO" as SEGMENT_DAO
-entity "Transfer DAO" as TRANSFER_DAO
+entity "Position DAO" as POS_DAO
 database "Central Store" as DB
 
 box "Central Service" #LightYellow
@@ -50,7 +50,7 @@ box "Central Service" #LightYellow
     participant TOPIC_TRANSFER_POSITION
     participant NOTIFICATIONS_TOPIC
     participant EVENT_TOPIC
-    participant TRANSFER_DAO
+    participant POS_DAO
     participant SEGMENT_DAO
     participant DB
 end box
@@ -86,9 +86,9 @@ group Timeout Handler Consume
     end
 
     group Do Cleanup
-        TIMEOUT_HANDLER -> TRANSFER_DAO: Clean up transferTimeout from finalised transfers
-        activate TRANSFER_DAO
-        TRANSFER_DAO -> DB: Clean up transferTimeout from finalised transfers
+        TIMEOUT_HANDLER -> POS_DAO: Clean up transferTimeout from finalised transfers
+        activate POS_DAO
+        POS_DAO -> DB: Clean up transferTimeout from finalised transfers
         hnote over DB #lightyellow
             DELETE tt
             FROM **transferTimeout** AS tt
@@ -105,32 +105,32 @@ group Timeout Handler Consume
         end note
         activate DB
         deactivate DB
-        TRANSFER_DAO --> TIMEOUT_HANDLER: Return success
-        deactivate TRANSFER_DAO
+        POS_DAO --> TIMEOUT_HANDLER: Return success
+        deactivate POS_DAO
     end
 
     group Determine IntervalMax (Upper limit for inclusion)
-        TIMEOUT_HANDLER -> TRANSFER_DAO: Get last transferStateChangeId as @intervalMax
-        activate TRANSFER_DAO
-        TRANSFER_DAO -> DB: Get last transferStateChangeId as @intervalMax
+        TIMEOUT_HANDLER -> POS_DAO: Get last transferStateChangeId as @intervalMax
+        activate POS_DAO
+        POS_DAO -> DB: Get last transferStateChangeId as @intervalMax
         hnote over DB #lightyellow
             SELECT MAX(transferStateChangeId) INTO @intervalMax
             FROM **transferStateChange**
         end note
         activate DB
-        DB --> TRANSFER_DAO: Return @intervalMax
+        DB --> POS_DAO: Return @intervalMax
         deactivate DB
-        TRANSFER_DAO --> TIMEOUT_HANDLER: Return @intervalMax
-        deactivate TRANSFER_DAO
+        POS_DAO --> TIMEOUT_HANDLER: Return @intervalMax
+        deactivate POS_DAO
     end
 
     
     group Prepare data and return the list for expiration
-        TIMEOUT_HANDLER -> TRANSFER_DAO: Prepare data and get transfers to be expired
-        activate TRANSFER_DAO
+        TIMEOUT_HANDLER -> POS_DAO: Prepare data and get transfers to be expired
+        activate POS_DAO
         group <color #blue>DB TRANSACTION</color>
-            TRANSFER_DAO <-> TRANSFER_DAO: **transactionTimestamp** = now()
-            TRANSFER_DAO -> DB: Insert all new transfers still in processing state
+            POS_DAO <-> POS_DAO: **transactionTimestamp** = now()
+            POS_DAO -> DB: Insert all new transfers still in processing state
             hnote over DB #lightyellow
                 INSERT INTO **transferTimeout**(transferId, expirationDate)
                 SELECT t.transferId, t.expirationDate
@@ -148,7 +148,7 @@ group Timeout Handler Consume
             activate DB
             deactivate DB
 
-            TRANSFER_DAO -> DB: Insert transfer state ABORTED for\nexpired RECEIVED_PREPARE transfers
+            POS_DAO -> DB: Insert transfer state ABORTED for\nexpired RECEIVED_PREPARE transfers
             hnote over DB #lightyellow
                 INSERT INTO **transferStateChange**
                 SELECT tt.transferId, 'EXPIRED_PREPARED' AS transferStateId, 'Aborted by Timeout Handler' AS reason
@@ -168,7 +168,7 @@ group Timeout Handler Consume
             activate DB
             deactivate DB
 
-            TRANSFER_DAO -> DB: Insert transfer state EXPIRED for\nexpired RESERVED transfers
+            POS_DAO -> DB: Insert transfer state EXPIRED for\nexpired RESERVED transfers
             hnote over DB #lightyellow
                 INSERT INTO **transferStateChange**
                 SELECT tt.transferId, 'RESERVED_TIMEOUT' AS transferStateId, 'Expired by Timeout Handler' AS reason
@@ -187,7 +187,7 @@ group Timeout Handler Consume
             activate DB
             deactivate DB
 
-            TRANSFER_DAO -> DB: Update segment table to be used for the next run
+            POS_DAO -> DB: Update segment table to be used for the next run
             hnote over DB #lightyellow
                 IF @intervalMin = 0
                     INSERT
@@ -204,7 +204,7 @@ group Timeout Handler Consume
             deactivate DB
         end
 
-        TRANSFER_DAO -> DB: Get list of transfers to be expired with current state
+        POS_DAO -> DB: Get list of transfers to be expired with current state
         hnote over DB #lightyellow
             SELECT tt.*, tsc.transferStateId, tp1.participantCurrencyId payerParticipantId, 
                     tp2.participantCurrencyId payeeParticipantId
@@ -228,10 +228,10 @@ group Timeout Handler Consume
             WHERE tt.expirationDate < {transactionTimestamp}
         end note
         activate DB
-        TRANSFER_DAO <-- DB: Return list
+        POS_DAO <-- DB: Return list
         deactivate DB
-        TRANSFER_DAO --> TIMEOUT_HANDLER: Return list
-        deactivate TRANSFER_DAO
+        POS_DAO --> TIMEOUT_HANDLER: Return list
+        deactivate POS_DAO
     end
 
     loop for each transfer in the list

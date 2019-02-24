@@ -46,9 +46,7 @@ collections "Fulfil-Topic" as TOPIC_FULFIL
 control "Fulfil Event Handler" as FULF_HANDLER
 collections "topic-transfer-position" as TOPIC_TRANSFER_POSITION
 control "Position Event Handler" as POS_HANDLER
-collections "Transfer-Topic" as TOPIC_TRANSFERS
 collections "Event-Topic" as TOPIC_EVENTS
-control "Transfer Event Handler" as TRANS_HANDLER
 collections "Notification-Topic" as TOPIC_NOTIFICATIONS
 
 box "Financial Service Providers" #lightGray
@@ -68,8 +66,6 @@ box "Central Service" #LightYellow
     participant TOPIC_TRANSFER_POSITION
     participant TOPIC_EVENTS
     participant POS_HANDLER
-    participant TOPIC_TRANSFERS
-    participant TRANS_HANDLER
     participant TOPIC_NOTIFICATIONS
 end box
 
@@ -77,7 +73,6 @@ end box
 activate NOTIFY_HANDLER
 activate FULF_HANDLER
 activate POS_HANDLER
-activate TRANS_HANDLER
 group DFSP2 sends a Fulfil Reject Transfer request
     DFSP2 <-> DFSP2: Retrieve fulfilment string generated during\nthe quoting process or regenerate it using\n**Local secret** and **ILP Packet** as inputs
     note right of DFSP2 #yellow
@@ -154,12 +149,8 @@ group DFSP2 sends a Fulfil Reject Transfer request
     FULF_HANDLER -> TOPIC_TRANSFER_POSITION: Produce message
     |||
     TOPIC_TRANSFER_POSITION <- POS_HANDLER: Consume message
-    ref over TOPIC_TRANSFER_POSITION, TOPIC_TRANSFERS: Position Handler Consume (Reject) {[[https://github.com/mojaloop/docs/blob/master/CentralServices/seq_diagrams/seq-position-1.3.3-abort.svg seq-position-1.3.3-abort]]} \n
-    POS_HANDLER -> TOPIC_TRANSFERS: Produce message
-    |||
-    TOPIC_TRANSFERS <- TRANS_HANDLER: Consume message
-    ref over TOPIC_EVENTS, TOPIC_NOTIFICATIONS: Transfer Handler Consume (Reject) {[[https://github.com/mojaloop/docs/blob/master/CentralServices/seq_diagrams/seq-reject-2.2.3.svg 2.2.3.]]} \n
-    TRANS_HANDLER -> TOPIC_NOTIFICATIONS: Produce message
+    ref over TOPIC_TRANSFER_POSITION, TOPIC_NOTIFICATIONS: Position Handler Consume (Reject) {[[https://github.com/mojaloop/docs/blob/master/CentralServices/seq_diagrams/seq-position-1.3.3-abort.svg seq-position-1.3.3-abort]]} \n
+    POS_HANDLER -> TOPIC_NOTIFICATIONS: Produce message
     |||
     TOPIC_NOTIFICATIONS <- NOTIFY_HANDLER: <color #FF0000>**Consume message**</color>
     opt action == 'reject'
@@ -169,7 +160,6 @@ group DFSP2 sends a Fulfil Reject Transfer request
     end
     |||
 end
-activate TRANS_HANDLER
 activate POS_HANDLER
 activate FULF_HANDLER
 activate NOTIFY_HANDLER

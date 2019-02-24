@@ -38,7 +38,6 @@ autonumber
 
 ' declare actors
 control "Position Handler" as POS_HANDLER
-collections "Transfer-Topic" as TOPIC_TRANSFERS
 entity "Position DAO" as POS_DAO
 collections "Notification-Topic" as TOPIC_NOTIFICATIONS
 ' entity "Participant DAO" as PARTICIPANT_DAO
@@ -47,7 +46,6 @@ database "Central Store" as DB
 
 box "Central Service" #LightYellow
     participant POS_HANDLER
-    participant TOPIC_TRANSFERS
     participant TOPIC_NOTIFICATIONS
     participant POS_DAO
     ' participant PARTICIPANT_DAO
@@ -195,9 +193,9 @@ group Abort Position Handler Consume
                 }
             }
         end note
-        POS_HANDLER -> TOPIC_TRANSFERS: Publish Transfer event\n<color #FF0000><b>Error code:</b> 2003</color>
-        activate TOPIC_TRANSFERS
-        deactivate TOPIC_TRANSFERS
+        POS_HANDLER -> TOPIC_NOTIFICATIONS: Publish Notification event\n<color #FF0000><b>Error code:</b> 2003</color>
+        activate TOPIC_NOTIFICATIONS
+        deactivate TOPIC_NOTIFICATIONS
     end
     ' We do not see how this scenario will be triggered
     opt type == 'position' && action == 'fail' (Unable to currently trigger this scenario)
@@ -257,9 +255,9 @@ group Abort Position Handler Consume
                 }
             }
         end note
-        POS_HANDLER -> TOPIC_TRANSFERS: Publish Transfer event\n<color #FF0000><b>Error code:</b> 2003</color>
-        activate TOPIC_TRANSFERS
-        deactivate TOPIC_TRANSFERS
+        POS_HANDLER -> TOPIC_NOTIFICATIONS: Publish Notification event\n<color #FF0000><b>Error code:</b> 2003</color>
+        activate TOPIC_NOTIFICATIONS
+        deactivate TOPIC_NOTIFICATIONS
     end
 end
 deactivate POS_HANDLER
