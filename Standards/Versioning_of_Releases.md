@@ -1,3 +1,5 @@
+moving to documentation
+
 ## Versioning of releases made for core Switch services
 This document provides guidelines regarding the versioning strategy used for the releases of Mojaloop Open Source repositories corresponding to the Switch services.
 
