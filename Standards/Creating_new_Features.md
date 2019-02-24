@@ -1,3 +1,5 @@
+Moved to Documentation
+
 ## Creating new Features ## 
 
 ### Fork ###
