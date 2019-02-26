@@ -34,12 +34,13 @@ autonumber
 ' database - Database Persistance Store
 
 ' declare actors
-actor "FSP" as FSP
+actor "PAYER_FSP" as PAYER_FSP
 boundary "Account Lookup Service" as ALS
 control "Parties Handler" as PARTIES_HANDLER
 entity "Account Lookup Service API" as ALS
 entity "Participant DAO" as PARTICIPANT_DAO
 database "Central Ledger Database" as DB
+actor "Payee_FSP" as PAYEE_FSP
 
 box "Account Lookup Service" #LightYellow
 participant ALS
@@ -48,12 +49,14 @@ participant PARTICIPANT_DAO
 participant DB
 end box
 
+participant PAYEE_FSP
+
 ' start flow
 
-activate FSP
+activate PAYER_FSP
 group Put Party's Details
-    FSP -> ALS: Callback for the Get Party's request   \nPUT - /parties/{Type}/{ID}
-    note right of FSP #yellow
+    PAYER_FSP -> ALS: Callback for the Get Party's request   \nPUT - /parties/{Type}/{ID}
+    note right of PAYER_FSP #yellow
         Message:
         party: {
             partyIdInfo: {
@@ -89,10 +92,11 @@ group Put Party's Details
     deactivate DB
     PARTICIPANT_DAO --> PARTIES_HANDLER: Return Target Participant Endpoint
     deactivate PARTICIPANT_DAO
-    PARTIES_HANDLER -> ALS: Return Target Participant Name
+    PARTIES_HANDLER -> ALS: Return Success
+    PARTIES_HANDLER -> PAYEE_FSP: Forward Request to Target Participant
     deactivate PARTIES_HANDLER
-    ALS -->FSP: Return Result to Target Party Endpoint
+    ALS -->PAYER_FSP: Return Success 200
     deactivate ALS
-    deactivate FSP
+    deactivate PAYER_FSP
 end
 @enduml

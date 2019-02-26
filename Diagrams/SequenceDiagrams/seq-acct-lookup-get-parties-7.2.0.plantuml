@@ -34,7 +34,7 @@ autonumber
 ' database - Database Persistance Store
 
 ' declare actors
-actor "FSP" as FSP
+actor "Payer FSP" as PAYER_FSP
 boundary "Account Lookup Service" as ALS
 control "Parties Handler" as PARTIES_HANDLER
 entity "Account Lookup Service API" as ALS
@@ -42,6 +42,7 @@ entity "Participant DAO" as PARTICIPANT_DAO
 database "Central Ledger Database" as DB
 entity "Pathfinder Service" as PATHFINDER_SERVICE
 actor "GSMA Pathfinder" as PATHFINDER
+actor "Payee FSP" as PAYEE_FSP
 
 box "Account Lookup Service" #LightYellow
 participant ALS
@@ -55,12 +56,13 @@ participant PATHFINDER_SERVICE
 end box
 
 participant PATHFINDER
+participant PAYEE_FSP
 
 ' start flow
 
-activate FSP
+activate PAYER_FSP
 group Get Party's Details
-    FSP -> ALS: Request to get party's details \nGET - /parties/{Type}/{ID}
+    PAYER_FSP -> ALS: Request to get party's details \nGET - /parties/{Type}/{ID}
     activate ALS
     ALS -> PARTIES_HANDLER: Get Party by ID and Type \n(PartiesByTypeAndID)
     activate PARTIES_HANDLER
@@ -80,7 +82,7 @@ group Get Party's Details
     activate PATHFINDER_SERVICE
     PATHFINDER_SERVICE -> PATHFINDER: Query Party
     activate PATHFINDER
-    PATHFINDER -> PATHFINDER_SERVICE: Return Mobile Country Code and Network Code
+    PATHFINDER -> PATHFINDER_SERVICE: Return Mobile Country Code \nand Network Code
     deactivate PATHFINDER
     PATHFINDER_SERVICE -> PARTIES_HANDLER: Return MCC & MNC
     deactivate PATHFINDER_SERVICE
@@ -106,10 +108,11 @@ group Get Party's Details
     deactivate DB
     PARTICIPANT_DAO --> PARTIES_HANDLER: Return Target Participant Endpoint
     deactivate PARTICIPANT_DAO
-    PARTIES_HANDLER -> ALS: Return Target Participant Name
+    PARTIES_HANDLER -> ALS: Return Success
+    PARTIES_HANDLER -> PAYEE_FSP: Forward Request to Target Participant with Updated Headers
     deactivate PARTIES_HANDLER
-    ALS -->FSP: Return Result to Target Party Endpoint
+    ALS -->PAYER_FSP: Return Success 202
     deactivate ALS
-    deactivate FSP
+    deactivate PAYER_FSP
 end
 @enduml
