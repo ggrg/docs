@@ -20,6 +20,7 @@
 
  * Rajiv Mothilal <rajiv.mothilal@modusbox.com>
  * Georgi Georgiev <georgi.georgiev@modusbox.com>
+ * Sam Kummary <sam@modusbox.com>
  -------------
  ******'/
 
@@ -40,16 +41,12 @@ autonumber
 control "Position Handler" as POS_HANDLER
 entity "Position DAO" as POS_DAO
 collections "Notification-Topic" as TOPIC_NOTIFICATIONS
-' entity "Participant DAO" as PARTICIPANT_DAO
-' entity "Transfer DAO" as TRANS_DAO
 database "Central Store" as DB
 
 box "Central Service" #LightYellow
     participant POS_HANDLER
     participant TOPIC_NOTIFICATIONS
     participant POS_DAO
-    ' participant PARTICIPANT_DAO
-    ' participant TRANS_DAO
     participant DB
 end box
 
@@ -143,7 +140,7 @@ group Abort Position Handler Consume
         activate TOPIC_NOTIFICATIONS
         deactivate TOPIC_NOTIFICATIONS
     end
-    opt type == 'position' && action == 'reject'
+    opt type == 'position' && (action IN ['reject', 'abort'])
         POS_HANDLER -> POS_DAO: Request current state of transfer from DB\n<color #FF0000><b>Error code:</b> 2003</color>
         activate POS_DAO
         POS_DAO -> DB: Retrieve current state of transfer from DB
@@ -155,9 +152,9 @@ group Abort Position Handler Consume
         deactivate DB
         POS_DAO --> POS_HANDLER: Return current state of transfer from DB
         deactivate POS_DAO
-        POS_HANDLER <-> POS_HANDLER: Validate current state (transferStateChange.transferStateId == 'REJECTED')\n<color #FF0000><b>Error code:</b> 2001</color>
+        POS_HANDLER <-> POS_HANDLER: Validate current state (transferStateChange.transferStateId IN ['RECEIVED_REJECT', 'RECEIVED_ABORT'])\n<color #FF0000><b>Error code:</b> 2001</color>
 
-        group Persist Position change and Transfer State (with transferState='ABORTED' on position check pass)
+        group Persist Position change and Transfer State ( (transferState=='RECEIVED_REJECT')?'ABORTED_REJECTED':'ABORTED_ERROR' on position check pass)
             POS_HANDLER -> POS_DAO: Request to persist latest position and state to DB\n<color #FF0000><b>Error code:</b> 2003</color>
             group <color #blue>REFER TO DB TRANSACTION IMPLEMENTATION ABOVE</color>
                 activate POS_DAO
@@ -186,7 +183,7 @@ group Abort Position Handler Consume
                         action: abort,
                         createdAt: <timestamp>,
                         state: {
-                            status: "rejected",
+                            status: "aborted",
                             code: 0
                         }
                     }
