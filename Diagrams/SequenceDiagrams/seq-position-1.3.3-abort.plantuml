@@ -152,10 +152,10 @@ group Abort Position Handler Consume
         deactivate DB
         POS_DAO --> POS_HANDLER: Return current state of transfer from DB
         deactivate POS_DAO
-        POS_HANDLER <-> POS_HANDLER: Validate current state (transferStateChange.transferStateId IN ['RECEIVED_REJECT', 'RECEIVED_ABORT'])\n<color #FF0000><b>Error code:</b> 2001</color>
+        POS_HANDLER <-> POS_HANDLER: Validate current state (transferStateChange.transferStateId IN ['RECEIVED_REJECT', 'RECEIVED_ERROR'])\n<color #FF0000><b>Error code:</b> 2001</color>
 
-        group Persist Position change and Transfer State ( (transferState=='RECEIVED_REJECT')?'ABORTED_REJECTED':'ABORTED_ERROR' on position check pass)
-            POS_HANDLER -> POS_DAO: Request to persist latest position and state to DB\n<color #FF0000><b>Error code:</b> 2003</color>
+        group Persist Position change and Transfer State
+            POS_HANDLER -> POS_DAO: Request to persist latest position and state to DB\n<color #FF0000><b>Error code:</b> 2003</color> \ntransferState=(action=='reject' ? 'ABORTED_REJECTED' : 'ABORTED_ERROR' ) on position check pass
             group <color #blue>REFER TO DB TRANSACTION IMPLEMENTATION ABOVE</color>
                 activate POS_DAO
                 POS_DAO -> DB: Refer to implementation above

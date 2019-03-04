@@ -145,7 +145,7 @@ group DFSP2 sends a Fulfil Reject Transfer request
     MLAPI --> DFSP2: Respond HTTP - 200 (OK)
     deactivate MLAPI
     TOPIC_FULFIL <- FULF_HANDLER: Consume message
-    ref over TOPIC_FULFIL, TOPIC_EVENTS: Fulfil Handler Consume (Reject) {[[https://github.com/mojaloop/docs/blob/master/CentralServices/seq_diagrams/seq-reject-2.2.1.svg 2.2.1.]]} \n
+    ref over TOPIC_FULFIL, TOPIC_EVENTS: Fulfil Handler Consume (Reject/Abort) {[[https://github.com/mojaloop/docs/blob/master/CentralServices/seq_diagrams/seq-reject-2.2.1.svg 2.2.1.]]} \n
     FULF_HANDLER -> TOPIC_TRANSFER_POSITION: Produce message
     |||
     TOPIC_TRANSFER_POSITION <- POS_HANDLER: Consume message

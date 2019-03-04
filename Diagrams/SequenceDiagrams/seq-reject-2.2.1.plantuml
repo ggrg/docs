@@ -26,7 +26,7 @@
 
 @startuml
 ' declate title
-title 2.1.1. Fulfil Handler Consume (Reject/Abort)
+title 2.2.1. Fulfil Handler Consume (Reject/Abort)
 autonumber
 ' Actor Keys:
 '   boundary - APIs/Interfaces, etc
@@ -212,7 +212,7 @@ group Fulfil Handler Consume (Failure)
             end
         else Tranfer Fulfilment not present (an error message or otherwise)
             alt Validation successful
-                group Persist Transfer State (with transferState='RECEIVED_ABORT')
+                group Persist Transfer State (with transferState='RECEIVED_ERROR')
                     FULF_HANDLER -> TRANS_DAO: Request to persist transfer state and Error\n<color #FF0000><b>Error code:</b> 2003</color>
                     activate TRANS_DAO
                     TRANS_DAO -> DB: Persist transfer state and error information

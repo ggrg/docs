@@ -24,7 +24,7 @@
 
 @startuml
 ' declate title
-title 2.1.0. DFSP2 sends a PUT call on /error end-point for a Transfer request
+title 2.2.0.a. DFSP2 sends a PUT call on /error end-point for a Transfer request
 
 autonumber
 ' Actor Keys:
@@ -70,7 +70,7 @@ activate NOTIFY_HANDLER
 activate FULF_HANDLER
 activate POS_HANDLER
 group DFSP2 sends a Fulfil Success Transfer request
-    DFSP2 <-> DFSP2: Retrieve fulfilment string generated during\nthe quoting process or regenerate it using\n**Local secret** and **ILP Packet** as inputs
+    DFSP2 <-> DFSP2: During processing of an incoming\nPOST /transfers request, some processing\nerror occurred and an Error callback is made
     note right of DFSP2 #yellow
         Headers - transferHeaders: {
             Content-Length: <Content-Length>,
@@ -101,7 +101,7 @@ group DFSP2 sends a Fulfil Success Transfer request
     end note
     DFSP2 -> MLAPI: PUT - /transfers/<ID>/error
     activate MLAPI
-    MLAPI -> MLAPI: Validate incoming token and originator matching Payee\n<color #FF0000><b>Error codes:</b> 3000-3002, 3100-3107</color>
+    MLAPI -> MLAPI: Validate incoming originator matching Payee\n<color #FF0000><b>Error codes:</b> 3000-3002, 3100-3107</color>
     note right of MLAPI #yellow
         Message:
         {
