@@ -20,12 +20,13 @@
 
  * Rajiv Mothilal <rajiv.mothilal@modusbox.com>
  * Georgi Georgiev <georgi.georgiev@modusbox.com>
+ * Sam Kummary <sam@modusbox.com>
  --------------
  ******'/
 
 @startuml
 ' declate title
-title 2.1.1. Fulfil Handler Consume (Reject)
+title 2.2.1. Fulfil Handler Consume (Reject/Abort)
 autonumber
 ' Actor Keys:
 '   boundary - APIs/Interfaces, etc
@@ -53,14 +54,14 @@ box "Central Service" #LightYellow
 end box
 ' start flow
 activate FULF_HANDLER
-group Fulfil Handler Consume (Success)
+group Fulfil Handler Consume (Failure)
     alt Consume Single Message
-        TOPIC_FULFIL <- FULF_HANDLER: Consume Prepare event message for Payer
+        TOPIC_FULFIL <- FULF_HANDLER: Consume Fulfil event message for Payer
         activate TOPIC_FULFIL
         deactivate TOPIC_FULFIL
         break
             group Validate Event
-                FULF_HANDLER <-> FULF_HANDLER: Validate event - Rule: type == 'fulfil' && action == 'reject'\n<color #FF0000><b>Error codes:</b> 2001</color>
+                FULF_HANDLER <-> FULF_HANDLER: Validate event - Rule: type == 'fulfil' && ( action IN ['reject','abort'] )\n<color #FF0000><b>Error codes:</b> 2001</color>
             end
         end
         group Persist Event Information
@@ -131,7 +132,7 @@ group Fulfil Handler Consume (Success)
                 deactivate TRANS_DAO
             end
         end
-        group Validate and persist Transfer Fulfilment
+        alt Validate and persist Transfer Fulfilment (if it is present)
             FULF_HANDLER -> TRANS_DAO: Request information for the validate checks\n<color #FF0000><b>Error code:</b> 2003</color>
             activate TRANS_DAO
             TRANS_DAO -> DB: Fetch from database
@@ -160,7 +161,7 @@ group Fulfil Handler Consume (Success)
             end
 
             alt Transfer.ilpCondition validate successful
-                group Persist Transfer State (with transferState='REJECTED')
+                group Persist Transfer State (with transferState='RECEIVED_REJECT')
                     FULF_HANDLER -> TRANS_DAO: Request to persist transfer state\n<color #FF0000><b>Error code:</b> 2003</color>
                     activate TRANS_DAO
                     TRANS_DAO -> DB: Persist transfer state
@@ -199,10 +200,62 @@ group Fulfil Handler Consume (Success)
                     }
                 end note
 
-                FULF_HANDLER -> TOPIC_TRANSFER_POSITION: Route & Publish Position event for Payee
+                FULF_HANDLER -> TOPIC_TRANSFER_POSITION: Route & Publish Position event for Payer
                 activate TOPIC_TRANSFER_POSITION
                 deactivate TOPIC_TRANSFER_POSITION
             else Validate Fulfil Transfer not successful
+                break
+                    FULF_HANDLER -> TOPIC_NOTIFICATIONS: Route & Publish Notification event for Payee
+                    activate TOPIC_NOTIFICATIONS
+                    deactivate TOPIC_NOTIFICATIONS
+                end
+            end
+        else Tranfer Fulfilment not present (an error message or otherwise)
+            alt Validation successful
+                group Persist Transfer State (with transferState='RECEIVED_ERROR')
+                    FULF_HANDLER -> TRANS_DAO: Request to persist transfer state and Error\n<color #FF0000><b>Error code:</b> 2003</color>
+                    activate TRANS_DAO
+                    TRANS_DAO -> DB: Persist transfer state and error information
+                    activate DB
+                    hnote over DB #lightyellow
+                        transferStateChange
+                        transferError
+                    end note
+                    deactivate DB
+                    TRANS_DAO --> FULF_HANDLER: Return success
+                end
+
+                note right of FULF_HANDLER #yellow
+                    Message:
+                    {
+                        id: <ID>,
+                        from: <transferHeaders.FSPIOP-Source>,
+                        to: <transferHeaders.FSPIOP-Destination>,
+                        type: application/json,
+                        content: {
+                            headers: <transferHeaders>,
+                            payload: <transferMessage>
+                        },
+                        metadata: {
+                            event: {
+                                id: <uuid>,
+                                responseTo: <previous.uuid>,
+                                type: position,
+                                action: abort,
+                                createdAt: <timestamp>,
+                                state: {
+                                    status: "success",
+                                    code: 0
+                                }
+                            }
+                        }
+                    }
+                end note
+
+                FULF_HANDLER -> TOPIC_TRANSFER_POSITION: Route & Publish Position event for Payer
+                activate TOPIC_TRANSFER_POSITION
+                deactivate TOPIC_TRANSFER_POSITION
+            else Validate Transfer Error Message not successful
                 break
                     FULF_HANDLER -> TOPIC_NOTIFICATIONS: Route & Publish Notification event for Payee
                     activate TOPIC_NOTIFICATIONS

@@ -39,22 +39,17 @@ autonumber
 
 ' declare actors
 control "Position Handler" as POS_HANDLER
-collections "Transfer-Topic" as TOPIC_TRANSFERS
+
 entity "Position\nManagement\nFacade" as POS_MGMT
-' entity "Position DAO" as POS_DAO
 collections "Notification-Topic" as TOPIC_NOTIFICATIONS
-' entity "Participant DAO" as PARTICIPANT_DAO
-entity "Transfer DAO" as TRANS_DAO
+entity "Position DAO" as POS_DAO
 database "Central Store" as DB
 
 box "Central Service" #LightYellow
     participant POS_HANDLER
-    participant TOPIC_TRANSFERS
     participant TOPIC_NOTIFICATIONS
     participant POS_MGMT
-    ' participant POS_DAO
-    ' participant PARTICIPANT_DAO
-    participant TRANS_DAO
+    participant POS_DAO
     participant DB
 end box
 
@@ -223,27 +218,27 @@ group Prepare Position Handler Consume
                 }
             }
         end note
-        POS_HANDLER -> TOPIC_TRANSFERS: Publish Transfer event\n<color #FF0000><b>Error code:</b> 2003</color>
-        activate TOPIC_TRANSFERS
-        deactivate TOPIC_TRANSFERS
+        POS_HANDLER -> TOPIC_NOTIFICATIONS: Publish Notification event\n<color #FF0000><b>Error code:</b> 2003</color>
+        activate TOPIC_NOTIFICATIONS
+        deactivate TOPIC_NOTIFICATIONS
    else Calculate & Validate Latest Position Prepare (failure)
         note right of POS_HANDLER #red: Validation failure!
 
         group Persist Transfer State (with transferState='ABORTED' on position check fail)
-            POS_HANDLER -> TRANS_DAO: Request to persist transfer\n<color #FF0000><b>Error code:</b> 2003</color>
-            activate TRANS_DAO
+            POS_HANDLER -> POS_DAO: Request to persist transfer\n<color #FF0000><b>Error code:</b> 2003</color>
+            activate POS_DAO
             note right of POS_HANDLER #lightgray
                 transferStateChange.state = "ABORTED",
                 transferStateChange.reason = "Net Debit Cap exceeded by this request at this time, please try again later"
             end note
-            TRANS_DAO -> DB: Persist transfer state
+            POS_DAO -> DB: Persist transfer state
             hnote over DB #lightyellow
                 transferStateChange
             end note
             activate DB
             deactivate DB
-            TRANS_DAO --> POS_HANDLER: Return success
-            deactivate TRANS_DAO
+            POS_DAO --> POS_HANDLER: Return success
+            deactivate POS_DAO
         end
 
         note right of POS_HANDLER #yellow

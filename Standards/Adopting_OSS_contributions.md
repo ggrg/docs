@@ -1,3 +1,5 @@
+Document Moved to GitBooks
+
 ## Standards for adopting an Open Source contribution into Mojaloop
 This document provides guidelines regarding the adoption of a contribution to the Mojaloop Open Source repositories.
 

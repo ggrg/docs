@@ -39,23 +39,19 @@ autonumber
 ' declare actors
 collections "topic-transfer-position" as TOPIC_TRANSFER_POSITION
 control "Position Event Handler" as POS_HANDLER
-collections "Transfer-Topic" as TOPIC_TRANSFERS
 entity "Position DAO" as POS_DAO
 collections "Event-Topic" as TOPIC_EVENTS
 collections "Notification-Topic" as TOPIC_NOTIFICATIONS
 entity "Participant DAO" as PARTICIPANT_DAO
-entity "Transfer DAO" as TRANS_DAO
 database "Central Store" as DB
 
 box "Central Service" #LightYellow
     participant TOPIC_TRANSFER_POSITION
     participant POS_HANDLER
-    participant TOPIC_TRANSFERS
     participant TOPIC_EVENTS
     participant TOPIC_NOTIFICATIONS
     participant POS_DAO
     participant PARTICIPANT_DAO
-    participant TRANS_DAO
     participant DB
 end box
 
@@ -123,16 +119,16 @@ group Position Handler Consume
         end
 
         group Persist Transfer State (with transferState='RESERVED' on position check pass)
-            POS_HANDLER -> TRANS_DAO: Request to persist transfer
-            activate TRANS_DAO
-            TRANS_DAO -> DB: Persist transfer state
+            POS_HANDLER -> POS_DAO: Request to persist transfer
+            activate POS_DAO
+            POS_DAO -> DB: Persist transfer state
             hnote over DB #lightyellow
                 transferStateChange
             end note
             activate DB
             deactivate DB
-            TRANS_DAO --> POS_HANDLER: Return success
-            deactivate TRANS_DAO
+            POS_DAO --> POS_HANDLER: Return success
+            deactivate POS_DAO
         end
 
         note right of POS_HANDLER #yellow
@@ -161,9 +157,9 @@ group Position Handler Consume
                 }
             }
         end note
-        POS_HANDLER -> TOPIC_TRANSFERS: Publish Transfer event
-        activate TOPIC_TRANSFERS
-        deactivate TOPIC_TRANSFERS
+        POS_HANDLER -> TOPIC_NOTIFICATIONS: Publish Notification event to Payee
+        activate TOPIC_NOTIFICATIONS
+        deactivate TOPIC_NOTIFICATIONS
     else Calculate & Validate Latest Position (failure)
         group Calculate position and persist change
             POS_HANDLER -> POS_DAO: Request latest position from DB for Payer
@@ -199,16 +195,16 @@ group Position Handler Consume
         end
         
         group Persist Transfer State (with transferState='ABORTED' on position check pass)
-            POS_HANDLER -> TRANS_DAO: Request to persist transfer
-            activate TRANS_DAO
-            TRANS_DAO -> DB: Persist transfer state
+            POS_HANDLER -> POS_DAO: Request to persist transfer
+            activate POS_DAO
+            POS_DAO -> DB: Persist transfer state
             hnote over DB #lightyellow
                 transferStateChange
             end note
             activate DB
             deactivate DB
-            TRANS_DAO --> POS_HANDLER: Return success
-            deactivate TRANS_DAO
+            POS_DAO --> POS_HANDLER: Return success
+            deactivate POS_DAO
         end
 
         note right of POS_HANDLER #yellow
