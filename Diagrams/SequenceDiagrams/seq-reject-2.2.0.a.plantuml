@@ -87,15 +87,18 @@ group DFSP2 sends a Fulfil Success Transfer request
 
         Payload - errorMessage:
         {
-            "errorCode": <errorCode>,
-            "errorDescription": <errorDescription>,
-            "extensionList": {
-                "extension": [
-                    {
-                        "key": <string>,
-                        "value": <string>
-                    }
-                ]
+            errorInformation
+            {
+                "errorCode": <errorCode>,
+                "errorDescription": <errorDescription>
+                "extensionList": {
+                    "extension": [
+                        {
+                            "key": <string>,
+                            "value": <string>
+                        }
+                    ]
+                }
             }
         }
     end note
