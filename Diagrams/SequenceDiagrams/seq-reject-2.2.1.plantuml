@@ -220,8 +220,34 @@ group Fulfil Handler Consume (Failure)
                 FULF_HANDLER -> TOPIC_TRANSFER_POSITION: Route & Publish Position event for Payer
                 activate TOPIC_TRANSFER_POSITION
                 deactivate TOPIC_TRANSFER_POSITION
-            else Validate Fulfil Transfer not successful or Generic validation not successful
+            else Validate Fulfil Transfer not successful or Generic validation failed
                 break
+                    note right of FULF_HANDLER #yellow
+                        Message:
+                        {
+                            id: <ID>,
+                            from: <transferHeaders.FSPIOP-Source>,
+                            to: <transferHeaders.FSPIOP-Destination>,
+                            type: application/json,
+                            content: {
+                                headers: <transferHeaders>,
+                                payload: <transferMessage>
+                            },
+                            metadata: {
+                                event: {
+                                    id: <uuid>,
+                                    responseTo: <previous.uuid>,
+                                    type: position,
+                                    action: reject,
+                                    createdAt: <timestamp>,
+                                    state: {
+                                        status: "fail",
+                                        code: 1
+                                    }
+                                }
+                            }
+                        }
+                    end note
                     FULF_HANDLER -> TOPIC_NOTIFICATIONS: Route & Publish Notification event for Payee
                     activate TOPIC_NOTIFICATIONS
                     deactivate TOPIC_NOTIFICATIONS
@@ -275,6 +301,32 @@ group Fulfil Handler Consume (Failure)
                 deactivate TOPIC_TRANSFER_POSITION
             else Validate Transfer Error Message not successful
                 break
+                    note right of FULF_HANDLER #yellow
+                        Message:
+                        {
+                            id: <ID>,
+                            from: <transferHeaders.FSPIOP-Source>,
+                            to: <transferHeaders.FSPIOP-Destination>,
+                            type: application/json,
+                            content: {
+                                headers: <transferHeaders>,
+                                payload: <transferMessage>
+                            },
+                            metadata: {
+                                event: {
+                                    id: <uuid>,
+                                    responseTo: <previous.uuid>,
+                                    type: position,
+                                    action: abort,
+                                    createdAt: <timestamp>,
+                                    state: {
+                                        status: "fail",
+                                        code: 1
+                                    }
+                                }
+                            }
+                        }
+                    end note
                     FULF_HANDLER -> TOPIC_NOTIFICATIONS: Route & Publish Notification event for Payee
                     activate TOPIC_NOTIFICATIONS
                     deactivate TOPIC_NOTIFICATIONS
