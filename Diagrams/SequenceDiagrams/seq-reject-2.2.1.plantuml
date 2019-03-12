@@ -72,7 +72,7 @@ group Fulfil Handler Consume (Failure)
             |||
             ref over FULF_HANDLER, TOPIC_NOTIFICATIONS: Validate message.content.headers.**FSPIOP-Signature** {[[https://github.com/mojaloop/docs/blob/master/CentralServices/seq_diagrams/seq-signature-validation.svg seq-signature-validation]]} \n<color #FF0000><b>Error codes:</b> 2001</color>
         end
-        group Validate Transfer Fulfilment Duplicate Check
+        group Validate Transfer Fulfil Duplicate Check
             FULF_HANDLER -> FULF_HANDLER: Generate transferFulfilmentId uuid
             FULF_HANDLER -> TRANS_DAO: Request to retrieve transfer fulfilment hashes by transferId\n<color #FF0000><b>Error code:</b> 2003</color>
             activate TRANS_DAO
@@ -132,7 +132,7 @@ group Fulfil Handler Consume (Failure)
                 deactivate TRANS_DAO
             end
         end
-        alt Validate and persist Transfer Fulfilment (if it is present)
+        alt action=='reject' call made on PUT /transfers/{ID}
             FULF_HANDLER -> TRANS_DAO: Request information for the validate checks\n<color #FF0000><b>Error code:</b> 2003</color>
             activate TRANS_DAO
             TRANS_DAO -> DB: Fetch from database
@@ -144,23 +144,40 @@ group Fulfil Handler Consume (Failure)
             deactivate DB
             FULF_HANDLER <-- TRANS_DAO: Return transfer
             deactivate TRANS_DAO
-            FULF_HANDLER ->FULF_HANDLER: Validate that Transfer.ilpCondition = SHA-256 (content.payload.fulfilment)\n<color #FF0000><b>Error code:</b> 2001</color>
 
-            group Persist fulfilment
-                FULF_HANDLER -> TRANS_DAO: Persist fulfilment with the result of the above check (transferFulfilment.isValid)\n<color #FF0000><b>Error code:</b> 2003</color>
-                activate TRANS_DAO
-                TRANS_DAO -> DB: Persist to database
-                activate DB
-                deactivate DB
-                hnote over DB #lightyellow
-                    transferFulfilment
-                    transferExtension
-                end note
-                FULF_HANDLER <-- TRANS_DAO: Return success
-                deactivate TRANS_DAO
+            alt Fulfilment present in the PUT /transfers/{ID} message
+                FULF_HANDLER ->FULF_HANDLER: Validate that Transfer.ilpCondition = SHA-256 (content.payload.fulfilment)\n<color #FF0000><b>Error code:</b> 2001</color>
+
+                group Persist fulfilment
+                    FULF_HANDLER -> TRANS_DAO: Persist fulfilment with the result of the above check (transferFulfilment.isValid)\n<color #FF0000><b>Error code:</b> 2003</color>
+                    activate TRANS_DAO
+                    TRANS_DAO -> DB: Persist to database
+                    activate DB
+                    deactivate DB
+                    hnote over DB #lightyellow
+                        transferFulfilment
+                        transferExtension
+                    end note
+                    FULF_HANDLER <-- TRANS_DAO: Return success
+                    deactivate TRANS_DAO
+                end
+            else Fulfilment NOT present in the PUT /transfers/{ID} message
+                FULF_HANDLER ->FULF_HANDLER: Validate that transfer fulfilment message to Abort is valid\n<color #FF0000><b>Error code:</b> 2001</color>
+                group Persist extensions
+                    FULF_HANDLER -> TRANS_DAO: Persist extensionList elements\n<color #FF0000><b>Error code:</b> 2003</color>
+                    activate TRANS_DAO
+                    TRANS_DAO -> DB: Persist to database
+                    activate DB
+                    deactivate DB
+                    hnote over DB #lightyellow
+                        transferExtension
+                    end note
+                    FULF_HANDLER <-- TRANS_DAO: Return success
+                    deactivate TRANS_DAO
+                end
             end
 
-            alt Transfer.ilpCondition validate successful
+            alt Transfer.ilpCondition validate successful OR generic validation successful
                 group Persist Transfer State (with transferState='RECEIVED_REJECT')
                     FULF_HANDLER -> TRANS_DAO: Request to persist transfer state\n<color #FF0000><b>Error code:</b> 2003</color>
                     activate TRANS_DAO
@@ -203,14 +220,14 @@ group Fulfil Handler Consume (Failure)
                 FULF_HANDLER -> TOPIC_TRANSFER_POSITION: Route & Publish Position event for Payer
                 activate TOPIC_TRANSFER_POSITION
                 deactivate TOPIC_TRANSFER_POSITION
-            else Validate Fulfil Transfer not successful
+            else Validate Fulfil Transfer not successful or Generic validation not successful
                 break
                     FULF_HANDLER -> TOPIC_NOTIFICATIONS: Route & Publish Notification event for Payee
                     activate TOPIC_NOTIFICATIONS
                     deactivate TOPIC_NOTIFICATIONS
                 end
             end
-        else Tranfer Fulfilment not present (an error message or otherwise)
+        else action=='abort' Error callback
             alt Validation successful
                 group Persist Transfer State (with transferState='RECEIVED_ERROR')
                     FULF_HANDLER -> TRANS_DAO: Request to persist transfer state and Error\n<color #FF0000><b>Error code:</b> 2003</color>
@@ -220,6 +237,7 @@ group Fulfil Handler Consume (Failure)
                     hnote over DB #lightyellow
                         transferStateChange
                         transferError
+                        transferExtension
                     end note
                     deactivate DB
                     TRANS_DAO --> FULF_HANDLER: Return success
