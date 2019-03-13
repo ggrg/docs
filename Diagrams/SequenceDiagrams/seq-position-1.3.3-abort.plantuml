@@ -68,7 +68,8 @@ group Abort Position Handler Consume
         deactivate POS_DAO
         POS_HANDLER <-> POS_HANDLER: Validate current state (transferStateChange.transferStateId == 'RESERVED_TIMEOUT')\n<color #FF0000><b>Error code:</b> 2001</color>
 
-        group Persist Position change
+        group Persist Position change and Transfer state
+            POS_HANDLER -> POS_HANDLER: **transferStateId** = 'EXPIRED_RESERVED'
             POS_HANDLER -> POS_DAO: Request to persist latest position and state to DB\n<color #FF0000><b>Error code:</b> 2003</color>
             group <color #blue>DB TRANSACTION IMPLEMENTATION</color>
                 activate POS_DAO
@@ -89,7 +90,8 @@ group Abort Position Handler Consume
                 deactivate DB
                 POS_DAO -> DB: Persist participant position change and state change
                 hnote over DB #lightyellow
-                        INSERT **transferStateChange** transferStateId = 'EXPIRED_RESERVED'
+                        INSERT **transferStateChange** 
+                        VALUES (transferStateId)
 
                         INSERT **participantPositionChange**
                         SET participantPositionId = participantPosition.participantPositionId,
@@ -114,7 +116,7 @@ group Abort Position Handler Consume
                     headers: <transferHeaders>,
                     payload: {
                          "errorInformation": {
-                             "errorCode": 3303,
+                             "errorCode": 3300,
                              "errorDescription": "Transfer expired",
                              "extensionList": <transferMessage.extensionList>
                          }
@@ -124,7 +126,7 @@ group Abort Position Handler Consume
                     event: {
                         id: <uuid>,
                         responseTo: <previous.uuid>,
-                        type: transfer,
+                        type: notification,
                         action: abort,
                         createdAt: <timestamp>,
                         state: {
@@ -154,47 +156,84 @@ group Abort Position Handler Consume
         deactivate POS_DAO
         POS_HANDLER <-> POS_HANDLER: Validate current state (transferStateChange.transferStateId IN ['RECEIVED_REJECT', 'RECEIVED_ERROR'])\n<color #FF0000><b>Error code:</b> 2001</color>
 
-        group Persist Position change and Transfer State
-            POS_HANDLER -> POS_DAO: Request to persist latest position and state to DB\n<color #FF0000><b>Error code:</b> 2003</color> \ntransferState=(action=='reject' ? 'ABORTED_REJECTED' : 'ABORTED_ERROR' ) on position check pass
-            group <color #blue>REFER TO DB TRANSACTION IMPLEMENTATION ABOVE</color>
+        group Persist Position change and Transfer state
+            POS_HANDLER -> POS_HANDLER: **transferStateId** = (action == 'reject' ? 'ABORTED_REJECTED' : 'ABORTED_ERROR' )
+            POS_HANDLER -> POS_DAO: Request to persist latest position and state to DB\n<color #FF0000><b>Error code:</b> 2003</color>
+            group Refer to <color #blue>DB TRANSACTION IMPLEMENTATION</color> above
                 activate POS_DAO
-                POS_DAO -> DB: Refer to implementation above
+                POS_DAO -> DB: Persist to database
                 activate DB
                 deactivate DB
+                hnote over DB #lightyellow
+                    participantPosition
+                    transferStateChange
+                    participantPositionChange
+                end note
             end
             POS_DAO --> POS_HANDLER: Return success
             deactivate POS_DAO
         end
-        note right of POS_HANDLER #yellow
-            Message: {
-                id: <transferMessage.transferId>
-                from: <transferMessage.payerFsp>,
-                to: <transferMessage.payeeFsp>,
-                type: application/json
-                content: {
-                    headers: <transferHeaders>,
-                    payload: <transferMessage>
-                },
-                metadata: {
-                    event: {
-                        id: <uuid>,
-                        responseTo: <previous.uuid>,
-                        type: transfer,
-                        action: abort,
-                        createdAt: <timestamp>,
-                        state: {
-                            status: "aborted",
-                            code: 0
+        alt action == 'reject'
+            note right of POS_HANDLER #yellow
+                Message: {
+                    id: <transferMessage.transferId>
+                    from: <transferMessage.payerFsp>,
+                    to: <transferMessage.payeeFsp>,
+                    type: application/json
+                    content: {
+                        headers: <transferHeaders>,
+                        payload: <transferMessage>
+                    },
+                    metadata: {
+                        event: {
+                            id: <uuid>,
+                            responseTo: <previous.uuid>,
+                            type: notification,
+                            action: reject,
+                            createdAt: <timestamp>,
+                            state: {
+                                status: "success",
+                                code: 0,
+                                description: "action successful"
+                            }
                         }
                     }
                 }
-            }
-        end note
+            end note
+        else action == 'abort'
+            note right of POS_HANDLER #yellow
+                Message: {
+                    id: <transferMessage.transferId>
+                    from: <transferMessage.payerFsp>,
+                    to: <transferMessage.payeeFsp>,
+                    type: application/json
+                    content: {
+                        headers: <transferHeaders>,
+                        payload: <transferMessage>
+                    },
+                    metadata: {
+                        event: {
+                            id: <uuid>,
+                            responseTo: <previous.uuid>,
+                            type: notification,
+                            action: abort,
+                            createdAt: <timestamp>,
+                            state: {
+                                status: 'error',
+                                code: <payload.errorInformation.errorCode || 5000>
+                                description: <payload.errorInformation.errorDescription>
+                            }
+                        }
+                    }
+                }
+            end note
+        end
         POS_HANDLER -> TOPIC_NOTIFICATIONS: Publish Notification event\n<color #FF0000><b>Error code:</b> 2003</color>
         activate TOPIC_NOTIFICATIONS
         deactivate TOPIC_NOTIFICATIONS
     end
-    ' We do not see how this scenario will be triggered
+
+    ' TODO: We do not see how this scenario will be triggered
     opt type == 'position' && action == 'fail' (Unable to currently trigger this scenario)
         POS_HANDLER -> POS_DAO: Request current state of transfer from DB\n<color #FF0000><b>Error code:</b> 2003</color>
         activate POS_DAO
@@ -209,13 +248,19 @@ group Abort Position Handler Consume
         deactivate POS_DAO
         POS_HANDLER <-> POS_HANDLER: Validate current state (transferStateChange.transferStateId == 'FAILED')
 
-        group Persist Position change and Transfer State (with transferState='ABORTED' on position check pass)
+        group Persist Position change and Transfer state
+            POS_HANDLER -> POS_HANDLER: **transferStateId** = 'FAILED'
             POS_HANDLER -> POS_DAO: Request to persist latest position and state to DB\n<color #FF0000><b>Error code:</b> 2003</color>
-            group <color #blue>REFER TO DB TRANSACTION IMPLEMENTATION ABOVE</color>
+            group Refer to <color #blue>DB TRANSACTION IMPLEMENTATION</color> above
                 activate POS_DAO
-                POS_DAO -> DB: Refer to implementation above
+                POS_DAO -> DB: Persist to database
                 activate DB
                 deactivate DB
+                hnote over DB #lightyellow
+                    participantPosition
+                    transferStateChange
+                    participantPositionChange
+                end note
             end
             POS_DAO --> POS_HANDLER: Return success
             deactivate POS_DAO
@@ -240,7 +285,7 @@ group Abort Position Handler Consume
                     event: {
                         id: <uuid>,
                         responseTo: <previous.uuid>,
-                        type: transfer,
+                        type: notification,
                         action: abort,
                         createdAt: <timestamp>,
                         state: {
