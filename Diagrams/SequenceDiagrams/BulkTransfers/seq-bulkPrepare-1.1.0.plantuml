@@ -1,7 +1,7 @@
 
 
 @startuml
-' declate title
+' declare title
 title 1.1.0. DFSP1 sends a Bulk Prepare Transfer request to DFSP2
 
 autonumber
