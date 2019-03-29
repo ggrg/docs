@@ -65,7 +65,7 @@ group Bulk Prepare Handler Consume
 
     break
         group Validate Event
-            BULK_PREP_HANDLER <-> BULK_PREP_HANDLER: Validate event - Rule: type == 'bulkPrepare' && action == 'bulkPrepare'\n<color #FF0000><b>Error codes:</b> 2001</color>
+            BULK_PREP_HANDLER <-> BULK_PREP_HANDLER: Validate event - Rule: type == 'bulk-prepare' && action == 'bulk-prepare'\n<color #FF0000><b>Error codes:</b> 2001</color>
         end
     end
 
@@ -162,7 +162,7 @@ group Bulk Prepare Handler Consume
                                                 }
                                             }
                                         ],
-                                        completedTimestamp: "2018-10-24T08:38:08.699-04:00"
+                                        completedTimestamp: "2019-10-24T08:38:08.699-04:00"
                                     }
                                 },
                                 metadata: {
@@ -170,7 +170,7 @@ group Bulk Prepare Handler Consume
                                         id: <uuid>,
                                         responseTo: <previous.uuid>,
                                         type: bulk-notification,
-                                        action: bulkPrepareDuplicate,
+                                        action: bulk-prepare-duplicate,
                                         createdAt: <timestamp>,
                                         state: {
                                             status: "success",
@@ -329,8 +329,8 @@ group Bulk Prepare Handler Consume
                     event: {
                         id: <uuid>,
                         responseTo: <previous.uuid>,
-                        type: bulkPrepareNotification,
-                        action: bulkPrepare,
+                        type: bulk-notification,
+                        action: bulk-abort,
                         createdAt: <timestamp>,
                         state: {
                             status: 'error',
