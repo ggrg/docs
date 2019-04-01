@@ -293,7 +293,7 @@ group Bulk Prepare Handler Consume
                         event: {
                             id: <uuid>,
                             responseTo: <previous.uuid>,
-                            type: position,
+                            type: bulk-prepare,
                             action: prepare,
                             createdAt: <timestamp>,
                             state: {
