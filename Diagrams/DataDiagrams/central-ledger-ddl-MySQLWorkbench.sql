@@ -1,5 +1,3 @@
-CREATE DATABASE  IF NOT EXISTS `central_ledger` /*!40100 DEFAULT CHARACTER SET utf8 */;
-USE `central_ledger`;
 -- MySQL dump 10.13  Distrib 8.0.12, for macos10.13 (x86_64)
 --
 -- Host: 127.0.0.1    Database: central_ledger
@@ -134,7 +132,7 @@ CREATE TABLE `ledgerEntryType` (
   `createdDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`ledgerEntryTypeId`),
   UNIQUE KEY `ledgerentrytype_name_unique` (`name`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -150,7 +148,7 @@ CREATE TABLE `migration` (
   `batch` int(11) DEFAULT NULL,
   `migration_time` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -662,9 +660,30 @@ CREATE TABLE `transferError` (
   `errorCode` int(10) unsigned NOT NULL,
   `errorDescription` varchar(128) NOT NULL,
   `createdDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `transferErrorDuplicateCheckId` bigint(20) unsigned DEFAULT NULL,
   PRIMARY KEY (`transferErrorId`),
   KEY `transfererror_transferstatechangeid_index` (`transferStateChangeId`),
+  KEY `transfererror_transfererrorduplicatecheckid_index` (`transferErrorDuplicateCheckId`),
+  CONSTRAINT `transfererror_transfererrorduplicatecheckid_foreign` FOREIGN KEY (`transferErrorDuplicateCheckId`) REFERENCES `transferErrorDuplicateCheck` (`transfererrorduplicatecheckid`),
   CONSTRAINT `transfererror_transferstatechangeid_foreign` FOREIGN KEY (`transferStateChangeId`) REFERENCES `transferStateChange` (`transferstatechangeid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `transferErrorDuplicateCheck`
+--
+
+DROP TABLE IF EXISTS `transferErrorDuplicateCheck`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+ SET character_set_client = utf8mb4 ;
+CREATE TABLE `transferErrorDuplicateCheck` (
+  `transferErrorDuplicateCheckId` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `transferId` varchar(36) NOT NULL,
+  `hash` varchar(256) NOT NULL,
+  `createdDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`transferErrorDuplicateCheckId`),
+  KEY `transfererrorduplicatecheck_transferid_index` (`transferId`),
+  CONSTRAINT `transfererrorduplicatecheck_transferid_foreign` FOREIGN KEY (`transferId`) REFERENCES `transfer` (`transferid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -713,6 +732,7 @@ CREATE TABLE `transferFulfilment` (
   KEY `transferfulfilment_transferid_index` (`transferId`),
   KEY `transferfulfilment_settlementwindowid_index` (`settlementWindowId`),
   CONSTRAINT `transferfulfilment_settlementwindowid_foreign` FOREIGN KEY (`settlementWindowId`) REFERENCES `settlementWindow` (`settlementwindowid`),
+  CONSTRAINT `transferfulfilment_transferfulfilmentid_foreign` FOREIGN KEY (`transferFulfilmentId`) REFERENCES `transferFulfilmentDuplicateCheck` (`transferfulfilmentid`),
   CONSTRAINT `transferfulfilment_transferid_foreign` FOREIGN KEY (`transferId`) REFERENCES `transfer` (`transferid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -730,8 +750,7 @@ CREATE TABLE `transferFulfilmentDuplicateCheck` (
   `hash` varchar(256) NOT NULL,
   `createdDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`transferFulfilmentId`),
-  KEY `transferfulfilmentduplicatecheck_transferid_index` (`transferId`),
-  CONSTRAINT `transferfulfilmentduplicatecheck_transferid_foreign` FOREIGN KEY (`transferId`) REFERENCES `transfer` (`transferid`)
+  KEY `transferfulfilmentduplicatecheck_transferid_index` (`transferId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -845,4 +864,4 @@ CREATE TABLE `transferTimeout` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2019-03-13 15:53:48
+-- Dump completed on 2019-04-01 14:25:38
