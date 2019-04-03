@@ -108,7 +108,7 @@ group DFSP1 sends a Prepare Transfer request to DFSP2
             }
         }
     end note
-    DFSP1 -> MLAPI: POST - /transfers
+    DFSP1 ->> MLAPI: POST - /transfers
     activate MLAPI
     MLAPI -> MLAPI: Validate incoming token and originator matching Payer\n<color #FF0000><b>Error codes:</b> 3000-3002, 3100-3107</color>
     note right of MLAPI #yellow
@@ -141,19 +141,19 @@ group DFSP1 sends a Prepare Transfer request to DFSP2
     TOPIC_TRANSFER_PREPARE <-> TOPIC_TRANSFER_PREPARE: Ensure event is replicated as configured (ACKS=all)\n<color #FF0000><b>Error code:</b> 2003</color>
     TOPIC_TRANSFER_PREPARE --> MLAPI: Respond replication acknowledgements have been received
     deactivate TOPIC_TRANSFER_PREPARE
-    MLAPI ---> DFSP1: Respond HTTP - 202 (Accepted)
+    MLAPI -->> DFSP1: Respond HTTP - 202 (Accepted)
     deactivate MLAPI
     |||
     TOPIC_TRANSFER_PREPARE <- PREP_HANDLER: Consume message
-    ref over TOPIC_TRANSFER_PREPARE, PREP_HANDLER, TOPIC_TRANSFER_POSITION :  Prepare Handler Consume {[[https://github.com/mojaloop/docs/blob/master/CentralServices/seq_diagrams/seq-prepare-1.1.1.a.svg 1.1.1.a]], [[https://github.com/mojaloop/docs/blob/master/CentralServices/seq_diagrams/seq-prepare-1.1.1.b.svg 1.1.1.b]]} \n
+    ref over TOPIC_TRANSFER_PREPARE, PREP_HANDLER, TOPIC_TRANSFER_POSITION :  Prepare Handler Consume {[[https://github.com/mojaloop/docs/blob/master/Diagrams/SequenceDiagrams/seq-prepare-1.1.1.a.svg 1.1.1.a]], [[https://github.com/mojaloop/docs/blob/master/Diagrams/SequenceDiagrams/seq-prepare-1.1.1.b.svg 1.1.1.b]]} \n
     PREP_HANDLER -> TOPIC_TRANSFER_POSITION: Produce message
     |||
     TOPIC_TRANSFER_POSITION <- POS_HANDLER: Consume message
-    ref over TOPIC_TRANSFER_POSITION, POS_HANDLER : Position Handler Consume {[[https://github.com/mojaloop/docs/blob/master/CentralServices/seq_diagrams/seq-prepare-1.1.2.a.svg 1.1.2.a]], [[https://github.com/mojaloop/docs/blob/master/CentralServices/seq_diagrams/seq-prepare-1.1.2.b.svg 1.1.2.b]]} \n
+    ref over TOPIC_TRANSFER_POSITION, POS_HANDLER : Position Handler Consume {[[https://github.com/mojaloop/docs/blob/master/Diagrams/SequenceDiagrams/seq-prepare-1.1.2.a.svg 1.1.2.a]], [[https://github.com/mojaloop/docs/blob/master/Diagrams/SequenceDiagrams/seq-prepare-1.1.2.b.svg 1.1.2.b]]} \n
     POS_HANDLER -> TOPIC_NOTIFICATIONS: Produce message
     |||
     TOPIC_NOTIFICATIONS <- NOTIFY_HANDLER: Consume message
-    ref over DFSP2, TOPIC_NOTIFICATIONS : Send notification to Participant (Payee) {[[https://github.com/mojaloop/docs/blob/master/CentralServices/seq_diagrams/seq-prepare-1.1.4.a.svg 1.1.4.a]], [[https://github.com/mojaloop/docs/blob/master/CentralServices/seq_diagrams/seq-prepare-1.1.4.b.svg 1.1.4.b]]} \n
+    ref over DFSP2, TOPIC_NOTIFICATIONS : Send notification to Participant (Payee) {[[https://github.com/mojaloop/docs/blob/master/Diagrams/SequenceDiagrams/seq-prepare-1.1.4.a.svg 1.1.4.a]], [[https://github.com/mojaloop/docs/blob/master/Diagrams/SequenceDiagrams/seq-prepare-1.1.4.b.svg 1.1.4.b]]} \n
     NOTIFY_HANDLER -> DFSP2: Send callback notification
     |||
 end
