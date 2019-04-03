@@ -120,20 +120,33 @@ group Bulk Prepare Handler Consume
                     POS_DAO --> BULK_PREP_HANDLER: Return Transfer state
                     deactivate POS_DAO
                     break
-                        alt If transferState IN ['COMPLETED', 'REJECTED']
-                            BULK_PREP_HANDLER -> POS_DAO: Request to retrieve bulkTransferState, completedTimestamp of the bulk and\nfulfilment, completedTimestamp for each individual transferId
+                        alt If bulkTransferState IN ['COMPLETED', 'REJECTED']
+                            BULK_PREP_HANDLER -> POS_DAO: Request to retrieve bulkTransferState, completedTimestamp of the bulk and the individual transfers involved
                             activate POS_DAO
-                            POS_DAO -> DB: Request fulfilment, completedTimestamp for the transferId
+                            POS_DAO -> DB: Return bulk transfer state, completedTimestamp for bulk and the list of individual transfers
                             activate DB
                             hnote over DB #lightyellow
                                 bulkTransfer
                                 bulkTransferAssociation
-                                transferFulfilment
                             end note
-                            POS_DAO <-- DB: Return completedTimestamp for bulk and\nfulfilment, completedTimestamp (if they exist) for individual transfers
+                            POS_DAO <-- DB: Return bulk transfer state, completedTimestamp for bulk and the list of individual transfers
                             deactivate DB
-                            BULK_PREP_HANDLER <-- POS_DAO: Return completedTimestamp for bulk and\nfulfilment, completedTimestamp (if they exist) for individual transfers
+                            BULK_PREP_HANDLER <-- POS_DAO: Return completedTimestamp for bulk and the list of individual transfers
                             deactivate POS_DAO
+                            loop for each individual transfer in the bulk
+                                BULK_PREP_HANDLER -> POS_DAO: Request to retrieve fulfilment, completedTimestamp for each individual transferId
+                                activate POS_DAO
+                                POS_DAO -> DB: Request fulfilment, completedTimestamp for the transferId
+                                activate DB
+                                hnote over DB #lightyellow
+                                    transfer
+                                    transferFulfilment
+                                end note
+                                POS_DAO <-- DB: Return fulfilment, completedTimestamp (if they exist) for individual transfers
+                                deactivate DB
+                                BULK_PREP_HANDLER <-- POS_DAO: Return fulfilment, completedTimestamp (if they exist) for individual transfers
+                                deactivate POS_DAO
+                            end
                             note right of BULK_PREP_HANDLER #yellow
                             Message:
                             {
