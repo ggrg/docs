@@ -43,6 +43,7 @@ autonumber
 collections "topic-transfer-prepare" as TOPIC_TRANSFER_PREPARE
 control "Prepare Event Handler" as PREP_HANDLER
 collections "topic-transfer-position" as TOPIC_TRANSFER_POSITION
+collections "topic-bulk-processing" as TOPIC_BULK_PROCESSING
 collections "Event-Topic" as TOPIC_EVENTS
 collections "Notification-Topic" as TOPIC_NOTIFICATIONS
 entity "Position DAO" as POS_DAO
@@ -55,6 +56,7 @@ box "Central Service" #LightYellow
     participant TOPIC_TRANSFER_POSITION
     participant TOPIC_EVENTS
     participant TOPIC_NOTIFICATIONS
+    participant TOPIC_BULK_PROCESSING
     participant POS_DAO
     participant PARTICIPANT_DAO
     participant DB
@@ -69,7 +71,7 @@ group Prepare Handler Consume
 
     break
         group Validate Event
-            PREP_HANDLER <-> PREP_HANDLER: Validate event - Rule: type == 'prepare' && action == 'prepare'\n<color #FF0000><b>Error codes:</b> 2001</color>
+            PREP_HANDLER <-> PREP_HANDLER: Validate event - Rule: type IN ['prepare', 'bulk-prepare'] && action == 'prepare'\n<color #FF0000><b>Error codes:</b> 2001</color>
         end
     end
 
@@ -136,36 +138,9 @@ group Prepare Handler Consume
                             deactivate DB
                             PREP_HANDLER <-- POS_DAO: Return fulfilment, completedTimestamp (if they exist)
                             deactivate POS_DAO
-                            note right of PREP_HANDLER #yellow
-                            Message:
-                            {
-                                id: <transferMessage.transferId>
-                                from: <transferMessage.payerFsp>,
-                                to: <transferMessage.payeeFsp>,
-                                type: application/json
-                                content: {
-                                    headers: <transferHeaders>,
-                                    payload: {
-                                        transferState: "COMMITTED",
-                                        fulfilment: "WLctttbu2HvTsa1XWvUoGRcQozHsqeu9Ahl2JW9Bsu8",
-                                        completedTimestamp: "2018-10-24T08:38:08.699-04:00"
-                                    }
-                                },
-                                metadata: {
-                                    event: {
-                                        id: <uuid>,
-                                        responseTo: <previous.uuid>,
-                                        type: notification,
-                                        action: prepare-duplicate,
-                                        createdAt: <timestamp>,
-                                        state: {
-                                            status: "success",
-                                            code: 0
-                                        }
-                                    }
-                                }
-                            }
-                        end note
+                            
+                            PREP_HANDLER -> PREP_HANDLER: <color #AAAAFF><b> Reference - Prepare Handler notifications </b></color #AAAAFF>
+
                             PREP_HANDLER -> TOPIC_NOTIFICATIONS: Publish Notification event for Payer with the completed transfer \nFor the Data Model, refer to the Swagger (transferState - mandatory, fulfilment, completedTimestamp - sample values above).
                         else If transferState IN ['RECEIVED', 'RESERVED']
                             PREP_HANDLER <-> PREP_HANDLER: This request can be ignored, because a callback is about to be sent to the client.
@@ -330,6 +305,75 @@ group Prepare Handler Consume
         activate TOPIC_NOTIFICATIONS
         deactivate TOPIC_NOTIFICATIONS
     end
+end
+
+group Reference: Prepare Handler notifications
+    alt If type == 'bulk-prepare'
+        note right of PREP_HANDLER #yellow
+        Message:
+        {
+            id: <transferMessage.transferId>
+            from: <transferMessage.payerFsp>,
+            to: <transferMessage.payeeFsp>,
+            type: application/json
+            content: {
+                headers: <transferHeaders>,
+                payload: {
+                    transferState: "COMMITTED",
+                    fulfilment: "WLctttbu2HvTsa1XWvUoGRcQozHsqeu9Ahl2JW9Bsu8",
+                    completedTimestamp: "2018-10-24T08:38:08.699-04:00"
+                }
+            },
+            metadata: {
+                event: {
+                    id: <uuid>,
+                    responseTo: <previous.uuid>,
+                    type: bulk-notification,
+                    action: prepare-duplicate,
+                    createdAt: <timestamp>,
+                    state: {
+                        status: "success",
+                        code: 0
+                    }
+                }
+            }
+        }
+        end note
+        PREP_HANDLER -> TOPIC_BULK_PROCESSING: Publish Notification event for Payer with the completed transfer \nFor the Data Model, refer to the Swagger (transferState - mandatory, fulfilment, completedTimestamp - sample values above).      
+    else If type == 'prepare'
+        note right of PREP_HANDLER #yellow
+        Message:
+        {
+            id: <transferMessage.transferId>
+            from: <transferMessage.payerFsp>,
+            to: <transferMessage.payeeFsp>,
+            type: application/json
+            content: {
+                headers: <transferHeaders>,
+                payload: {
+                    transferState: "COMMITTED",
+                    fulfilment: "WLctttbu2HvTsa1XWvUoGRcQozHsqeu9Ahl2JW9Bsu8",
+                    completedTimestamp: "2018-10-24T08:38:08.699-04:00"
+                }
+            },
+            metadata: {
+                event: {
+                    id: <uuid>,
+                    responseTo: <previous.uuid>,
+                    type: notification,
+                    action: prepare-duplicate,
+                    createdAt: <timestamp>,
+                    state: {
+                        status: "success",
+                        code: 0
+                    }
+                }
+            }
+        }
+        end note
+        PREP_HANDLER -> TOPIC_NOTIFICATIONS: Publish Notification event for Payer with the completed transfer \nFor the Data Model, refer to the Swagger (transferState - mandatory, fulfilment, completedTimestamp - sample values above).
+    end
+    
 end
 deactivate PREP_HANDLER
 @enduml
