@@ -16,6 +16,160 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
+-- Table structure for table `bulkTransfer`
+--
+
+DROP TABLE IF EXISTS `bulkTransfer`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+ SET character_set_client = utf8mb4 ;
+CREATE TABLE `bulkTransfer` (
+  `bulkTransferId` varchar(36) NOT NULL,
+  `bulkQuoteId` varchar(36) DEFAULT NULL,
+  `payerParticipantId` int(10) unsigned NOT NULL,
+  `payeeParticipantId` int(10) unsigned NOT NULL,
+  `expirationDate` datetime NOT NULL,
+  `createdDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`bulkTransferId`),
+  KEY `bulktransfer_payerparticipantid_index` (`payerParticipantId`),
+  KEY `bulktransfer_payeeparticipantid_index` (`payeeParticipantId`),
+  CONSTRAINT `bulktransfer_bulktransferid_foreign` FOREIGN KEY (`bulkTransferId`) REFERENCES `bulkTransferDuplicateCheck` (`bulktransferid`),
+  CONSTRAINT `bulktransfer_payeeparticipantid_foreign` FOREIGN KEY (`payeeParticipantId`) REFERENCES `participant` (`participantid`),
+  CONSTRAINT `bulktransfer_payerparticipantid_foreign` FOREIGN KEY (`payerParticipantId`) REFERENCES `participant` (`participantid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `bulkTransferAssociation`
+--
+
+DROP TABLE IF EXISTS `bulkTransferAssociation`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+ SET character_set_client = utf8mb4 ;
+CREATE TABLE `bulkTransferAssociation` (
+  `transferId` varchar(36) NOT NULL,
+  `bulkTransferId` varchar(36) NOT NULL,
+  `createdDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`transferId`),
+  KEY `bulktransferassociation_bulktransferid_index` (`bulkTransferId`),
+  CONSTRAINT `bulktransferassociation_bulktransferid_foreign` FOREIGN KEY (`bulkTransferId`) REFERENCES `bulkTransfer` (`bulktransferid`),
+  CONSTRAINT `bulktransferassociation_transferid_foreign` FOREIGN KEY (`transferId`) REFERENCES `transfer` (`transferid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `bulkTransferDuplicateCheck`
+--
+
+DROP TABLE IF EXISTS `bulkTransferDuplicateCheck`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+ SET character_set_client = utf8mb4 ;
+CREATE TABLE `bulkTransferDuplicateCheck` (
+  `bulkTransferId` varchar(36) NOT NULL,
+  `hash` varchar(256) NOT NULL,
+  `createdDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`bulkTransferId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `bulkTransferError`
+--
+
+DROP TABLE IF EXISTS `bulkTransferError`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+ SET character_set_client = utf8mb4 ;
+CREATE TABLE `bulkTransferError` (
+  `bulkTransferErrorId` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `bulkTransferStateChangeId` bigint(20) unsigned NOT NULL,
+  `errorCode` int(10) unsigned NOT NULL,
+  `errorDescription` varchar(128) NOT NULL,
+  `createdDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`bulkTransferErrorId`),
+  KEY `bulktransfererror_bulktransferstatechangeid_index` (`bulkTransferStateChangeId`),
+  CONSTRAINT `bulktransfererror_bulktransferstatechangeid_foreign` FOREIGN KEY (`bulkTransferStateChangeId`) REFERENCES `bulkTransferStateChange` (`bulktransferstatechangeid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `bulkTransferExtension`
+--
+
+DROP TABLE IF EXISTS `bulkTransferExtension`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+ SET character_set_client = utf8mb4 ;
+CREATE TABLE `bulkTransferExtension` (
+  `bulkTransferExtensionId` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `bulkTransferId` varchar(36) NOT NULL,
+  `bulkTransferFulfilmentId` varchar(36) DEFAULT NULL,
+  `key` varchar(128) NOT NULL,
+  `value` text NOT NULL,
+  `createdDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`bulkTransferExtensionId`),
+  KEY `bulktransferextension_bulktransferid_index` (`bulkTransferId`),
+  KEY `bulktransferextension_bulktransferfulfilmentid_index` (`bulkTransferFulfilmentId`),
+  CONSTRAINT `bulktransferextension_bulktransferfulfilmentid_foreign` FOREIGN KEY (`bulkTransferFulfilmentId`) REFERENCES `bulkTransferFulfilment` (`bulktransferfulfilmentid`),
+  CONSTRAINT `bulktransferextension_bulktransferid_foreign` FOREIGN KEY (`bulkTransferId`) REFERENCES `bulkTransfer` (`bulktransferid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `bulkTransferFulfilment`
+--
+
+DROP TABLE IF EXISTS `bulkTransferFulfilment`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+ SET character_set_client = utf8mb4 ;
+CREATE TABLE `bulkTransferFulfilment` (
+  `bulkTransferFulfilmentId` varchar(36) NOT NULL,
+  `bulkTransferId` varchar(36) NOT NULL,
+  `completedDate` datetime NOT NULL,
+  `isValid` tinyint(1) DEFAULT NULL,
+  `createdDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`bulkTransferFulfilmentId`),
+  KEY `bulktransferfulfilment_bulktransferid_index` (`bulkTransferId`),
+  CONSTRAINT `bulktransferfulfilment_bulktransferid_foreign` FOREIGN KEY (`bulkTransferId`) REFERENCES `bulkTransfer` (`bulktransferid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `bulkTransferState`
+--
+
+DROP TABLE IF EXISTS `bulkTransferState`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+ SET character_set_client = utf8mb4 ;
+CREATE TABLE `bulkTransferState` (
+  `bulkTransferStateId` varchar(50) NOT NULL,
+  `enumeration` varchar(50) NOT NULL COMMENT 'bulkTransferState associated to the Mojaloop API',
+  `description` varchar(512) DEFAULT NULL,
+  `isActive` tinyint(1) NOT NULL DEFAULT '1',
+  `createdDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`bulkTransferStateId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `bulkTransferStateChange`
+--
+
+DROP TABLE IF EXISTS `bulkTransferStateChange`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+ SET character_set_client = utf8mb4 ;
+CREATE TABLE `bulkTransferStateChange` (
+  `bulkTransferStateChangeId` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `bulkTransferId` varchar(36) NOT NULL,
+  `bulkTransferStateId` varchar(50) NOT NULL,
+  `reason` varchar(512) DEFAULT NULL,
+  `createdDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`bulkTransferStateChangeId`),
+  KEY `bulktransferstatechange_bulktransferid_index` (`bulkTransferId`),
+  KEY `bulktransferstatechange_bulktransferstateid_index` (`bulkTransferStateId`),
+  CONSTRAINT `bulktransferstatechange_bulktransferid_foreign` FOREIGN KEY (`bulkTransferId`) REFERENCES `bulkTransfer` (`bulktransferid`),
+  CONSTRAINT `bulktransferstatechange_bulktransferstateid_foreign` FOREIGN KEY (`bulkTransferStateId`) REFERENCES `bulkTransferState` (`bulktransferstateid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `contactType`
 --
 
@@ -747,9 +901,10 @@ DROP TABLE IF EXISTS `transferFulfilmentDuplicateCheck`;
 CREATE TABLE `transferFulfilmentDuplicateCheck` (
   `transferFulfilmentId` varchar(36) NOT NULL,
   `transferId` varchar(36) NOT NULL,
-  `hash` varchar(256) NOT NULL,
+  `hash` varchar(256) DEFAULT NULL,
   `createdDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`transferFulfilmentId`),
+  UNIQUE KEY `tfdc_transferfulfilmentid_hash_unique` (`transferFulfilmentId`,`hash`),
   KEY `transferfulfilmentduplicatecheck_transferid_index` (`transferId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -864,4 +1019,4 @@ CREATE TABLE `transferTimeout` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2019-04-01 14:25:38
+-- Dump completed on 2019-04-05  1:28:05
