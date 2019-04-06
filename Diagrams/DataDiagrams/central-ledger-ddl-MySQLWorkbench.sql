@@ -16,6 +16,24 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
+-- Table structure for table `bulkProcessingState`
+--
+
+DROP TABLE IF EXISTS `bulkProcessingState`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+ SET character_set_client = utf8mb4 ;
+CREATE TABLE `bulkProcessingState` (
+  `bulkProcessingStateId` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(50) NOT NULL,
+  `description` varchar(512) DEFAULT NULL,
+  `isActive` tinyint(1) NOT NULL DEFAULT '1',
+  `createdDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`bulkProcessingStateId`),
+  UNIQUE KEY `bulkprocessingstate_name_unique` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `bulkTransfer`
 --
 
@@ -28,6 +46,7 @@ CREATE TABLE `bulkTransfer` (
   `payerParticipantId` int(10) unsigned NOT NULL,
   `payeeParticipantId` int(10) unsigned NOT NULL,
   `expirationDate` datetime NOT NULL,
+  `transfersJson` json NOT NULL,
   `createdDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`bulkTransferId`),
   KEY `bulktransfer_payerparticipantid_index` (`payerParticipantId`),
@@ -49,8 +68,12 @@ CREATE TABLE `bulkTransferAssociation` (
   `transferId` varchar(36) NOT NULL,
   `bulkTransferId` varchar(36) NOT NULL,
   `createdDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `bulkProcessingStateId` int(10) unsigned NOT NULL,
+  `lastProcessedDate` datetime DEFAULT NULL,
   PRIMARY KEY (`transferId`),
+  KEY `bulktransferassociation_bulkprocessingstateid_foreign` (`bulkProcessingStateId`),
   KEY `bulktransferassociation_bulktransferid_index` (`bulkTransferId`),
+  CONSTRAINT `bulktransferassociation_bulkprocessingstateid_foreign` FOREIGN KEY (`bulkProcessingStateId`) REFERENCES `bulkProcessingState` (`bulkprocessingstateid`),
   CONSTRAINT `bulktransferassociation_bulktransferid_foreign` FOREIGN KEY (`bulkTransferId`) REFERENCES `bulkTransfer` (`bulktransferid`),
   CONSTRAINT `bulktransferassociation_transferid_foreign` FOREIGN KEY (`transferId`) REFERENCES `transfer` (`transferid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -123,6 +146,7 @@ CREATE TABLE `bulkTransferFulfilment` (
   `bulkTransferFulfilmentId` varchar(36) NOT NULL,
   `bulkTransferId` varchar(36) NOT NULL,
   `completedDate` datetime NOT NULL,
+  `transfersJson` json NOT NULL,
   `isValid` tinyint(1) DEFAULT NULL,
   `createdDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`bulkTransferFulfilmentId`),
@@ -1019,4 +1043,4 @@ CREATE TABLE `transferTimeout` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2019-04-05  1:28:05
+-- Dump completed on 2019-04-06 23:14:21
