@@ -106,9 +106,9 @@ group Transfer Expiry
         NOTIFY_HANDLER -> DFSP1: Send callback notification
     end
     |||
-    TOPIC_NOTIFICATIONS <- NOTIFY_HANDLER: Consume message
     opt action IN ['timeout-reserved', 'bulk-timeout-reserved']
         |||
+        TOPIC_NOTIFICATIONS <- NOTIFY_HANDLER: Consume message
         ref over DFSP2, TOPIC_NOTIFICATIONS : Send notification to Participant (Payee) {[[https://github.com/mojaloop/docs/blob/master/Diagrams/SequenceDiagrams/seq-prepare-1.1.4.a.svg 1.1.4.a]]} \n
         NOTIFY_HANDLER -> DFSP2: Send callback notification
     end
